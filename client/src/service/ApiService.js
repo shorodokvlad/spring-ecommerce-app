@@ -17,8 +17,8 @@ export default class ApiService {
         return response.data;
     }
 
-    static async logginUser(logginDetails) {
-        const response = await axios.post(`${this.BASE_URL}/auth/login`, logginDetails)
+    static async loginUser(loginDetails) {
+        const response = await axios.post(`${this.BASE_URL}/auth/login`, loginDetails)
         return response.data;
     }
 
@@ -69,7 +69,7 @@ export default class ApiService {
     }
 
     static async getProductById(productId) {
-        const response = await axios.get(`${this.BASE_URL}/product/get-product-by-id/${productId}`)
+        const response = await axios.get(`${this.BASE_URL}/product/get-by-product-id/${productId}`)
         return response.data;
     }
 
