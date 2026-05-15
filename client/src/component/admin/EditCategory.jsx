@@ -11,21 +11,20 @@ const EditCategory = () => {
 
 
     useEffect(() => {
-        fetchCategory(categoryId);
-    }, [categoryId])
+        const fetchCategory = async () => {
+            try {
+                const response = await ApiService.getCategoryById(categoryId);
+                setName(response.category.name);
 
-    const fetchCategory = async () => {
-        try {
-            const response = await ApiService.getCategoryById(categoryId);
-            setName(response.category.name);
-
-        } catch (error) {
-            setMessage(error.response?.data?.message || error.message || "Failed to get a category by id")
-            setTimeout(() => {
-                setMessage('');
-            }, 3000)
+            } catch (error) {
+                setMessage(error.response?.data?.message || error.message || "Failed to get a category by id")
+                setTimeout(() => {
+                    setMessage('');
+                }, 3000)
+            }
         }
-    }
+        fetchCategory();
+    }, [categoryId])
 
     const handleSubmit = async (e) => {
         e.preventDefault();

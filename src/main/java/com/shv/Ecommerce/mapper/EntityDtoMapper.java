@@ -99,7 +99,7 @@ public class EntityDtoMapper {
     // OrderItem to DTO plus product and user
     public OrderItemDto mapOrderItemToDtoPlusProductAndUser(OrderItem orderItem) {
         OrderItemDto orderItemDto = mapOrderItemToDtoPlusAProduct(orderItem);
-        if (orderItemDto.getUserDto() != null) {
+        if (orderItem.getUser() != null) {
             UserDto userDto = mapUserToDtoPlusAddress(orderItem.getUser());
             orderItemDto.setUserDto(userDto);
         }
