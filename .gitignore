@@ -24,6 +24,7 @@ hs_err_pid*
 replay_pid*
 
 # .application.properties
+src/main/resources/application.properties
 target/classes/application.properties
 server/src/main/resources/application.properties
 server/target/classes/application.properties
@@ -116,3 +117,5 @@ deployment_keys.tar
 
 .github/.release
 release-artifacts-*
+src/main/resources/application.properties
+src/main/resources/application.properties
