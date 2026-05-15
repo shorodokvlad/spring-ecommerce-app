@@ -26,7 +26,6 @@ replay_pid*
 # .application.properties
 src/main/resources/application.properties
 target/classes/application.properties
-server/src/main/resources/application.properties
 server/target/classes/application.properties
 
 *.log

@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-//import { ProtectedRoute, AdminRoute } from './service/Guard';
+import { ProtectedRoute, AdminRoute } from './service/Guard';
 import Navbar from './component/common/NavBar';
 import Footer from './component/common/footer';
 import { CartProvider } from './component/context/CartContext';
@@ -11,6 +11,8 @@ import CategoryProductsPage from './component/pages/CategoryProductsPage';
 import CartPage from './component/pages/CartPage';
 import RegisterPage from './component/pages/RegisterPage';
 import LoginPage from './component/pages/LoginPage';
+import ProfilePage from './component/pages/ProfilePage';
+import AddressPage from './component/pages/AddressPage';
 
 function App() {
   return (
@@ -25,6 +27,10 @@ function App() {
           <Route path='/cart' element={<CartPage/>}/>
           <Route path='/register' element={<RegisterPage/>}/>
           <Route path='/login' element={<LoginPage/>}/>
+
+           <Route path='/profile' element={<ProtectedRoute element={<ProfilePage/>} />} />
+           <Route path='/add-address' element={<ProtectedRoute element={<AddressPage/>} />} />
+           <Route path='/edit-address' element={<ProtectedRoute element={<AddressPage/>} />} />
         </Routes>
       <Footer/>
     </CartProvider>

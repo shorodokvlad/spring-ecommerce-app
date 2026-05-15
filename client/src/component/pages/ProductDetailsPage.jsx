@@ -17,7 +17,7 @@ const ProductDetailsPage = () => {
 
     const fetchProduct = async () => {
         try {
-            const response = await ApiService.getProductById(productId);
+            const response = await ApiService.getProductByProductId(productId);
             setProduct(response.product);
             
         } catch (error) {
