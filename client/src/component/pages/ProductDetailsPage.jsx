@@ -17,7 +17,7 @@ const ProductDetailsPage = () => {
 
     const fetchProduct = async () => {
         try {
-            const response = await ApiService.getProductByProductId(productId);
+            const response = await ApiService.getProductById(productId);
             setProduct(response.product);
             
         } catch (error) {
@@ -52,7 +52,7 @@ const ProductDetailsPage = () => {
     }
 
     if (!product) {
-        return <p>Loading product details ...</p>
+        return <p className="loading-product-details">Loading product details ...</p>
     }
 
     const cartItem = cart.find(item => item.id === product.id);

@@ -5,7 +5,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/shorodokvlad/ecommerce-app">
-    <img src="client/public/logo.svg" alt="Logo" width="80" height="80">
+    <img src="client/public/cart.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Ecommerce App</h3>

@@ -118,5 +118,4 @@ deployment_keys.tar
 .github/.release
 release-artifacts-*
 src/main/resources/application.properties
-src/main/resources/application.properties
-src/main/resources/application.properties
+/src/main/resources

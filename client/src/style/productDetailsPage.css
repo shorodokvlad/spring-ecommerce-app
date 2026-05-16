@@ -1,40 +1,72 @@
-.product-detail{
-    max-width: 350px;
-    margin: 10rem auto 10rem auto;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    align-items: center;
-
+.product-detail {
+    max-width: 500px;
+    margin: 4rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 1.5rem;
+    border: 1px solid var(--border-color);
+    align-items: center;
 }
 
-.product-detail img{
-    width: 350px;
+.product-detail img {
+    width: 100%;
     height: auto;
+    border-radius: var(--radius-md);
+    object-fit: contain;
 }
 
-.product-detail h1{
+.product-detail h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
     text-align: center;
 }
-.product-detail span{
-    display: block;
-    font-size: 20px;
-    color: cornflowerblue;
+
+.product-detail p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
 }
-.product-detail button{
-    display: block;
-    width: 100%;
-    padding: 10px;
+
+.product-detail span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.product-detail button {
+    background-color: var(--primary-color);
     border: none;
-    border-radius: 5px;
-    background-color:cornflowerblue;
+    border-radius: var(--radius-md);
     color: white;
-    font-size: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem;
     cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    width: 100%;
 }
-.product-detail button:hover{
-    background-color: cornflowerblue;
+
+.product-detail button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.product-detail button:active {
+    transform: translateY(0);
+}
+
+.loading-product-details {
+    text-align: center;
+    padding: 5rem;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    font-weight: 500;
 }
