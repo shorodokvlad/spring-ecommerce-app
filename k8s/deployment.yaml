@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-backend
+  labels:
+    app: ecommerce-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce-backend
+  template:
+    metadata:
+      labels:
+        app: ecommerce-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/shorodokvlad/spring-ecommerce-app:latest
+          ports:
+            - containerPort: 2424
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+            - secretRef:
+                name: ecommerce-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          # TCP probes: the app has no actuator health endpoint yet
+          startupProbe:
+            tcpSocket:
+              port: 2424
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 2424
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 2424
+            periodSeconds: 20

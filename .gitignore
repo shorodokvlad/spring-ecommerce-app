@@ -119,3 +119,10 @@ deployment_keys.tar
 release-artifacts-*
 src/main/resources/application.properties
 /src/main/resources
+
+# local config with real secrets
+src/main/resources/application-local.properties
+
+# k8s secret with real values
+k8s/secret.yaml
+target/classes/application-local.properties
