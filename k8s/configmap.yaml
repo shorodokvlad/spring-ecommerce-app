@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+data:
+  SERVER_PORT: "2424"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update

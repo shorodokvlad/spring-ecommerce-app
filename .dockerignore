@@ -1,0 +1,7 @@
+target/
+client/
+.git/
+.github/
+k8s/
+*.md
+src/main/resources/application-local.properties
