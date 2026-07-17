@@ -1,0 +1,26 @@
+# Render Blueprint — deploys the Spring Boot backend from the Dockerfile.
+# In Render: New + -> Blueprint -> select this repo. Secret values are
+# prompted in the dashboard (sync: false), never stored here.
+services:
+  - type: web
+    name: spring-ecommerce-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: "2424"
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=75"
+      - key: SUPABASE_DB_URL
+        sync: false
+      - key: SUPABASE_DB_USER
+        sync: false
+      - key: SUPABASE_DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: AWS_S3_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_SECRET_KEY
+        sync: false
