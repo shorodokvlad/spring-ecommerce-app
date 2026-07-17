@@ -12,6 +12,7 @@ const AddProductPage = () => {
     const [description, setDescription] = useState('');
     const [message, setMessage] = useState('');
     const [price, setPrice] = useState('');
+    const [stockQuantity, setStockQuantity] = useState('');
 
     const navigate = useNavigate();
 
@@ -32,6 +33,7 @@ const AddProductPage = () => {
             formData.append('name', name);
             formData.append('description', description);
             formData.append('price', price);
+            formData.append('stockQuantity', stockQuantity || 0);
 
             const response = await ApiService.addProduct(formData);
             if (response.status === 200) {
@@ -69,10 +71,18 @@ const AddProductPage = () => {
                 value={description}
                 onChange={(e)=> setDescription(e.target.value)}/>
 
-                <input type="number" 
-                placeholder="price"
+                <input type="number"
+                placeholder="Price"
+                step="0.01"
+                min="0"
                 value={price}
                 onChange={(e)=> setPrice(e.target.value)} />
+
+                <input type="number"
+                placeholder="Stock quantity"
+                min="0"
+                value={stockQuantity}
+                onChange={(e)=> setStockQuantity(e.target.value)} />
 
                 <button type="submit">Add Product</button>
             </form>

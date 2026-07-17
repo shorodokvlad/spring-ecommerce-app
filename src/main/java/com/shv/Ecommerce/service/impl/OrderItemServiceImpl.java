@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
@@ -38,6 +39,7 @@ public class OrderItemServiceImpl implements IOrderItemService {
     private final IUserService userService;
     private final EntityDtoMapper entityDtoMapper;
     @Override
+    @Transactional
     public Response placeOrder(OrderRequest orderRequest) {
         User user = userService.getLoginUser();
 
@@ -45,6 +47,16 @@ public class OrderItemServiceImpl implements IOrderItemService {
         List<OrderItem> orderItems = orderRequest.getItems().stream().map(orderItemRequest ->{
             Product product = productRepo.findById(orderItemRequest.getProductId())
                     .orElseThrow(()->new NotFoundException("Product not found"));
+
+            Integer stock = product.getStockQuantity();
+            if (stock != null) {
+                if (stock < orderItemRequest.getQuantity()) {
+                    throw new NotFoundException("Not enough stock for " + product.getName()
+                            + " — only " + stock + " left");
+                }
+                product.setStockQuantity(stock - orderItemRequest.getQuantity());
+                productRepo.save(product);
+            }
 
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);

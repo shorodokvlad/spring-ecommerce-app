@@ -1,53 +1,74 @@
-.admin-product-list{
-    align-items: center;
-    width: 50%;
-    margin: auto;
-    font-size: 16px;
-}
-.product-btn{
-    border-radius: 5px;
-    margin: 5px 0px;
-    padding: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 18px;
-    color: #fff;
-    border: none;
-    background-color: cornflowerblue;
+.admin-product-list {
+    max-width: 720px !important;
 }
 
-.product-btn-delete{
-    border-radius: 5px;
-    margin: 5px 0px;
-    padding: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 18px;
-    color: #fff;
-    border: none;
-    background-color: cornflowerblue;
+.admin-product-list h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin: 12px 0 16px;
+}
 
+.admin-product-list > div > .product-btn:first-of-type {
+    background: var(--ink);
+    color: var(--card);
+    padding: 10px 20px;
+    margin-bottom: 20px;
 }
-.admin-product-list button:hover{
-    background-color: royalblue;
+
+.admin-product-list > div > .product-btn:first-of-type:hover {
+    background: var(--accent);
 }
-.admin-product-list ul{
-    list-style-type: none;
+
+.admin-product-list ul {
+    list-style: none;
+    margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
-.admin-product-list li{
+
+.admin-product-list li {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 10px 10px 15px;
-    margin-bottom: 1.5px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
 }
-.admin-product-list span{
+
+.admin-product-list li span {
     flex: 1;
-    color: #444;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.admin-product-list button{
-    margin-left: 10px;
-} 
+
+.admin-product-list li .product-btn {
+    padding: 7px 14px;
+    font-size: 0.85rem;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--line);
+}
+
+.admin-product-list li .product-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.product-btn-delete {
+    padding: 7px 14px;
+    font-size: 0.85rem;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--line);
+}
+
+.product-btn-delete:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: var(--danger-soft);
+}

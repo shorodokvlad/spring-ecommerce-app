@@ -24,13 +24,14 @@ public class ProductController {
             @RequestParam MultipartFile image,
             @RequestParam String name,
             @RequestParam String description,
-            @RequestParam BigDecimal price
+            @RequestParam BigDecimal price,
+            @RequestParam(required = false) Integer stockQuantity
     ) {
         if (categoryId == null || image.isEmpty() || name.isEmpty() || description.isEmpty() || price == null) {
             throw new InvalidCredentialsException("All fields are required");
         }
 
-        return ResponseEntity.ok(productService.createProduct(categoryId, image, name, description, price));
+        return ResponseEntity.ok(productService.createProduct(categoryId, image, name, description, price, stockQuantity));
     }
 
     @PutMapping("/update")
@@ -41,9 +42,10 @@ public class ProductController {
             @RequestParam(required = false) MultipartFile image,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) BigDecimal price
+            @RequestParam(required = false) BigDecimal price,
+            @RequestParam(required = false) Integer stockQuantity
     ) {
-        return ResponseEntity.ok(productService.updateProduct(productId, categoryId, image, name, description, price));
+        return ResponseEntity.ok(productService.updateProduct(productId, categoryId, image, name, description, price, stockQuantity));
     }
 
     @DeleteMapping("/delete/{productId}")

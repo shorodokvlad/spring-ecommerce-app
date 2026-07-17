@@ -1,25 +1,30 @@
-.admin-page{
-    margin-bottom: 200px;
+.admin-page {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 14px;
+    padding-top: 64px;
 }
-.admin-page h1{
-    margin-bottom: 20xp;
-    font-size: 35px;
+
+.admin-page h1 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 18px;
 }
-.admin-page button{
-    margin: 10px;
-    padding: 20px;
-    font-size: 20px;
-    border-radius: 8px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    background-color: cornflowerblue;
-    width: 35%;
-    color: #fff;
+
+.admin-page button {
+    width: 280px;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ink);
+    padding: 16px 20px;
+    font-size: 1rem;
+    text-align: left;
+    transition: border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
-.admin-page button:hover{
-    background-color: royalblue;
+
+.admin-page button:hover {
+    border-left-color: var(--accent);
+    color: var(--accent);
+    box-shadow: var(--shadow);
 }

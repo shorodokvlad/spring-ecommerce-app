@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import '../../style/register.css'
 
@@ -13,6 +13,7 @@ const LoginPage = () => {
 
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
 
     const handleChange = (e) => {
@@ -25,15 +26,14 @@ const LoginPage = () => {
         try {
             const response = await ApiService.loginUser(formData);
             if (response.status === 200) {
-                setMessage("User Successfully Loged in");
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('role', response.role);
-                setTimeout(() => {
-                    navigate("/profile")
-                }, 4000)
+                const from = location.state?.from?.pathname;
+                const destination = from || (response.role === 'ADMIN' ? '/admin' : '/');
+                navigate(destination, { replace: true });
             }
         } catch (error) {
-            setMessage(error.response?.data.message || error.message || "unable to Login a user");
+            setMessage(error.response?.data.message || error.message || "Unable to log in — check your email and password");
         }
     }
 

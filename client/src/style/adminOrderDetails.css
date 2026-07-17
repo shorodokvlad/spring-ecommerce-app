@@ -1,57 +1,44 @@
-.order-details-page{
+.order-details-page {
+    max-width: 720px !important;
+}
+
+.order-details-page h2,
+.order-details-page h3 {
+    margin: 12px 0 12px;
+}
+
+.order-item-details {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     padding: 20px;
-    width: 50%;
-    margin: auto;
-    margin-bottom: 100px;
-}
-.order-details-page h2{
-    text-align: center;
-    font-weight: 700;
-}
-.message{
-    text-align: center;
-    margin-bottom: 20px;
-}
-.order-item-details{
-    border: 1px solid #ddd;
-    padding: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
-.info, .status-change{
-    margin-bottom: 20px;
-}
-.info p{
-    margin: 5px 0;
-}
-.status-option{
-    padding: 10px;
-}
-.update-status-button{
-    background-color: cornflowerblue;
-    color: #fff;
-    margin-left: 10px;
-    padding: 10px;
-    font-weight: 800;
-    font-size: 15px;
-    border: none;
-    border-radius: 5px;
-}
-.update-status-button:hover{
-    background-color: royalblue;
+.order-item-details .info p {
+    margin: 4px 0;
+    color: var(--muted);
 }
 
+.order-item-details .info p strong {
+    color: var(--ink);
+}
 
+.order-item-details img {
+    max-width: 140px;
+    background: var(--paper);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+}
 
+.status-change {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+}
 
-
-
-
-
-
-
-
-
-
-
-
+.status-option {
+    width: auto;
+    min-width: 180px;
+}

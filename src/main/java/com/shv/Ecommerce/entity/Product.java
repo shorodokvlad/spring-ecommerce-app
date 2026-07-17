@@ -19,6 +19,9 @@ public class Product {
     private String imageUrl;
     private BigDecimal price;
 
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

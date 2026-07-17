@@ -6,9 +6,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 
 public interface IProductService {
-    Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price);
+    Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity);
 
-    Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price);
+    Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity);
 
     Response deleteProduct(Long productId);
 

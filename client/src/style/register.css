@@ -1,80 +1,36 @@
 .register-page {
-    max-width: 450px;
-    margin: 6rem auto;
-    padding: 3rem;
-    background: var(--card-bg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border-color);
+    max-width: 420px !important;
+    padding-top: 48px;
 }
 
 .register-page h2 {
     text-align: center;
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-main);
+    font-size: 1.6rem;
+    margin: 0 0 20px;
 }
 
 .register-page form {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 28px;
     display: flex;
     flex-direction: column;
+    gap: 6px;
 }
 
 .register-page label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--text-main);
-    font-size: 0.9rem;
+    margin-top: 10px;
 }
 
-.register-page input {
-    margin-bottom: 1.5rem;
-    /* Styles are mostly inherited from global input in index.css */
-}
-
-.register-page button {
-    padding: 1rem;
-    border: none;
-    border-radius: var(--radius-md);
-    background-color: var(--primary-color);
-    color: white;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-.register-page button:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-}
-
-.register-page button:active {
-    transform: translateY(0);
-}
-
-.message {
-    text-align: center;
-    color: #10b981;
-    margin-bottom: 1rem;
-    font-weight: 600;
+.register-page button[type="submit"] {
+    margin-top: 18px;
 }
 
 .register-link {
-    margin-top: 1.5rem;
     text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.register-link a {
-    text-decoration: none;
-    color: var(--primary-color);
-    font-weight: 600;
-    margin-left: 0.25rem;
-}
-
-.register-link a:hover {
-    text-decoration: underline;
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 14px 0 0;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import { useCart } from "../context/CartContext";
 import '../../style/cart.css'
@@ -30,11 +30,11 @@ const CartPage = () => {
 
     const handleCheckout = async () => {
         if (!ApiService.isAuthenticated()) {
-            setMessage("You need to login first before you can place an order");
+            setMessage("Log in to place your order");
             setTimeout(() => {
                 setMessage('')
                 navigate("/login")
-            }, 3000);
+            }, 1500);
             return;
         }
 
@@ -61,10 +61,10 @@ const CartPage = () => {
             }
 
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message || 'Failed to place an order');
+            setMessage(error.response?.data?.message || error.message || 'Failed to place the order');
             setTimeout(() => {
                 setMessage('')
-            }, 3000);
+            }, 4000);
 
         }
 
@@ -77,28 +77,41 @@ const CartPage = () => {
             {message && <p className="response-message">{message}</p>}
 
             {cart.length === 0 ? (
-                <p>Your cart is empty</p>
+                <div className="cart-empty">
+                    <p>Your cart is empty.</p>
+                    <Link to="/" className="btn-primary">Browse the catalogue</Link>
+                </div>
             ) : (
-                <div>
-                    <ul>
+                <div className="cart-layout">
+                    <ul className="cart-items">
                         {cart.map(item => (
-                            <li key={item.id}>
+                            <li key={item.id} className="cart-item">
                                 <img src={item.imageUrl} alt={item.name} />
-                                <div>
+                                <div className="cart-item-info">
                                     <h2>{item.name}</h2>
-                                    <p>{item.description}</p>
-                                    <div className="quantity-controls">
-                                        <button onClick={()=> decrementItem(item)}>-</button>
-                                        <span>{item.quantity}</span>
-                                        <button onClick={()=> incrementItem(item)}>+</button>
+                                    <p className="cart-item-desc">{item.description}</p>
+                                    <div className="cart-item-row">
+                                        <div className="quantity-controls">
+                                            <button onClick={()=> decrementItem(item)} aria-label={`Remove one ${item.name}`}>−</button>
+                                            <span>{item.quantity}</span>
+                                            <button onClick={()=> incrementItem(item)}
+                                                disabled={item.stockQuantity != null && item.quantity >= item.stockQuantity}
+                                                aria-label={`Add one ${item.name}`}>+</button>
+                                        </div>
+                                        <span className="price-ticket">€{(item.price * item.quantity).toFixed(2)}</span>
                                     </div>
-                                    <span>€{item.price.toFixed()}</span>
                                 </div>
                             </li>
                         ))}
                     </ul>
-                    <h2>Total: €{totalPrice.toFixed(2)}</h2>
-                    <button className="checkout-button" onClick={handleCheckout}>Checkout</button>
+                    <aside className="cart-summary">
+                        <h2>Summary</h2>
+                        <div className="cart-summary-row">
+                            <span>{(() => { const n = cart.reduce((sum, item) => sum + item.quantity, 0); return `${n} ${n === 1 ? 'item' : 'items'}`; })()}</span>
+                            <span className="price-ticket price-ticket-lg">€{totalPrice.toFixed(2)}</span>
+                        </div>
+                        <button className="checkout-button" onClick={handleCheckout}>Place order</button>
+                    </aside>
                 </div>
             )}
         </div>

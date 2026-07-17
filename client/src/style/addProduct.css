@@ -1,35 +1,37 @@
 .product-form {
+    max-width: 480px;
+    margin: 32px auto 64px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 28px;
     display: flex;
     flex-direction: column;
-    width: 50%;
-    margin: auto;
-    margin-bottom: 250px;
+    gap: 12px;
 }
 
-.product-form input,
-.product-form select,
-.product-form textarea,
-.product-form button {
-    margin: 10x 0;
-    padding: 10px;
-    font-size: 16px;
-}
-
-.product-form button {
-    background-color: cornflowerblue;
-    padding: 15px;
-    border: none;
-    cursor: pointer;
-    color: #fff;
-    font-weight: 800;
-}
-
-.product-form button:hover {
-    background-color: royalblue;
-
+.product-form h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 0 0 8px;
 }
 
 .product-form img {
-    max-width: 100px;
-    margin: 10px 0;
+    max-height: 160px;
+    object-fit: contain;
+    background: var(--paper);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    align-self: center;
+}
+
+.product-form input[type="file"] {
+    border: 1px dashed var(--line);
+    background: var(--paper);
+    font-size: 0.85rem;
+}
+
+.product-form button[type="submit"] {
+    margin-top: 8px;
 }

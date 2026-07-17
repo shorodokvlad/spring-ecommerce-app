@@ -2,6 +2,10 @@ import React, {createContext, useReducer, useContext, useEffect} from "react";
 
 const CartContext = createContext();
 
+// Quantity can never exceed available stock (unknown stock = no cap)
+const cappedQuantity = (wanted, stockQuantity) =>
+    stockQuantity == null ? wanted : Math.min(wanted, stockQuantity);
+
 const initialState = {
     cart: JSON.parse(localStorage.getItem('cart')) || [],
 }
@@ -17,7 +21,7 @@ const cartReducer = (state, action) =>{
             if(existingItem){
                 newCart = state.cart.map(item =>
                     item.id === action.payload.id
-                    ? {...item, quantity: item.quantity + 1}
+                    ? {...item, quantity: cappedQuantity(item.quantity + 1, item.stockQuantity)}
                     : item
                 );
             }else {
@@ -36,7 +40,7 @@ const cartReducer = (state, action) =>{
         case 'INCREMENT_ITEM': {
             const newCart = state.cart.map(item=>
                 item.id === action.payload.id
-                ? {...item, quantity: item.quantity + 1}
+                ? {...item, quantity: cappedQuantity(item.quantity + 1, item.stockQuantity)}
                 :item
             );
             localStorage.setItem('cart', JSON.stringify(newCart));

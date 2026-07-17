@@ -27,10 +27,10 @@ const RegisterPage = () => {
         try {
             const response = await ApiService.registerUser(formData);
             if (response.status === 200) {
-                setMessage("User Successfully Registerd");
+                setMessage("Account created — taking you to login");
                 setTimeout(() => {
                     navigate("/login")
-                }, 4000)
+                }, 1200)
             }
         } catch (error) {
             setMessage(error.response?.data.message || error.message || "unable to register a user");

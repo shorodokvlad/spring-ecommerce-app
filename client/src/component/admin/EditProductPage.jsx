@@ -13,6 +13,7 @@ const EditProductPage = () => {
     const [description, setDescription] = useState('');
     const [message, setMessage] = useState('');
     const [price, setPrice] = useState('');
+    const [stockQuantity, setStockQuantity] = useState('');
     const [imageUrl, setImageUrl] = useState(null);
     const navigate = useNavigate();
 
@@ -24,6 +25,7 @@ const EditProductPage = () => {
                 setName(response.product.name);
                 setDescription(response.product.description);
                 setPrice(response.product.price);
+                setStockQuantity(response.product.stockQuantity ?? '');
                 setCategoryId(response.product.category?.id || '');
                 setImageUrl(response.product.imageUrl);
             })
@@ -48,6 +50,9 @@ const EditProductPage = () => {
             formData.append('name', name);
             formData.append('description', description);
             formData.append('price', price);
+            if (stockQuantity !== '') {
+                formData.append('stockQuantity', stockQuantity);
+            }
 
             const response = await ApiService.updateProduct(formData);
             if (response.status === 200) {
@@ -86,10 +91,18 @@ const EditProductPage = () => {
                 value={description}
                 onChange={(e)=> setDescription(e.target.value)}/>
 
-                <input type="number" 
+                <input type="number"
                 placeholder="Price"
+                step="0.01"
+                min="0"
                 value={price}
                 onChange={(e)=> setPrice(e.target.value)} />
+
+                <input type="number"
+                placeholder="Stock quantity"
+                min="0"
+                value={stockQuantity}
+                onChange={(e)=> setStockQuantity(e.target.value)} />
 
                 <button type="submit">Update</button>
         </form>

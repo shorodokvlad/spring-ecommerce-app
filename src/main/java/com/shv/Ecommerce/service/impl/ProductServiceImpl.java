@@ -29,7 +29,7 @@ public class ProductServiceImpl implements IProductService {
     private final EntityDtoMapper entityDtoMapper;
     private final AwsS3Service awsS3Service;
     @Override
-    public Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price) {
+    public Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(()->new NotFoundException("Category not found"));
         String productImageUrl = awsS3Service.saveImageToS3(image);
 
@@ -39,6 +39,7 @@ public class ProductServiceImpl implements IProductService {
         product.setName(name);
         product.setDescription(description);
         product.setImageUrl(productImageUrl);
+        product.setStockQuantity(stockQuantity != null ? stockQuantity : 0);
 
         productRepo.save(product);
 
@@ -49,7 +50,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price) {
+    public Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
 
         Category category = null;
@@ -68,6 +69,7 @@ public class ProductServiceImpl implements IProductService {
         if (price != null) product.setPrice(price);
         if (description != null) product.setDescription(description);
         if (productImageUrl != null) product.setImageUrl(productImageUrl);
+        if (stockQuantity != null) product.setStockQuantity(stockQuantity);
 
         productRepo.save(product);
         return Response.builder()
