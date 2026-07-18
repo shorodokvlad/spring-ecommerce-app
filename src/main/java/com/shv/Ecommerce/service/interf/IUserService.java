@@ -8,6 +8,9 @@ import com.shv.Ecommerce.entity.User;
 public interface IUserService {
     Response registerUser(UserDto registrationRequest);
     Response loginRequest(LoginRequest loginRequest);
+    Response forgotPassword(String email);
+    Response resetPassword(String token, String newPassword);
+    Response googleLogin(String idToken);
     Response getAllUsers();
     User getLoginUser();
     Response getUserInfoAndOrderHistory();

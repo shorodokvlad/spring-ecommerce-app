@@ -22,6 +22,21 @@ export default class ApiService {
         return response.data;
     }
 
+    static async forgotPassword(email) {
+        const response = await axios.post(`${this.BASE_URL}/auth/forgot-password`, { email })
+        return response.data;
+    }
+
+    static async resetPassword(token, newPassword) {
+        const response = await axios.post(`${this.BASE_URL}/auth/reset-password`, { token, newPassword })
+        return response.data;
+    }
+
+    static async googleLogin(idToken) {
+        const response = await axios.post(`${this.BASE_URL}/auth/google`, { idToken })
+        return response.data;
+    }
+
     static async getLoggedInUserInfo() {
         const response = await axios.get(`${this.BASE_URL}/user/my-info`, {
             headers: this.getHeader()

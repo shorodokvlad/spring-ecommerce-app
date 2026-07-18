@@ -11,6 +11,8 @@ import CategoryProductsPage from './component/pages/CategoryProductsPage';
 import CartPage from './component/pages/CartPage';
 import RegisterPage from './component/pages/RegisterPage';
 import LoginPage from './component/pages/LoginPage';
+import ForgotPasswordPage from './component/pages/ForgotPasswordPage';
+import ResetPasswordPage from './component/pages/ResetPasswordPage';
 import ProfilePage from './component/pages/ProfilePage';
 import AddressPage from './component/pages/AddressPage';
 import AdminPage from './component/admin/AdminPage';
@@ -36,6 +38,8 @@ function App() {
           <Route path='/cart' element={<CartPage/>}/>
           <Route path='/register' element={<RegisterPage/>}/>
           <Route path='/login' element={<LoginPage/>}/>
+          <Route path='/forgot-password' element={<ForgotPasswordPage/>}/>
+          <Route path='/reset-password' element={<ResetPasswordPage/>}/>
 
            <Route path='/profile' element={<ProtectedRoute element={<ProfilePage/>} />} />
            <Route path='/add-address' element={<ProtectedRoute element={<AddressPage/>} />} />

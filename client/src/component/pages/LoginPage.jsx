@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import '../../style/register.css'
 
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const LoginPage = () => {
 
@@ -14,7 +15,54 @@ const LoginPage = () => {
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
+    const googleButtonRef = useRef(null);
 
+    const finishLogin = useCallback((response) => {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('role', response.role);
+        const from = location.state?.from?.pathname;
+        const destination = from || (response.role === 'ADMIN' ? '/admin' : '/');
+        navigate(destination, { replace: true });
+    }, [location.state, navigate]);
+
+    // Google Sign-In: load the GIS script and render the official button
+    useEffect(() => {
+        if (!GOOGLE_CLIENT_ID) return;
+
+        const handleCredential = async (credentialResponse) => {
+            try {
+                const response = await ApiService.googleLogin(credentialResponse.credential);
+                if (response.status === 200) {
+                    finishLogin(response);
+                }
+            } catch (error) {
+                setMessage(error.response?.data?.message || "Google sign-in failed");
+            }
+        };
+
+        const renderButton = () => {
+            if (!window.google || !googleButtonRef.current) return;
+            window.google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredential,
+            });
+            window.google.accounts.id.renderButton(googleButtonRef.current, {
+                theme: 'outline',
+                size: 'large',
+                width: 320,
+            });
+        };
+
+        if (window.google) {
+            renderButton();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.onload = renderButton;
+        document.body.appendChild(script);
+    }, [finishLogin]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -26,11 +74,7 @@ const LoginPage = () => {
         try {
             const response = await ApiService.loginUser(formData);
             if (response.status === 200) {
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('role', response.role);
-                const from = location.state?.from?.pathname;
-                const destination = from || (response.role === 'ADMIN' ? '/admin' : '/');
-                navigate(destination, { replace: true });
+                finishLogin(response);
             }
         } catch (error) {
             setMessage(error.response?.data.message || error.message || "Unable to log in — check your email and password");
@@ -49,7 +93,7 @@ const LoginPage = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required />
-                    
+
                 <label>Password: </label>
                 <input
                     type="password"
@@ -58,10 +102,21 @@ const LoginPage = () => {
                     onChange={handleChange}
                     required />
 
+                    <p className="forgot-link">
+                        <Link to="/forgot-password">Forgot password?</Link>
+                    </p>
+
                     <button type="submit">Login</button>
-                    
+
+                    {GOOGLE_CLIENT_ID && (
+                        <>
+                            <div className="auth-divider"><span>or</span></div>
+                            <div className="google-button" ref={googleButtonRef}></div>
+                        </>
+                    )}
+
                     <p className="register-link">
-                        Don't have an account? <a href="/register">Register</a>
+                        Don't have an account? <Link to="/register">Register</Link>
                     </p>
             </form>
         </div>

@@ -1,9 +1,13 @@
 package com.shv.Ecommerce.controller;
 
+import com.shv.Ecommerce.dto.ForgotPasswordRequest;
+import com.shv.Ecommerce.dto.GoogleLoginRequest;
 import com.shv.Ecommerce.dto.LoginRequest;
+import com.shv.Ecommerce.dto.ResetPasswordRequest;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.dto.UserDto;
 import com.shv.Ecommerce.service.interf.IUserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,5 +29,20 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Response> loginUser(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(userService.loginRequest(loginRequest));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Response> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(userService.forgotPassword(request.getEmail()));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Response> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(userService.resetPassword(request.getToken(), request.getNewPassword()));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<Response> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        return ResponseEntity.ok(userService.googleLogin(request.getIdToken()));
     }
 }

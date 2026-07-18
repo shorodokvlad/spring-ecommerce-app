@@ -34,3 +34,36 @@
     color: var(--muted);
     margin: 14px 0 0;
 }
+
+.forgot-link {
+    text-align: right;
+    font-size: 0.85rem;
+    margin: 4px 0 0;
+}
+
+.form-hint {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 0 0 8px;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin: 16px 0 12px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--line);
+}
+
+.google-button {
+    display: flex;
+    justify-content: center;
+}
