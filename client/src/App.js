@@ -29,7 +29,9 @@ function App() {
   return (
     <BrowserRouter>
     <CartProvider>
+      <div className="app-shell">
       <Navbar/>
+      <main className="app-main">
         <Routes>
           <Route exact path='/' element={<Home/>}></Route>
           <Route path='/product/:productId' element={<ProductDetailsPage/>} />
@@ -56,7 +58,9 @@ function App() {
            <Route path='/admin/orders' element={<AdminRoute element={<AdminOrdersPage/>} />} />
            <Route path='/admin/order-details/:itemId' element={<AdminRoute element={<AdminOrderDetailsPage/>} />} />
         </Routes>
+      </main>
       <Footer/>
+      </div>
     </CartProvider>
     </BrowserRouter>
   );

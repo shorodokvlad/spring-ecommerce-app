@@ -6,6 +6,9 @@ services:
     name: spring-ecommerce-backend
     runtime: docker
     plan: free
+    # Sit next to the Supabase database (eu-central-1 / Frankfurt) so DB
+    # queries don't cross the Atlantic on every request
+    region: frankfurt
     dockerfilePath: ./Dockerfile
     envVars:
       - key: PORT
