@@ -1,28 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Spline+Sans+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap');
 
 /* ---------------------------------------------------------------------------
-   SHV Store design system
-   Porcelain ground, ink type, cobalt interactions.
-   Signature: mono "shelf ticket" prices + live stock badges.
+   SHV Store — restyled to match the portfolio design system
+   White ground, dark-teal ink, purple interactions, yellow/teal/red accents,
+   Archivo Black display headings, PT Sans body, pill chips, soft gray blobs.
 --------------------------------------------------------------------------- */
 
 :root {
-    --paper: #F2F4F3;
+    --paper: #FFFFFF;          /* page background */
+    --well: #F2F4F6;           /* media wells / soft surfaces */
     --card: #FFFFFF;
-    --ink: #1F242B;
-    --muted: #68717B;
-    --line: #E1E5E3;
-    --accent: #2743C7;
-    --accent-deep: #1C2F9E;
-    --ok: #14775A;
-    --low: #A85F00;
-    --danger: #B93B2E;
-    --danger-soft: #FBEeec;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --shadow: 0 1px 2px rgb(31 36 43 / 0.06), 0 8px 24px -12px rgb(31 36 43 / 0.12);
-    --font-sans: 'Familjen Grotesk', system-ui, -apple-system, sans-serif;
-    --font-mono: 'Spline Sans Mono', ui-monospace, 'SF Mono', monospace;
+    --ink: #1F4E63;            /* dark teal — headings, text, primary buttons */
+    --ink-deep: #17435A;
+    --muted: #4A7086;          /* body blue-gray */
+    --faint: #93A9B5;          /* small caps meta */
+    --line: #DCE7EC;
+    --accent: #8D7BEA;         /* purple interactions */
+    --accent-soft: #EEEAFC;
+    --teal: #6EC8C0;
+    --teal-soft: #CDEAE7;
+    --yellow: #F3C94B;
+    --lilac: #DCCDF6;
+    --ok: #2E9C90;
+    --low: #C08A16;
+    --danger: #E4595C;
+    --danger-soft: #FCEEEE;
+    --radius: 12px;
+    --radius-sm: 9px;
+    --shadow: 0 4px 10px rgb(31 78 99 / 0.06), 0 14px 28px -14px rgb(31 78 99 / 0.18);
+    --font-sans: 'PT Sans', system-ui, -apple-system, sans-serif;
+    --font-display: 'Archivo Black', 'Arial Black', sans-serif;
 }
 
 * {
@@ -34,22 +41,25 @@ body {
     padding: 0;
     font-family: var(--font-sans);
     background-color: var(--paper);
-    color: var(--ink);
-    line-height: 1.55;
+    color: var(--muted);
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
     font-family: var(--font-sans);
-    font-weight: 650;
-    letter-spacing: -0.015em;
-    line-height: 1.15;
+    font-weight: 700;
+    line-height: 1.25;
     color: var(--ink);
 }
 
 a {
     color: var(--accent);
     text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 img {
@@ -83,31 +93,94 @@ img {
     min-height: 60vh;
 }
 
-/* --- Signature: the shelf ticket ------------------------------------- */
-.price-ticket {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 0.9rem;
+/* --- Display headings: portfolio section-title style ------------------- */
+.shop-band h1,
+.cart-page > h1,
+.category-list > h2,
+.profile-page > h2,
+.admin-page h1,
+.admin-category-list > h2,
+.admin-product-list > div > h2,
+.admin-orders-page > h2,
+.register-page > h2,
+.address-page > h2,
+.category-form h2,
+.product-form h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     color: var(--ink);
-    background: var(--card);
-    border: 1.5px solid var(--ink);
-    border-radius: 4px;
-    padding: 1px 8px 2px;
+    line-height: 1.15;
+}
+
+/* Centered titles get the little tick underneath, like the portfolio */
+.cart-page > h1,
+.category-list > h2,
+.profile-page > h2,
+.admin-page h1,
+.register-page > h2,
+.address-page > h2,
+.category-form h2,
+.product-form h2 {
+    text-align: center;
+}
+
+.cart-page > h1::after,
+.category-list > h2::after,
+.profile-page > h2::after,
+.admin-page h1::after {
+    content: "";
+    display: block;
+    width: 2px;
+    height: 34px;
+    background: var(--ink);
+    margin: 18px auto 0;
+}
+
+/* --- Small-caps meta (portfolio .meta pattern) ------------------------- */
+.eyebrow,
+.shop-eyebrow,
+.product-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+/* Lilac underline highlight, like the portfolio tagline */
+.hl {
+    background-image: linear-gradient(transparent 68%, var(--lilac) 68%);
+    padding: 0 2px;
+}
+
+/* --- Signature: the shelf ticket, restyled as a portfolio chip --------- */
+.price-ticket {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--ink);
+    background: #EEF4F6;
+    border: 1px solid #D5E3E8;
+    border-radius: 999px;
+    padding: 2px 12px 3px;
     white-space: nowrap;
 }
 
 .price-ticket-lg {
-    font-size: 1.35rem;
-    padding: 4px 14px 5px;
-    border-width: 2px;
+    font-size: 1.3rem;
+    padding: 5px 18px 6px;
 }
 
 /* --- Stock badges ------------------------------------------------------ */
 .stock-badge {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -130,11 +203,12 @@ img {
 button {
     font-family: var(--font-sans);
     font-size: 0.92rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     border: none;
     border-radius: var(--radius-sm);
-    transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+    transition: background-color 140ms ease, color 140ms ease,
+        border-color 140ms ease, transform 140ms ease;
 }
 
 button:disabled {
@@ -151,7 +225,7 @@ form button[type="submit"],
     display: inline-block;
     background: var(--ink);
     color: var(--card);
-    padding: 10px 20px;
+    padding: 10px 22px;
     text-align: center;
 }
 
@@ -161,16 +235,31 @@ form button[type="submit"],
 form button[type="submit"]:hover,
 .profile-button:hover,
 .update-status-button:hover {
-    background: var(--accent);
+    background: var(--ink-deep);
     color: var(--card);
+    transform: translateY(-2px);
+}
+
+/* Ghost buttons: 2px ink outline → purple on hover, like the portfolio */
+.btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    padding: 8px 18px;
+}
+
+.btn-ghost:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
 }
 
 /* --- Quantity stepper -------------------------------------------------- */
 .quantity-controls {
     display: inline-flex;
     align-items: center;
-    border: 1.5px solid var(--ink);
-    border-radius: var(--radius-sm);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
     overflow: hidden;
     background: var(--card);
 }
@@ -181,21 +270,22 @@ form button[type="submit"]:hover,
     background: var(--card);
     color: var(--ink);
     font-size: 1.05rem;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: 0;
 }
 
 .quantity-controls button:hover:not(:disabled) {
     background: var(--accent);
     color: var(--card);
+    transform: none;
 }
 
 .quantity-controls span {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-weight: 700;
+    font-size: 0.92rem;
     min-width: 34px;
     text-align: center;
+    color: var(--ink);
 }
 
 /* --- Forms ------------------------------------------------------------- */
@@ -213,7 +303,7 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgb(39 67 199 / 0.14);
+    box-shadow: 0 0 0 3px rgb(141 123 234 / 0.18);
 }
 
 textarea {
@@ -222,15 +312,17 @@ textarea {
 }
 
 label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
 }
 
 /* --- Messages ---------------------------------------------------------- */
 .message,
 .response-message {
-    background: var(--card);
+    background: var(--accent-soft);
     border: 1px solid var(--accent);
     border-left-width: 4px;
     color: var(--ink);

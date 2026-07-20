@@ -41,7 +41,7 @@
     width: 96px;
     height: 96px;
     object-fit: contain;
-    background: var(--paper);
+    background: var(--well);
     border-radius: var(--radius-sm);
     padding: 8px;
     flex-shrink: 0;

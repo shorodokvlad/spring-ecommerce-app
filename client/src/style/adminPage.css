@@ -16,7 +16,7 @@
     background: var(--card);
     color: var(--ink);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--ink);
+    border-left: 3px solid var(--teal);
     padding: 16px 20px;
     font-size: 1rem;
     text-align: left;

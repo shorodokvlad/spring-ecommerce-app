@@ -1,57 +1,64 @@
+/* Shop header band — portfolio hero flavor: centered display title with
+   tick, lilac-highlight capable subtitle, pill category chips. */
 .shop-band {
     padding: 28px 0 8px;
     margin-bottom: 24px;
-    border-bottom: 1px solid var(--line);
+    text-align: center;
 }
 
 .shop-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
     margin: 0 0 6px;
 }
 
 .shop-band h1 {
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
     margin: 0 0 6px;
+}
+
+.shop-band h1::after {
+    content: "";
+    display: block;
+    width: 2px;
+    height: 34px;
+    background: var(--ink);
+    margin: 18px auto 14px;
 }
 
 .shop-sub {
     color: var(--muted);
-    margin: 0 0 18px;
-    max-width: 48ch;
+    margin: 0 auto 18px;
+    max-width: 52ch;
 }
 
 .shop-band-clear {
     display: inline-block;
     margin-bottom: 16px;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .category-chips {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
     padding-bottom: 20px;
 }
 
+/* Portfolio chip style */
 .category-chip {
-    font-family: var(--font-mono);
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 700;
     color: var(--ink);
-    background: var(--card);
-    border: 1px solid var(--line);
+    background: #EEF4F6;
+    border: 1px solid #D5E3E8;
     border-radius: 999px;
     padding: 6px 14px;
-    transition: border-color 140ms ease, color 140ms ease;
+    transition: border-color 140ms ease, color 140ms ease, transform 140ms ease;
 }
 
 .category-chip:hover {
     border-color: var(--accent);
     color: var(--accent);
+    transform: translateY(-2px);
 }

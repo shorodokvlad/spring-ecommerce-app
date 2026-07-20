@@ -49,7 +49,7 @@
 .admin-product-list li .product-btn {
     padding: 7px 14px;
     font-size: 0.85rem;
-    background: var(--paper);
+    background: var(--well);
     color: var(--ink);
     border: 1px solid var(--line);
 }
@@ -62,7 +62,7 @@
 .product-btn-delete {
     padding: 7px 14px;
     font-size: 0.85rem;
-    background: var(--paper);
+    background: var(--well);
     color: var(--ink);
     border: 1px solid var(--line);
 }

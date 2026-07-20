@@ -6,7 +6,7 @@
 .category-form {
     background: var(--card);
     border: 1px solid var(--line);
-    border-top: 3px solid var(--ink);
+    border-top: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 28px;
     display: flex;

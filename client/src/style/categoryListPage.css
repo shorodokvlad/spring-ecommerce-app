@@ -20,7 +20,7 @@
     color: var(--ink);
     background: var(--card);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--ink);
+    border-left: 3px solid var(--teal);
     border-radius: var(--radius);
     padding: 20px 18px;
     transition: border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;

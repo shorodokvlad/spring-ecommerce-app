@@ -26,7 +26,7 @@
 
 .order-item-details img {
     max-width: 140px;
-    background: var(--paper);
+    background: var(--well);
     border-radius: var(--radius-sm);
     padding: 8px;
 }

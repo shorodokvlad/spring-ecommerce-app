@@ -30,14 +30,13 @@
 }
 
 .orders-table th {
-    font-family: var(--font-mono);
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     text-align: left;
     color: var(--muted);
-    background: var(--paper);
+    background: var(--well);
     padding: 12px 14px;
     border-bottom: 1px solid var(--line);
 }
@@ -55,7 +54,7 @@
 .orders-table button {
     padding: 6px 14px;
     font-size: 0.85rem;
-    background: var(--paper);
+    background: var(--well);
     color: var(--ink);
     border: 1px solid var(--line);
 }

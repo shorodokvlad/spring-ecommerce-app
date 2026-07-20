@@ -3,7 +3,7 @@
     margin: 32px auto 64px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-top: 3px solid var(--ink);
+    border-top: 1px solid var(--line);
     border-radius: var(--radius);
     padding: 28px;
     display: flex;
@@ -20,7 +20,7 @@
 .product-form img {
     max-height: 160px;
     object-fit: contain;
-    background: var(--paper);
+    background: var(--well);
     border-radius: var(--radius-sm);
     padding: 10px;
     align-self: center;
@@ -28,7 +28,7 @@
 
 .product-form input[type="file"] {
     border: 1px dashed var(--line);
-    background: var(--paper);
+    background: var(--well);
     font-size: 0.85rem;
 }
 

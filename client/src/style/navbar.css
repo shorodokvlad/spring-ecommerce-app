@@ -1,3 +1,5 @@
+/* Sticky nav — portfolio style: white blur bar, lowercase bold links,
+   purple hover/active, soft shadow. */
 .navbar {
     position: sticky;
     top: 0;
@@ -5,55 +7,69 @@
     display: flex;
     align-items: center;
     gap: 24px;
-    padding: 12px 24px;
-    background: var(--card);
-    border-bottom: 1px solid var(--line);
+    padding: 14px 24px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 24px rgb(31 78 99 / 0.08);
 }
 
 .navbar-brand {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     text-decoration: none;
 }
 
+.navbar-brand:hover {
+    text-decoration: none;
+}
+
+/* Brand mark: teal diamond chip, echoing the portfolio logo */
 .brand-mark {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 0.8rem;
+    font-weight: 700;
+    font-size: 0.72rem;
     letter-spacing: 0.06em;
-    color: var(--card);
+    color: #fff;
     background: var(--ink);
-    border-radius: 6px;
-    padding: 6px 8px;
+    border: 2px solid var(--teal);
+    border-radius: 9px;
+    padding: 5px 8px;
     line-height: 1;
+    transform: rotate(-4deg);
+    transition: background-color 140ms ease, transform 140ms ease;
 }
 
 .navbar-brand:hover .brand-mark {
     background: var(--accent);
+    transform: rotate(0deg);
 }
 
 .brand-word {
-    font-weight: 650;
+    font-weight: 700;
     font-size: 1.1rem;
     color: var(--ink);
-    letter-spacing: -0.01em;
 }
 
 .navbar-search {
     flex: 1;
     max-width: 420px;
     display: flex;
-    background: var(--paper);
-    border: 1px solid var(--line);
+    background: var(--card);
+    border: 2px solid var(--ink);
     border-radius: 999px;
     overflow: hidden;
+    transition: border-color 140ms ease;
+}
+
+.navbar-search:focus-within {
+    border-color: var(--accent);
 }
 
 .navbar-search input {
     border: none;
     background: transparent;
-    padding: 8px 16px;
+    padding: 7px 16px;
 }
 
 .navbar-search input:focus {
@@ -62,14 +78,16 @@
 
 .navbar-search button {
     background: transparent;
-    color: var(--muted);
-    padding: 8px 16px;
+    color: var(--ink);
+    padding: 7px 16px;
     border-radius: 0;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: lowercase;
 }
 
 .navbar-search button:hover {
     color: var(--accent);
+    transform: none;
 }
 
 .navbar-link {
@@ -81,9 +99,10 @@
 
 .navbar-link a,
 .navbar-logout {
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: lowercase;
+    color: var(--ink);
     padding: 7px 12px;
     border-radius: var(--radius-sm);
     background: transparent;
@@ -91,12 +110,14 @@
 
 .navbar-link a:hover,
 .navbar-logout:hover {
-    color: var(--ink);
-    background: var(--paper);
+    color: var(--accent);
+    background: transparent;
+    text-decoration: none;
+    transform: none;
 }
 
 .navbar-link a.active {
-    color: var(--ink);
+    color: var(--accent);
 }
 
 .navbar-cart {
@@ -106,10 +127,9 @@
 }
 
 .cart-count {
-    font-family: var(--font-mono);
     font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--card);
+    font-weight: 700;
+    color: #fff;
     background: var(--accent);
     border-radius: 999px;
     min-width: 20px;

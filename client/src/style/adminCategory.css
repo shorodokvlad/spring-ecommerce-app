@@ -47,7 +47,7 @@
 .admin-bt button {
     padding: 7px 14px;
     font-size: 0.85rem;
-    background: var(--paper);
+    background: var(--well);
     color: var(--ink);
     border: 1px solid var(--line);
 }
