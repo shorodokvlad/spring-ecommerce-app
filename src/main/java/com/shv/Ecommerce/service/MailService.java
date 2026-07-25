@@ -14,20 +14,37 @@ import org.springframework.stereotype.Service;
 public class MailService {
     private final JavaMailSender mailSender;
 
-    @Value("${app.mail.from-address:${spring.mail.username:spring-boot-ecommerce@shorodokvlad.eu}}")
+    @Value("${spring.mail.username:}")
+    private String smtpUsername;
+
+    @Value("${app.mail.from-address:${spring.mail.username:vlad.shorodoc@gmail.com}}")
     private String fromAddress;
 
     public void send(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
-        String sender = (fromAddress != null && !fromAddress.isBlank())
-                ? fromAddress
-                : "spring-boot-ecommerce@shorodokvlad.eu";
+        String sender = (fromAddress != null && !fromAddress.isBlank()) ? fromAddress : smtpUsername;
+        if (sender == null || sender.isBlank()) {
+            sender = "vlad.shorodoc@gmail.com";
+        }
         message.setFrom(sender);
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        mailSender.send(message);
-        log.info("Email sent to {} with subject '{}' from '{}'", to, subject, sender);
+        
+        try {
+            mailSender.send(message);
+            log.info("Email sent to {} with subject '{}' from '{}'", to, subject, sender);
+        } catch (Exception e) {
+            // If custom sender failed on Gmail SMTP (e.g. cloud IP domain restrictions), retry with authenticated account
+            if (smtpUsername != null && !smtpUsername.isBlank() && !smtpUsername.equalsIgnoreCase(sender)) {
+                log.warn("Sending with sender='{}' failed ({}), retrying with authenticated address '{}'", sender, e.getMessage(), smtpUsername);
+                message.setFrom(smtpUsername);
+                mailSender.send(message);
+                log.info("Email sent to {} with fallback sender '{}'", to, smtpUsername);
+            } else {
+                throw e;
+            }
+        }
     }
 
     /** Send asynchronously without letting mail network latency freeze the calling HTTP thread. */
