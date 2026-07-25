@@ -41,6 +41,13 @@ public class EntityDtoMapper {
         categoryDto.setId(category.getId());
         categoryDto.setName(category.getName());
 
+        if (category.getProductList() != null && !category.getProductList().isEmpty()) {
+            category.getProductList().stream()
+                    .filter(p -> p.getImageUrl() != null && !p.getImageUrl().isBlank())
+                    .findFirst()
+                    .ifPresent(p -> categoryDto.setImageUrl(p.getImageUrl()));
+        }
+
         return categoryDto;
     }
 

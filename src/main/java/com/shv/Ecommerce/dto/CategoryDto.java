@@ -14,5 +14,6 @@ import java.util.List;
 public class CategoryDto {
     private Long id;
     private String name;
+    private String imageUrl;
     private List<ProductDto> productDtoList;
 }

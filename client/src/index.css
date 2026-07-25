@@ -126,18 +126,6 @@ img {
     text-align: center;
 }
 
-.cart-page > h1::after,
-.category-list > h2::after,
-.profile-page > h2::after,
-.admin-page h1::after {
-    content: "";
-    display: block;
-    width: 2px;
-    height: 34px;
-    background: var(--ink);
-    margin: 18px auto 0;
-}
-
 /* --- Small-caps meta (portfolio .meta pattern) ------------------------- */
 .eyebrow,
 .shop-eyebrow,

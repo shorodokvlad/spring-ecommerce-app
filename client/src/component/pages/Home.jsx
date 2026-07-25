@@ -65,8 +65,7 @@ const Home = () => {
                 ) : (
                     <>
                         <p className="shop-eyebrow">SHV Store</p>
-                        <h1>Shop the catalogue.</h1>
-                        <p className="shop-sub">Every item ships from our own shelf — stock counts are live.</p>
+                        <h1>Shop the catalogue</h1>
                         {categories.length > 0 && (
                             <div className="category-chips">
                                 {categories.map((cat) => (

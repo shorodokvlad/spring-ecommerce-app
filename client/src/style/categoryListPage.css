@@ -1,33 +1,83 @@
+.category-list {
+    padding: 12px 0 40px;
+}
+
 .category-list h2 {
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    margin: 12px 0 24px;
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    text-align: center;
+    margin: 12px 0 32px;
 }
 
-.category-list ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.category-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
 }
 
-.category-list li button {
+.category-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    transition: transform 220ms ease, box-shadow 220ms ease;
+    border: none;
+}
+
+.category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1);
+}
+
+.category-image-wrap {
+    height: 170px;
     width: 100%;
-    text-align: left;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--ink);
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--teal);
-    border-radius: var(--radius);
-    padding: 20px 18px;
-    transition: border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+    overflow: hidden;
+    background: #f4f6f8;
+    position: relative;
 }
 
-.category-list li button:hover {
-    border-left-color: var(--accent);
-    color: var(--accent);
-    box-shadow: var(--shadow);
+.category-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 300ms ease;
+}
+
+.category-card:hover .category-image {
+    transform: scale(1.06);
+}
+
+.category-placeholder-img {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #eef4f8 0%, #dbe6ee 100%);
+    color: #4a6572;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.category-info {
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+}
+
+.category-info h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.category-cta {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent, #0070f3);
 }

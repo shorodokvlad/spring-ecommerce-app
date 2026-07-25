@@ -31,24 +31,40 @@ const CategoryListPage = () => {
         navigate(`/category/${categoryId}`);
     } 
 
-    return(
+    return (
         <div className="category-list">
             {error ? (
                 <p className="error-message">{error}</p>
-            ):(
+            ) : (
                 <div>
-                    <h2>Categories</h2>
-                    <ul>
-                        {categories.map((category)=>(
-                            <li key={category.id}>
-                                <button onClick={()=> handleCategoryClick(category.id)}>{category.name}</button>
-                            </li>
+                    <h2>Explore Categories</h2>
+                    <div className="category-grid">
+                        {categories.map((category) => (
+                            <div 
+                                className="category-card" 
+                                key={category.id}
+                                onClick={() => handleCategoryClick(category.id)}
+                            >
+                                <div className="category-image-wrap">
+                                    {category.imageUrl ? (
+                                        <img src={category.imageUrl} alt={category.name} className="category-image" />
+                                    ) : (
+                                        <div className="category-placeholder-img">
+                                            <span>{category.name.substring(0, 2).toUpperCase()}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="category-info">
+                                    <h3>{category.name}</h3>
+                                    <span className="category-cta">Browse →</span>
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </div>
             )}
         </div>
-    )
-}
+    );
+};
 
 export default CategoryListPage;
