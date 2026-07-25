@@ -116,7 +116,7 @@ public class UserServiceImpl implements IUserService {
             passwordResetTokenRepo.save(resetToken);
 
             String resetLink = frontendUrl + "/reset-password?token=" + resetToken.getToken();
-            mailService.send(
+            mailService.sendQuietly(
                     user.getEmail(),
                     "Reset your SHV Store password",
                     "Hi " + user.getName() + ",\n\n"
@@ -190,14 +190,25 @@ public class UserServiceImpl implements IUserService {
                 .build();
     }
 
+    private volatile GoogleIdTokenVerifier googleVerifier;
+
+    private GoogleIdTokenVerifier getGoogleVerifier() {
+        if (googleVerifier == null) {
+            synchronized (this) {
+                if (googleVerifier == null) {
+                    googleVerifier = new GoogleIdTokenVerifier.Builder(
+                            new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                            .setAudience(List.of(googleClientId))
+                            .build();
+                }
+            }
+        }
+        return googleVerifier;
+    }
+
     private GoogleIdToken.Payload verifyGoogleIdToken(String idTokenString) {
         try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier
-                    .Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
-                    .setAudience(List.of(googleClientId))
-                    .build();
-
-            GoogleIdToken idToken = verifier.verify(idTokenString);
+            GoogleIdToken idToken = getGoogleVerifier().verify(idTokenString);
             if (idToken == null) {
                 throw new InvalidCredentialsException("Google sign-in could not be verified");
             }

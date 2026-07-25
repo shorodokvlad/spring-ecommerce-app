@@ -60,17 +60,28 @@ public class ProductController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity<Response> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<Response> getAllProducts(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        return ResponseEntity.ok(productService.getAllProducts(page, size));
     }
 
     @GetMapping("/get-by-category-id/{categoryId}")
-    public ResponseEntity<Response> getProductsByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.getProductByCategory(categoryId));
+    public ResponseEntity<Response> getProductsByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        return ResponseEntity.ok(productService.getProductByCategory(categoryId, page, size));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Response> searchForProduct(@RequestParam String searchValue) {
-        return ResponseEntity.ok(productService.searchProduct(searchValue));
+    public ResponseEntity<Response> searchForProduct(
+            @RequestParam String searchValue,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        return ResponseEntity.ok(productService.searchProduct(searchValue, page, size));
     }
 }

@@ -15,9 +15,11 @@ public interface IProductService {
     Response getProductById(Long productId);
 
     Response getAllProducts();
+    Response getAllProducts(Integer page, Integer size);
 
-    Response getProductByCategory(Long productId);
+    Response getProductByCategory(Long categoryId);
+    Response getProductByCategory(Long categoryId, Integer page, Integer size);
 
     Response searchProduct(String searchValue);
-
+    Response searchProduct(String searchValue, Integer page, Integer size);
 }

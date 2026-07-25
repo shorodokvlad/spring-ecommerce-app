@@ -12,6 +12,9 @@ import com.shv.Ecommerce.service.AwsS3Service;
 import com.shv.Ecommerce.service.interf.IProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -102,6 +105,27 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Response getAllProducts() {
+        return getAllProducts(null, null);
+    }
+
+    @Override
+    public Response getAllProducts(Integer page, Integer size) {
+        if (page != null && size != null && page >= 0 && size > 0) {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+            Page<Product> productPage = productRepo.findAll(pageable);
+            List<ProductDto> productDtoList = productPage.getContent()
+                    .stream()
+                    .map(entityDtoMapper::mapProductToDtoBasic)
+                    .toList();
+
+            return Response.builder()
+                    .status(200)
+                    .totalPage(productPage.getTotalPages())
+                    .totalElement((int) productPage.getTotalElements())
+                    .productList(productDtoList)
+                    .build();
+        }
+
         List<ProductDto> productList = productRepo.findAll(Sort.by(Sort.Direction.DESC, "id"))
                 .stream()
                 .map(entityDtoMapper::mapProductToDtoBasic)
@@ -109,12 +133,39 @@ public class ProductServiceImpl implements IProductService {
 
         return Response.builder()
                 .status(200)
+                .totalPage(1)
+                .totalElement(productList.size())
                 .productList(productList)
                 .build();
     }
 
     @Override
     public Response getProductByCategory(Long categoryId) {
+        return getProductByCategory(categoryId, null, null);
+    }
+
+    @Override
+    public Response getProductByCategory(Long categoryId, Integer page, Integer size) {
+        if (page != null && size != null && page >= 0 && size > 0) {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+            Page<Product> productPage = productRepo.findByCategoryId(categoryId, pageable);
+
+            if (productPage.isEmpty()) {
+                throw new NotFoundException("No Products found for this category");
+            }
+
+            List<ProductDto> productDtoList = productPage.getContent().stream()
+                    .map(entityDtoMapper::mapProductToDtoBasic)
+                    .toList();
+
+            return Response.builder()
+                    .status(200)
+                    .totalPage(productPage.getTotalPages())
+                    .totalElement((int) productPage.getTotalElements())
+                    .productList(productDtoList)
+                    .build();
+        }
+
         List<Product> products = productRepo.findByCategoryId(categoryId);
 
         if (products.isEmpty()) {
@@ -127,12 +178,39 @@ public class ProductServiceImpl implements IProductService {
 
         return Response.builder()
                 .status(200)
+                .totalPage(1)
+                .totalElement(productDtoList.size())
                 .productList(productDtoList)
                 .build();
     }
 
     @Override
     public Response searchProduct(String searchValue) {
+        return searchProduct(searchValue, null, null);
+    }
+
+    @Override
+    public Response searchProduct(String searchValue, Integer page, Integer size) {
+        if (page != null && size != null && page >= 0 && size > 0) {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+            Page<Product> productPage = productRepo.findByNameContainingOrDescriptionContaining(searchValue, searchValue, pageable);
+
+            if (productPage.isEmpty()) {
+                throw new NotFoundException("No Products found");
+            }
+
+            List<ProductDto> productDtoList = productPage.getContent().stream()
+                    .map(entityDtoMapper::mapProductToDtoBasic)
+                    .toList();
+
+            return Response.builder()
+                    .status(200)
+                    .totalPage(productPage.getTotalPages())
+                    .totalElement((int) productPage.getTotalElements())
+                    .productList(productDtoList)
+                    .build();
+        }
+
         List<Product> products = productRepo.findByNameContainingOrDescriptionContaining(searchValue, searchValue);
 
         if (products.isEmpty()) {
@@ -145,6 +223,8 @@ public class ProductServiceImpl implements IProductService {
 
         return Response.builder()
                 .status(200)
+                .totalPage(1)
+                .totalElement(productDtoList.size())
                 .productList(productDtoList)
                 .build();
     }

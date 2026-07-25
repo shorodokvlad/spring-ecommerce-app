@@ -32,6 +32,11 @@ public class MailService {
             send(to, subject, body);
         } catch (Exception e) {
             log.warn("Failed to send email to {}: {}", to, e.getMessage());
+            log.info("=== EMAIL SENDING FAILED (SMTP NOT CONFIGURED?) ===");
+            log.info("To: {}", to);
+            log.info("Subject: {}", subject);
+            log.info("Body:\n{}", body);
+            log.info("==================================================");
         }
     }
 }

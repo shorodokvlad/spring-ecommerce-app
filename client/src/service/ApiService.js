@@ -66,20 +66,27 @@ export default class ApiService {
         return response.data;
     }
 
-    static async getAllProducts() {
-        const response = await axios.get(`${this.BASE_URL}/product/get-all`)
+    static async getAllProducts(page, size) {
+        const params = {};
+        if (page !== undefined && page !== null) params.page = page;
+        if (size !== undefined && size !== null) params.size = size;
+        const response = await axios.get(`${this.BASE_URL}/product/get-all`, { params });
         return response.data;
     }
 
-    static async searchProducts(searchValue) {
-        const response = await axios.get(`${this.BASE_URL}/product/search`, {
-            params: { searchValue }
-        });
+    static async searchProducts(searchValue, page, size) {
+        const params = { searchValue };
+        if (page !== undefined && page !== null) params.page = page;
+        if (size !== undefined && size !== null) params.size = size;
+        const response = await axios.get(`${this.BASE_URL}/product/search`, { params });
         return response.data;
     }
 
-    static async getProductByCategoryId(categoryId) {
-        const response = await axios.get(`${this.BASE_URL}/product/get-by-category-id/${categoryId}`)
+    static async getProductByCategoryId(categoryId, page, size) {
+        const params = {};
+        if (page !== undefined && page !== null) params.page = page;
+        if (size !== undefined && size !== null) params.size = size;
+        const response = await axios.get(`${this.BASE_URL}/product/get-by-category-id/${categoryId}`, { params });
         return response.data;
     }
 

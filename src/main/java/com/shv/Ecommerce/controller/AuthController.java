@@ -10,6 +10,7 @@ import com.shv.Ecommerce.service.interf.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,5 +45,10 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<Response> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
         return ResponseEntity.ok(userService.googleLogin(request.getIdToken()));
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Response> healthCheck() {
+        return ResponseEntity.ok(Response.builder().status(200).message("OK").build());
     }
 }
