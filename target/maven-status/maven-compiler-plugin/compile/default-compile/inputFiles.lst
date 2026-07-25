@@ -18,8 +18,10 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/ResetPasswordRequest.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/Response.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/UserDto.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/VerifyEmailRequest.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Address.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Category.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/EmailVerificationToken.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Order.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/OrderItem.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/PasswordResetToken.java
@@ -35,6 +37,7 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/mapper/EntityDtoMapper.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/AddressRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/CategoryRepo.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/EmailVerificationTokenRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/OrderItemRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/OrderRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/PasswordResetTokenRepo.java

@@ -38,6 +38,14 @@ public class User {
 
     private UserRole role;
 
+    @Column(name = "email_verified")
+    @Builder.Default
+    private Boolean emailVerified = false;
+
+    public boolean isEmailVerified() {
+        return emailVerified == null || emailVerified;
+    }
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItemList;
 

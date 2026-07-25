@@ -13,6 +13,7 @@ import RegisterPage from './component/pages/RegisterPage';
 import LoginPage from './component/pages/LoginPage';
 import ForgotPasswordPage from './component/pages/ForgotPasswordPage';
 import ResetPasswordPage from './component/pages/ResetPasswordPage';
+import VerifyEmailPage from './component/pages/VerifyEmailPage';
 import ProfilePage from './component/pages/ProfilePage';
 import AddressPage from './component/pages/AddressPage';
 import AdminPage from './component/admin/AdminPage';
@@ -42,6 +43,7 @@ function App() {
           <Route path='/login' element={<LoginPage/>}/>
           <Route path='/forgot-password' element={<ForgotPasswordPage/>}/>
           <Route path='/reset-password' element={<ResetPasswordPage/>}/>
+          <Route path='/verify-email' element={<VerifyEmailPage/>}/>
 
            <Route path='/profile' element={<ProtectedRoute element={<ProfilePage/>} />} />
            <Route path='/add-address' element={<ProtectedRoute element={<AddressPage/>} />} />

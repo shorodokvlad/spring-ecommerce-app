@@ -7,12 +7,14 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.shv.Ecommerce.dto.LoginRequest;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.dto.UserDto;
+import com.shv.Ecommerce.entity.EmailVerificationToken;
 import com.shv.Ecommerce.entity.PasswordResetToken;
 import com.shv.Ecommerce.entity.User;
 import com.shv.Ecommerce.enums.UserRole;
 import com.shv.Ecommerce.exception.InvalidCredentialsException;
 import com.shv.Ecommerce.exception.NotFoundException;
 import com.shv.Ecommerce.mapper.EntityDtoMapper;
+import com.shv.Ecommerce.repository.EmailVerificationTokenRepo;
 import com.shv.Ecommerce.repository.PasswordResetTokenRepo;
 import com.shv.Ecommerce.repository.UserRepo;
 import com.shv.Ecommerce.security.JwtUtils;
@@ -43,6 +45,7 @@ public class UserServiceImpl implements IUserService {
     private final JwtUtils jwtUtils;
     private final EntityDtoMapper entityDtoMapper;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
+    private final EmailVerificationTokenRepo emailVerificationTokenRepo;
     private final MailService mailService;
 
     @Value("${app.frontend-url}")
@@ -51,14 +54,14 @@ public class UserServiceImpl implements IUserService {
     @Value("${app.google.client-id}")
     private String googleClientId;
     @Override
+    @Transactional
     public Response registerUser(UserDto registrationRequest) {
+        if (userRepo.findByEmail(registrationRequest.getEmail()).isPresent()) {
+            throw new InvalidCredentialsException("Email is already registered. Please log in or reset your password.");
+        }
+
         UserRole role = UserRole.USER;
 
-        /*
-        if (registrationRequest.getRole() != null && registrationRequest.getRole().equals("ADMIN")) {
-            role = UserRole.ADMIN;
-        }
-         */
         if (registrationRequest.getRole() != null && registrationRequest.getRole() == UserRole.ADMIN) {
             role = UserRole.ADMIN;
         }
@@ -68,15 +71,37 @@ public class UserServiceImpl implements IUserService {
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .phoneNumber(registrationRequest.getPhoneNumber())
                 .role(role)
+                .emailVerified(false)
                 .build();
 
         User savedUser = userRepo.save(user);
+
+        // Generate email verification token (valid for 24 hours)
+        String token = UUID.randomUUID().toString();
+        EmailVerificationToken verificationToken = EmailVerificationToken.builder()
+                .token(token)
+                .user(savedUser)
+                .expiresAt(LocalDateTime.now().plusHours(24))
+                .used(false)
+                .build();
+        emailVerificationTokenRepo.save(verificationToken);
+
+        String verifyLink = frontendUrl + "/verify-email?token=" + token;
+        mailService.sendQuietly(
+                savedUser.getEmail(),
+                "Verify your email - SHV Store",
+                "Hello " + savedUser.getName() + ",\n\n"
+                        + "Thank you for registering at SHV Store. Please click the link below to verify your email address:\n\n"
+                        + verifyLink + "\n\n"
+                        + "This link will expire in 24 hours.\n\n"
+                        + "If you did not register for an account, please ignore this email."
+        );
 
         UserDto userDto = entityDtoMapper.mapUserToDtoBasic(savedUser);
 
         return Response.builder()
                 .status(200)
-                .message("User succsessfuly added")
+                .message("Registration successful! Please check your email to verify your account before logging in.")
                 .user(userDto)
                 .build();
     }
@@ -84,6 +109,10 @@ public class UserServiceImpl implements IUserService {
     @Override
     public Response loginRequest(LoginRequest loginRequest) {
         User user = userRepo.findByEmail(loginRequest.getEmail()).orElseThrow(()-> new NotFoundException("Email not found"));
+
+        if (!user.isEmailVerified()) {
+            throw new InvalidCredentialsException("Your email address is not verified. Please check your inbox for the verification link.");
+        }
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Password does not match");
@@ -96,6 +125,72 @@ public class UserServiceImpl implements IUserService {
                 .token(token)
                 .expirationTime("6 month")
                 .role(user.getRole().name())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public Response verifyEmail(String token) {
+        EmailVerificationToken verificationToken = emailVerificationTokenRepo.findByToken(token)
+                .orElseThrow(() -> new InvalidCredentialsException("Verification link is invalid"));
+
+        if (verificationToken.isUsed()) {
+            throw new InvalidCredentialsException("Verification link has already been used");
+        }
+
+        if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new InvalidCredentialsException("Verification link has expired — please request a new one");
+        }
+
+        User user = verificationToken.getUser();
+        user.setEmailVerified(true);
+        userRepo.save(user);
+
+        verificationToken.setUsed(true);
+        emailVerificationTokenRepo.save(verificationToken);
+
+        return Response.builder()
+                .status(200)
+                .message("Email verified successfully! You can now log in.")
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public Response resendVerification(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new NotFoundException("Email not found"));
+
+        if (user.isEmailVerified()) {
+            return Response.builder()
+                    .status(200)
+                    .message("Email is already verified")
+                    .build();
+        }
+
+        emailVerificationTokenRepo.deleteAllByUser(user);
+
+        String token = UUID.randomUUID().toString();
+        EmailVerificationToken verificationToken = EmailVerificationToken.builder()
+                .token(token)
+                .user(user)
+                .expiresAt(LocalDateTime.now().plusHours(24))
+                .used(false)
+                .build();
+        emailVerificationTokenRepo.save(verificationToken);
+
+        String verifyLink = frontendUrl + "/verify-email?token=" + token;
+        mailService.sendQuietly(
+                user.getEmail(),
+                "Verify your email - SHV Store",
+                "Hello " + user.getName() + ",\n\n"
+                        + "Please click the link below to verify your email address:\n\n"
+                        + verifyLink + "\n\n"
+                        + "This link will expire in 24 hours."
+        );
+
+        return Response.builder()
+                .status(200)
+                .message("Verification email sent! Please check your inbox.")
                 .build();
     }
 
@@ -165,7 +260,13 @@ public class UserServiceImpl implements IUserService {
         String email = payload.getEmail();
         String name = (String) payload.get("name");
 
-        User user = userRepo.findByEmail(email).orElseGet(() -> {
+        User user = userRepo.findByEmail(email).map(existing -> {
+            if (!existing.isEmailVerified()) {
+                existing.setEmailVerified(true);
+                userRepo.save(existing);
+            }
+            return existing;
+        }).orElseGet(() -> {
             User newUser = User.builder()
                     .name(name != null ? name : email)
                     .email(email)
@@ -174,6 +275,7 @@ public class UserServiceImpl implements IUserService {
                     .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                     .phoneNumber("google-oauth")
                     .role(UserRole.USER)
+                    .emailVerified(true)
                     .build();
             log.info("Creating new user from Google sign-in: {}", email);
             return userRepo.save(newUser);

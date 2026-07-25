@@ -19,12 +19,12 @@ const CategoryProductsPage = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await ApiService.getProductByCategoryId(categoryId);
-                const allProducts = response.productList || [];
-                setTotalPages(Math.ceil(allProducts.length / itemsPerPage));
-                setProducts(allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+                const pageIndex = currentPage - 1;
+                const response = await ApiService.getProductByCategoryId(categoryId, pageIndex, itemsPerPage);
+                setProducts(response.productList || []);
+                setTotalPages(response.totalPage || 1);
             } catch (error) {
-                setError(error.response?.data?.message || error.message || 'unable to fetch products by categoty id');
+                setError(error.response?.data?.message || error.message || 'Unable to fetch products by category ID');
             }
         };
 

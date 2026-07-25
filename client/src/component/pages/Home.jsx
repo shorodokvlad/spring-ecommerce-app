@@ -31,19 +31,17 @@ const Home = () => {
 
         const fetchProducts = async () => {
             try{
-                let allProducts = [];
+                let response;
+                const pageIndex = currentPage - 1;
 
                 if (searchItem) {
-                    const response = await ApiService.searchProducts(searchItem);
-                    allProducts = response.productList || [];
+                    response = await ApiService.searchProducts(searchItem, pageIndex, itemsPerPage);
                 }else{
-                    const response = await ApiService.getAllProducts();
-                    allProducts = response.productList || [];
-
+                    response = await ApiService.getAllProducts(pageIndex, itemsPerPage);
                 }
 
-                setTotalPages(Math.ceil(allProducts.length/itemsPerPage));
-                setProducts(allProducts.slice((currentPage -1) * itemsPerPage, currentPage * itemsPerPage));
+                setProducts(response.productList || []);
+                setTotalPages(response.totalPage || 1);
 
             }catch(error){
                 setError(error.response?.data?.message || error.message || 'Unable to fetch products')

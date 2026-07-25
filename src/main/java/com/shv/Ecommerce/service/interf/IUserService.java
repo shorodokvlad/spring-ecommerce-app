@@ -11,6 +11,8 @@ public interface IUserService {
     Response forgotPassword(String email);
     Response resetPassword(String token, String newPassword);
     Response googleLogin(String idToken);
+    Response verifyEmail(String token);
+    Response resendVerification(String email);
     Response getAllUsers();
     User getLoginUser();
     Response getUserInfoAndOrderHistory();

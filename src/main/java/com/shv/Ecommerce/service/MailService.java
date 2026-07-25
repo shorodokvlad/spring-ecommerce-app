@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,20 +14,24 @@ import org.springframework.stereotype.Service;
 public class MailService {
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from-address:${spring.mail.username:spring-boot-ecommerce@shorodokvlad.eu}}")
     private String fromAddress;
 
     public void send(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromAddress);
+        String sender = (fromAddress != null && !fromAddress.isBlank())
+                ? fromAddress
+                : "spring-boot-ecommerce@shorodokvlad.eu";
+        message.setFrom(sender);
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
         mailSender.send(message);
-        log.info("Email sent to {} with subject '{}'", to, subject);
+        log.info("Email sent to {} with subject '{}' from '{}'", to, subject, sender);
     }
 
-    /** Send without letting a mail failure break the calling flow (e.g. order receipts). */
+    /** Send asynchronously without letting mail network latency freeze the calling HTTP thread. */
+    @Async
     public void sendQuietly(String to, String subject, String body) {
         try {
             send(to, subject, body);

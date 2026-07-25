@@ -6,6 +6,7 @@ import com.shv.Ecommerce.dto.LoginRequest;
 import com.shv.Ecommerce.dto.ResetPasswordRequest;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.dto.UserDto;
+import com.shv.Ecommerce.dto.VerifyEmailRequest;
 import com.shv.Ecommerce.service.interf.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,16 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<Response> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
         return ResponseEntity.ok(userService.googleLogin(request.getIdToken()));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Response> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        return ResponseEntity.ok(userService.verifyEmail(request.getToken()));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Response> resendVerification(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(userService.resendVerification(request.getEmail()));
     }
 
     @GetMapping("/health")

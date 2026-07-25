@@ -37,6 +37,16 @@ export default class ApiService {
         return response.data;
     }
 
+    static async verifyEmail(token) {
+        const response = await axios.post(`${this.BASE_URL}/auth/verify-email`, { token })
+        return response.data;
+    }
+
+    static async resendVerification(email) {
+        const response = await axios.post(`${this.BASE_URL}/auth/resend-verification`, { email })
+        return response.data;
+    }
+
     static async getLoggedInUserInfo() {
         const response = await axios.get(`${this.BASE_URL}/user/my-info`, {
             headers: this.getHeader()
