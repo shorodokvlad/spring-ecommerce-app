@@ -37,7 +37,10 @@ const CategoryListPage = () => {
                 <p className="error-message">{error}</p>
             ) : (
                 <div>
-                    <h2>Explore Categories</h2>
+                    <header className="shop-band">
+                        <p className="shop-eyebrow">SHV Store</p>
+                        <h1>Explore categories</h1>
+                    </header>
                     <div className="category-grid">
                         {categories.map((category) => (
                             <div 
