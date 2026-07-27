@@ -51,9 +51,32 @@ const ProfilePage = () => {
 
 
 
+    const handleLogout = () => {
+        if (window.confirm("Log out of your account?")) {
+            ApiService.logout();
+            navigate('/login');
+        }
+    };
+
     return (
         <div className="profile-page">
-            <h2>Welcome {userInfo.name}</h2>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h2 style={{ margin: 0 }}>Welcome {userInfo.name}</h2>
+                <button 
+                    onClick={handleLogout} 
+                    style={{ 
+                        background: "#ef4444", 
+                        color: "#ffffff", 
+                        padding: "8px 16px", 
+                        borderRadius: "8px", 
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        border: "none"
+                    }}
+                >
+                    Log Out
+                </button>
+            </div>
 
             <div>
                 <p><strong>Name: </strong>{userInfo.name}</p>

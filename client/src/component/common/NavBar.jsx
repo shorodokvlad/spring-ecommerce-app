@@ -3,15 +3,14 @@ import '../../style/navbar.css';
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import { useCart } from "../context/CartContext";
-
+import { useFavorites } from "../context/FavoritesContext";
 
 const Navbar = () => {
-
     const [searchValue, setSearchValue] = useState("");
     const navigate = useNavigate();
-    // Subscribing to location keeps auth-dependent links fresh after login/logout
     useLocation();
     const { cart } = useCart();
+    const { favoritesCount } = useFavorites();
 
     const isAdmin = ApiService.isAdmin();
     const isAuthenticated = ApiService.isAuthenticated();
@@ -26,45 +25,63 @@ const Navbar = () => {
         navigate(`/?search=${searchValue}`)
     }
 
-    const handleLogout = () => {
-        const confirm = window.confirm("Log out of your account?");
-        if (confirm) {
-            ApiService.logout();
-            navigate('/login');
-        }
-    }
-
     return (
-        <nav className="navbar">
-            <NavLink to="/" className="navbar-brand">
-                <span className="brand-mark">SHV</span>
-                <span className="brand-word">Store</span>
-            </NavLink>
-
-            {/* SEARCH FORM */}
-            <form className="navbar-search" onSubmit={handleSearchSubmit} role="search">
-                <input type="text"
-                    placeholder="Search products"
-                    aria-label="Search products"
-                    value={searchValue}
-                    onChange={handleSearchChange} />
-                <button type="submit">Search</button>
-            </form>
-
-            <div className="navbar-link">
-                <NavLink to="/" end>Home</NavLink>
-                <NavLink to="/categories" >Categories</NavLink>
-                {isAuthenticated && <NavLink to="/profile" >My account</NavLink>}
-                {isAdmin && <NavLink to="/admin" >Admin</NavLink>}
-                {!isAuthenticated && <NavLink to="/login" >Log in</NavLink>}
-                {isAuthenticated && <button className="navbar-logout" onClick={handleLogout}>Log out</button>}
-                <NavLink to="/cart" className="navbar-cart">
-                    Cart
-                    {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+        <header className="navbar-header">
+            <nav className="navbar-container">
+                <NavLink to="/" className="navbar-brand">
+                    <span className="brand-mark">SHV</span>
+                    <span className="brand-word">Store</span>
                 </NavLink>
-            </div>
-        </nav>
-    );
 
+                {/* SEARCH FORM */}
+                <form className="navbar-search" onSubmit={handleSearchSubmit} role="search">
+                    <input type="text"
+                        placeholder="Search products..."
+                        aria-label="Search products"
+                        value={searchValue}
+                        onChange={handleSearchChange} />
+                    <button type="submit">Search</button>
+                </form>
+
+                <div className="navbar-link">
+                    <NavLink to="/categories" className="nav-item-link">
+                        <img src="/category.svg" alt="" className="nav-icon" />
+                        <span>Categories</span>
+                    </NavLink>
+
+                    {isAdmin && (
+                        <NavLink to="/admin" className="nav-item-link">
+                            <img src="/admin.svg" alt="" className="nav-icon" />
+                            <span>Admin</span>
+                        </NavLink>
+                    )}
+
+                    {/* Favorites */}
+                    <NavLink to="/favorites" className="nav-item-link" title="Favorites">
+                        <div className="nav-icon-wrapper">
+                            <img src="/favorite.svg" alt="" className="nav-icon" />
+                            {favoritesCount > 0 && <span className="cart-count fav-count">{favoritesCount}</span>}
+                        </div>
+                        <span>Favorites</span>
+                    </NavLink>
+
+                    {/* Cart */}
+                    <NavLink to="/cart" className="nav-item-link" title="Cart">
+                        <div className="nav-icon-wrapper">
+                            <img src="/cart.svg" alt="" className="nav-icon" />
+                            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+                        </div>
+                        <span>Cart</span>
+                    </NavLink>
+
+                    {/* Account */}
+                    <NavLink to={isAuthenticated ? "/profile" : "/login"} className="nav-item-link" title={isAuthenticated ? "Profile" : "Log In"}>
+                        <img src="/account.svg" alt="" className="nav-icon" />
+                        <span>My Account</span>
+                    </NavLink>
+                </div>
+            </nav>
+        </header>
+    );
 };
 export default Navbar;

@@ -14,6 +14,7 @@ const AdminBannerPage = () => {
     const [active, setActive] = useState(true);
     const [displayOrder, setDisplayOrder] = useState(0);
     const [message, setMessage] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         fetchBanners();
@@ -78,6 +79,7 @@ const AdminBannerPage = () => {
         formData.append("displayOrder", displayOrder);
 
         try {
+            setIsUploading(true);
             if (editingBannerId) {
                 await ApiService.updateBanner(editingBannerId, formData);
                 setMessage("Banner updated successfully!");
@@ -86,14 +88,26 @@ const AdminBannerPage = () => {
                 setMessage("Banner created successfully!");
             }
             resetForm();
-            fetchBanners();
+            await fetchBanners();
         } catch (err) {
             alert(err.response?.data?.message || "Failed to save banner");
+        } finally {
+            setIsUploading(false);
         }
     };
 
     return (
         <div className="admin-banner-container">
+            {isUploading && (
+                <div className="upload-overlay">
+                    <div className="upload-modal-card">
+                        <div className="banner-upload-spinner"></div>
+                        <h3>Uploading Banner...</h3>
+                        <p>Please wait while the image is being uploaded to S3 and saved.</p>
+                    </div>
+                </div>
+            )}
+
             <div className="admin-banner-header">
                 <h2>Manage Carousel Banners</h2>
                 {!showForm && (
@@ -180,11 +194,11 @@ const AdminBannerPage = () => {
                         </div>
 
                         <div className="form-actions">
-                            <button type="button" className="btn-secondary" onClick={resetForm}>
+                            <button type="button" className="btn-secondary" onClick={resetForm} disabled={isUploading}>
                                 Cancel
                             </button>
-                            <button type="submit" className="btn-primary">
-                                {editingBannerId ? "Update Banner" : "Save Banner"}
+                            <button type="submit" className="btn-primary" disabled={isUploading}>
+                                {isUploading ? "Uploading..." : (editingBannerId ? "Update Banner" : "Save Banner")}
                             </button>
                         </div>
                     </form>
