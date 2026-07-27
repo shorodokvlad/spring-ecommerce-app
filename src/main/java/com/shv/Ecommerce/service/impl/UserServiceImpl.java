@@ -197,35 +197,34 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public Response forgotPassword(String email) {
-        // Always answer the same way so the endpoint can't be used to
-        // discover which emails have accounts
-        userRepo.findByEmail(email).ifPresent(user -> {
-            passwordResetTokenRepo.deleteAllByUser(user);
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("No account found with email: " + email));
 
-            PasswordResetToken resetToken = PasswordResetToken.builder()
-                    .token(UUID.randomUUID().toString())
-                    .user(user)
-                    .expiresAt(LocalDateTime.now().plusMinutes(RESET_TOKEN_VALIDITY_MINUTES))
-                    .used(false)
-                    .build();
-            passwordResetTokenRepo.save(resetToken);
+        passwordResetTokenRepo.deleteAllByUser(user);
 
-            String resetLink = frontendUrl + "/reset-password?token=" + resetToken.getToken();
-            mailService.sendQuietly(
-                    user.getEmail(),
-                    "Reset your SHV Store password",
-                    "Hi " + user.getName() + ",\n\n"
-                            + "We received a request to reset your password. "
-                            + "Open the link below to choose a new one. "
-                            + "It expires in " + RESET_TOKEN_VALIDITY_MINUTES + " minutes.\n\n"
-                            + resetLink + "\n\n"
-                            + "If you didn't request this, you can ignore this email."
-            );
-        });
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(UUID.randomUUID().toString())
+                .user(user)
+                .expiresAt(LocalDateTime.now().plusMinutes(RESET_TOKEN_VALIDITY_MINUTES))
+                .used(false)
+                .build();
+        passwordResetTokenRepo.save(resetToken);
+
+        String resetLink = frontendUrl + "/reset-password?token=" + resetToken.getToken();
+        mailService.sendQuietly(
+                user.getEmail(),
+                "Reset your SHV Store password",
+                "Hi " + user.getName() + ",\n\n"
+                        + "We received a request to reset your password. "
+                        + "Open the link below to choose a new one. "
+                        + "It expires in " + RESET_TOKEN_VALIDITY_MINUTES + " minutes.\n\n"
+                        + resetLink + "\n\n"
+                        + "If you didn't request this, you can ignore this email."
+        );
 
         return Response.builder()
                 .status(200)
-                .message("If an account exists for that email, a reset link has been sent")
+                .message("Password reset link has been sent to " + email + ". Please check your inbox.")
                 .build();
     }
 
