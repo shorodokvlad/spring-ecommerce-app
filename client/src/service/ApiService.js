@@ -184,11 +184,51 @@ export default class ApiService {
     }
 
 
-    /**ADDRESS */
+    /***ADDRESS */
     static async saveAddress(body) {
         const response = await axios.post(`${this.BASE_URL}/address/save`, body, {
             headers: this.getHeader()
         })
+        return response.data;
+    }
+
+    /* BANNER ENDPOINTS */
+    static async getActiveBanners() {
+        const response = await axios.get(`${this.BASE_URL}/banner/active`);
+        return response.data;
+    }
+
+    static async getAllBanners() {
+        const response = await axios.get(`${this.BASE_URL}/banner/all`, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async createBanner(formData) {
+        const response = await axios.post(`${this.BASE_URL}/banner/create`, formData, {
+            headers: {
+                ...this.getHeader(),
+                "Content-Type": "multipart/form-data"
+            }
+        });
+        return response.data;
+    }
+
+    static async updateBanner(bannerId, formData) {
+        const response = await axios.put(`${this.BASE_URL}/banner/update/${bannerId}`, formData, {
+            headers: {
+                ...this.getHeader(),
+                "Content-Type": "multipart/form-data"
+            }
+        });
+        return response.data;
+    }
+
+    static async deleteBanner(bannerId) {
+        const response = await axios.delete(`${this.BASE_URL}/banner/delete/${bannerId}`, {
+            headers: this.getHeader()
+        });
         return response.data;
     }
 

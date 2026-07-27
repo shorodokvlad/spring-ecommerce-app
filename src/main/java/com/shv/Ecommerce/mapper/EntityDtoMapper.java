@@ -126,4 +126,17 @@ public class EntityDtoMapper {
         }
         return userDto;
     }
+
+    // Banner entity to Banner DTO
+    public BannerDto mapBannerToDtoBasic(Banner banner) {
+        BannerDto bannerDto = new BannerDto();
+        bannerDto.setId(banner.getId());
+        bannerDto.setTitle(banner.getTitle());
+        bannerDto.setLinkUrl(banner.getLinkUrl());
+        bannerDto.setImageUrl(banner.getImageUrl());
+        bannerDto.setActive(banner.isActive());
+        bannerDto.setDisplayOrder(banner.getDisplayOrder());
+        bannerDto.setCreatedAt(banner.getCreatedAt());
+        return bannerDto;
+    }
 }

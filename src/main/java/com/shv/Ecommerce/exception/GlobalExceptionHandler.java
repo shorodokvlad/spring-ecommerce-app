@@ -6,9 +6,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Response> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, WebRequest request) {
+        Response errorResponse = Response.builder()
+                .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
+                .message("File size exceeds the maximum allowed upload limit (10MB). Please select a smaller file.")
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response> handleAllExceptions(Exception ex, WebRequest request) {
@@ -40,4 +51,5 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
+
 

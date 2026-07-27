@@ -42,27 +42,36 @@ const CategoryListPage = () => {
                         <h1>Explore categories</h1>
                     </header>
                     <div className="category-grid">
-                        {categories.map((category) => (
-                            <div 
-                                className="category-card" 
-                                key={category.id}
-                                onClick={() => handleCategoryClick(category.id)}
-                            >
-                                <div className="category-image-wrap">
-                                    {category.imageUrl ? (
-                                        <img src={category.imageUrl} alt={category.name} className="category-image" />
-                                    ) : (
-                                        <div className="category-placeholder-img">
-                                            <span>{category.name.substring(0, 2).toUpperCase()}</span>
-                                        </div>
-                                    )}
+                        {categories.map((category) => {
+                            const catName = category.name ? category.name.toLowerCase() : '';
+                            const isSmaller = catName.includes('table') || catName.includes('wearable');
+                            return (
+                                <div 
+                                    className="category-card" 
+                                    key={category.id}
+                                    data-category={catName}
+                                    onClick={() => handleCategoryClick(category.id)}
+                                >
+                                    <div className="category-image-wrap">
+                                        {category.imageUrl ? (
+                                            <img 
+                                                src={category.imageUrl} 
+                                                alt={category.name} 
+                                                className={`category-image ${isSmaller ? 'category-image-small' : ''}`} 
+                                            />
+                                        ) : (
+                                            <div className="category-placeholder-img">
+                                                <span>{category.name.substring(0, 2).toUpperCase()}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="category-info">
+                                        <h3>{category.name}</h3>
+                                        <span className="category-cta">Browse →</span>
+                                    </div>
                                 </div>
-                                <div className="category-info">
-                                    <h3>{category.name}</h3>
-                                    <span className="category-cta">Browse →</span>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}

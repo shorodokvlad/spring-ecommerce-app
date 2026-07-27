@@ -25,6 +25,7 @@ import AddProductPage from './component/admin/AddProductPage';
 import EditProductPage from './component/admin/EditProductPage';
 import AdminOrdersPage from './component/admin/AdminOrderPage';
 import AdminOrderDetailsPage from './component/admin/AdminOrderDetailsPage';
+import AdminBannerPage from './component/admin/AdminBannerPage';
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
 
            <Route path='/admin/orders' element={<AdminRoute element={<AdminOrdersPage/>} />} />
            <Route path='/admin/order-details/:itemId' element={<AdminRoute element={<AdminOrderDetailsPage/>} />} />
+           <Route path='/admin/banners' element={<AdminRoute element={<AdminBannerPage/>} />} />
         </Routes>
       </main>
       <Footer/>

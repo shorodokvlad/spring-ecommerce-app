@@ -35,6 +35,9 @@
     overflow: hidden;
     background: #f4f6f8;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .category-image {
@@ -42,6 +45,15 @@
     height: 100%;
     object-fit: cover;
     transition: transform 300ms ease;
+    box-sizing: border-box;
+}
+
+.category-image.category-image-small,
+.category-card[data-category*="tablet"] .category-image,
+.category-card[data-category*="table"] .category-image,
+.category-card[data-category*="wearable"] .category-image {
+    object-fit: contain;
+    padding: 14px;
 }
 
 .category-card:hover .category-image {

@@ -3,12 +3,12 @@ import { useLocation, Link } from "react-router-dom";
 import ProductList from "../common/ProductList"
 import Pagination from "../common/Pagination";
 import ApiService from "../../service/ApiService";
+import BannerCarousel from "../common/BannerCarousel";
 import '../../style/home.css';
 
 const Home = () => {
     const location = useLocation();
     const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [error, setError] = useState(null);
@@ -20,12 +20,6 @@ const Home = () => {
     useEffect(() => {
         setCurrentPage(1);
     }, [location.search]);
-
-    useEffect(() => {
-        ApiService.getAllCategory()
-            .then((res) => setCategories(res.categoryList || []))
-            .catch(() => setCategories([]));
-    }, []);
 
     useEffect(()=> {
 
@@ -55,29 +49,15 @@ const Home = () => {
 
     return(
         <div className="home">
-            <header className="shop-band">
-                {searchItem ? (
-                    <>
-                        <p className="shop-eyebrow">Search results</p>
-                        <h1>“{searchItem}”</h1>
-                        <Link to="/" className="shop-band-clear">Clear search</Link>
-                    </>
-                ) : (
-                    <>
-                        <p className="shop-eyebrow">SHV Store</p>
-                        <h1>Shop the catalogue</h1>
-                        {categories.length > 0 && (
-                            <div className="category-chips">
-                                {categories.map((cat) => (
-                                    <Link key={cat.id} to={`/category/${cat.id}`} className="category-chip">
-                                        {cat.name}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                )}
-            </header>
+            {searchItem ? (
+                <header className="shop-band">
+                    <p className="shop-eyebrow">Search results</p>
+                    <h1>“{searchItem}”</h1>
+                    <Link to="/" className="shop-band-clear">Clear search</Link>
+                </header>
+            ) : (
+                <BannerCarousel />
+            )}
 
             {error ? (
                 <p className="error-message">{error}</p>

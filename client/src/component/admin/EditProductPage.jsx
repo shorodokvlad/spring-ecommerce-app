@@ -33,8 +33,17 @@ const EditProductPage = () => {
     }, [productId]);
 
     const handleImageChange = (e) =>{
-        setImage(e.target.files[0]);
-        setImageUrl(URL.createObjectURL(e.target.files[0]));
+        const file = e.target.files[0];
+        if (file && file.size > 10 * 1024 * 1024) {
+            alert("File size exceeds 10MB limit. Please select a smaller image.");
+            e.target.value = null;
+            setImage(null);
+            return;
+        }
+        setImage(file);
+        if (file) {
+            setImageUrl(URL.createObjectURL(file));
+        }
     };
 
     
