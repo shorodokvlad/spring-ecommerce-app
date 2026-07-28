@@ -1,61 +1,72 @@
 import React, { useState, useEffect } from "react";
 import ApiService from "../../service/ApiService";
 import { useNavigate } from "react-router-dom";
-import '../../style/adminCategory.css'
+import '../../style/adminCategory.css';
 
 const AdminCategoryPage = () => {
-
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-
-    useEffect(()=>{
+    useEffect(() => {
         fetchCategories();
-    }, [])
+    }, []);
 
-    const fetchCategories = async()=>{
+    const fetchCategories = async () => {
         try {
+            setLoading(true);
             const response = await ApiService.getAllCategory();
             setCategories(response.categoryList || []);
         } catch (error) {
-            console.log("Error fetching category list",  error)
+            console.log("Error fetching category list", error);
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
     const handleEdit = async (id) => {
-        navigate(`/admin/edit-category/${id}`)
-    }
-    const handleDelete = async(id) => {
-        const confirmed = window.confirm("Are your sure you want to delete this category? ")
-        if(confirmed){
+        navigate(`/admin/edit-category/${id}`);
+    };
+
+    const handleDelete = async (id) => {
+        const confirmed = window.confirm("Are you sure you want to delete this category?");
+        if (confirmed) {
             try {
                 await ApiService.deleteCategory(id);
                 fetchCategories();
             } catch (error) {
-                console.log("Error deleting category by id")
+                console.log("Error deleting category by id");
             }
         }
-    }
+    };
 
-    return(
+    return (
         <div className="admin-category-page">
             <div className="admin-category-list">
                 <h2>Categories</h2>
-                <button onClick={()=> navigate('/admin/add-category')}>Add Category</button>
-                <ul>
-                    {categories.map((category) => (
-                        <li key={category.id}>
-                            <span>{category.name}</span>
-                            <div className="admin-bt">
-                                    <button className="admin-btn-edit" onClick={()=> handleEdit(category.id)}>Edit</button>
-                                    <button  onClick={()=> handleDelete(category.id)}>Delete</button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+                <button onClick={() => navigate('/admin/add-category')}>Add Category</button>
+
+                {loading ? (
+                    <div style={{ textAlign: "center", padding: "48px 0", color: "var(--muted)" }}>
+                        <span className="button-spinner" style={{ width: "26px", height: "26px", borderColor: "var(--line)", borderTopColor: "var(--ink)" }} />
+                        <p style={{ marginTop: "12px", fontSize: "0.9rem" }}>Loading categories...</p>
+                    </div>
+                ) : (
+                    <ul>
+                        {categories.map((category) => (
+                            <li key={category.id}>
+                                <span>{category.name}</span>
+                                <div className="admin-bt">
+                                    <button className="admin-btn-edit" onClick={() => handleEdit(category.id)}>Edit</button>
+                                    <button onClick={() => handleDelete(category.id)}>Delete</button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default AdminCategoryPage;

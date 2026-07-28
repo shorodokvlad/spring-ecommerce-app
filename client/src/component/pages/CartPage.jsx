@@ -9,13 +9,11 @@ const CartPage = () => {
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
 
-
     const incrementItem = (product) => {
         dispatch({ type: 'INCREMENT_ITEM', payload: product });
     }
 
     const decrementItem = (product) => {
-
         const cartItem = cart.find(item => item.id === product.id);
         if (cartItem && cartItem.quantity > 1) {
             dispatch({ type: 'DECREMENT_ITEM', payload: product });
@@ -25,8 +23,6 @@ const CartPage = () => {
     }
 
     const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-
-
 
     const handleCheckout = async () => {
         if (!ApiService.isAuthenticated()) {
@@ -65,11 +61,8 @@ const CartPage = () => {
             setTimeout(() => {
                 setMessage('')
             }, 4000);
-
         }
-
     };
-
 
     return (
         <div className="cart-page">
@@ -77,9 +70,12 @@ const CartPage = () => {
             {message && <p className="response-message">{message}</p>}
 
             {cart.length === 0 ? (
-                <div className="cart-empty">
-                    <p>Your cart is empty.</p>
-                    <Link to="/" className="btn-primary">Browse the catalogue</Link>
+                <div className="cart-empty" style={{ textAlign: "center", padding: "48px 0" }}>
+                    <h3 style={{ margin: "0 0 8px", color: "var(--ink)", fontSize: "1.3rem", fontWeight: 700 }}>Your cart is empty</h3>
+                    <p style={{ margin: "0 0 24px", color: "var(--muted)", fontSize: "0.95rem" }}>Explore our catalog to find your favorite products and place your order.</p>
+                    <Link to="/" className="btn-primary" style={{ padding: "10px 24px", borderRadius: "10px" }}>
+                        Browse the Catalogue
+                    </Link>
                 </div>
             ) : (
                 <div className="cart-layout">

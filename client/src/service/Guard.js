@@ -1,6 +1,7 @@
 import React from "react";
 import {Navigate, useLocation} from "react-router-dom";
 import ApiService from "./ApiService";
+import AdminLayout from "../component/admin/AdminLayout";
 
 export const ProtectedRoute = ({ element }) => {
     const location = useLocation();
@@ -16,7 +17,7 @@ export const AdminRoute = ({ element }) => {
     const location = useLocation();
 
     if (ApiService.isAdmin()) {
-        return element;
+        return <AdminLayout>{element}</AdminLayout>;
     }
     // Logged in but not an admin: send home; not logged in: send to login
     return ApiService.isAuthenticated() ? (

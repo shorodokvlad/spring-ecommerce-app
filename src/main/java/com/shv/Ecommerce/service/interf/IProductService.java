@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 public interface IProductService {
     Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity);
     Response createProduct(Long categoryId, MultipartFile image, java.util.List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity);
+    Response createProduct(Long categoryId, MultipartFile image, java.util.List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, String variantsJson, java.util.Map<Integer, java.util.List<MultipartFile>> variantImagesMap);
 
     Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity);
     Response updateProduct(Long productId, Long categoryId, MultipartFile image, java.util.List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, java.util.List<String> existingImageUrls);
+    Response updateProduct(Long productId, Long categoryId, MultipartFile image, java.util.List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, java.util.List<String> existingImageUrls, String variantsJson, java.util.Map<Integer, java.util.List<MultipartFile>> variantImagesMap);
 
     Response deleteProduct(Long productId);
 

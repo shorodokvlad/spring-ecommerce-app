@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import ProductList from "../common/ProductList"
+import ProductList from "../common/ProductList";
 import Pagination from "../common/Pagination";
 import ApiService from "../../service/ApiService";
 import BannerCarousel from "../common/BannerCarousel";
@@ -12,6 +12,7 @@ const Home = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
     const itemsPerPage = 12;
 
     const searchItem = new URLSearchParams(location.search).get('search');
@@ -21,33 +22,33 @@ const Home = () => {
         setCurrentPage(1);
     }, [location.search]);
 
-    useEffect(()=> {
+    useEffect(() => {
         const fetchProducts = async () => {
-            try{
+            try {
+                setLoading(true);
                 setError(null);
                 let response;
                 const pageIndex = currentPage - 1;
 
                 if (searchItem) {
                     response = await ApiService.searchProducts(searchItem, pageIndex, itemsPerPage);
-                }else{
+                } else {
                     response = await ApiService.getAllProducts(pageIndex, itemsPerPage);
                 }
 
                 setProducts(response.productList || []);
                 setTotalPages(response.totalPage || 1);
-
-            }catch(error){
-                setError(error.response?.data?.message || error.message || 'Unable to fetch products')
+            } catch (err) {
+                setError(err.response?.data?.message || err.message || 'Unable to fetch products');
+            } finally {
+                setLoading(false);
             }
-        }
+        };
 
         fetchProducts();
+    }, [searchItem, currentPage]);
 
-    },[searchItem, currentPage])
-
-
-    return(
+    return (
         <div className="home">
             {searchItem ? (
                 <header className="shop-band">
@@ -59,29 +60,27 @@ const Home = () => {
                 <BannerCarousel />
             )}
 
-            {error ? (
-                <p className="error-message">{error}</p>
+            {error && <p className="error-message">{error}</p>}
+
+            {loading ? (
+                <p className="loading-product-details">Loading products...</p>
             ) : products.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
-                    <p style={{ fontSize: "1.1rem" }}>No products found matching "{searchItem}".</p>
-                    <Link to="/" className="btn-primary" style={{ marginTop: "12px", display: "inline-block" }}>
-                        View All Products
-                    </Link>
+                <div className="search-empty-state">
+                    <h3>No products found matching "{searchItem || ''}".</h3>
+                    <Link to="/" className="shop-band-clear">View All Products</Link>
                 </div>
             ) : (
                 <div>
-                    <ProductList products={products}/>
-                    {totalPages > 1 && (
-                        <Pagination  currentPage={currentPage}
+                    <ProductList products={products} />
+                    <Pagination
+                        currentPage={currentPage}
                         totalPages={totalPages}
-                        onPageChange={(page)=> setCurrentPage(page)}/>
-                    )}
+                        onPageChange={(page) => setCurrentPage(page)}
+                    />
                 </div>
             )}
         </div>
-    )
-
-
-}
+    );
+};
 
 export default Home;

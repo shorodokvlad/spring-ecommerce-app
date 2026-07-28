@@ -25,15 +25,17 @@ public class ProductController {
             @RequestParam(required = false) java.util.List<MultipartFile> images,
             @RequestParam String name,
             @RequestParam String description,
-            @RequestParam BigDecimal price,
-            @RequestParam(required = false) Integer stockQuantity
+            @RequestParam(required = false) BigDecimal price,
+            @RequestParam(required = false) Integer stockQuantity,
+            @RequestParam(required = false) String variantsJson,
+            jakarta.servlet.http.HttpServletRequest request
     ) {
-        boolean hasImage = (image != null && !image.isEmpty()) || (images != null && !images.isEmpty());
-        if (categoryId == null || !hasImage || name == null || name.isEmpty() || description == null || description.isEmpty() || price == null) {
-            throw new InvalidCredentialsException("All fields are required");
+        if (categoryId == null || name == null || name.isEmpty() || description == null || description.isEmpty()) {
+            throw new InvalidCredentialsException("Category, Name, and Description are required");
         }
 
-        return ResponseEntity.ok(productService.createProduct(categoryId, image, images, name, description, price, stockQuantity));
+        java.util.Map<Integer, java.util.List<MultipartFile>> variantImagesMap = extractVariantImages(request);
+        return ResponseEntity.ok(productService.createProduct(categoryId, image, images, name, description, price, stockQuantity, variantsJson, variantImagesMap));
     }
 
     @PutMapping("/update")
@@ -47,9 +49,28 @@ public class ProductController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) BigDecimal price,
             @RequestParam(required = false) Integer stockQuantity,
-            @RequestParam(required = false) java.util.List<String> existingImageUrls
+            @RequestParam(required = false) java.util.List<String> existingImageUrls,
+            @RequestParam(required = false) String variantsJson,
+            jakarta.servlet.http.HttpServletRequest request
     ) {
-        return ResponseEntity.ok(productService.updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls));
+        java.util.Map<Integer, java.util.List<MultipartFile>> variantImagesMap = extractVariantImages(request);
+        return ResponseEntity.ok(productService.updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls, variantsJson, variantImagesMap));
+    }
+
+    private java.util.Map<Integer, java.util.List<MultipartFile>> extractVariantImages(jakarta.servlet.http.HttpServletRequest request) {
+        java.util.Map<Integer, java.util.List<MultipartFile>> variantImagesMap = new java.util.HashMap<>();
+        if (request instanceof org.springframework.web.multipart.MultipartHttpServletRequest multipartRequest) {
+            java.util.Map<String, java.util.List<MultipartFile>> fileMap = multipartRequest.getMultiFileMap();
+            for (java.util.Map.Entry<String, java.util.List<MultipartFile>> entry : fileMap.entrySet()) {
+                if (entry.getKey().startsWith("variant_images_")) {
+                    try {
+                        int variantIndex = Integer.parseInt(entry.getKey().substring("variant_images_".length()));
+                        variantImagesMap.put(variantIndex, entry.getValue());
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        }
+        return variantImagesMap;
     }
 
     @DeleteMapping("/delete/{productId}")

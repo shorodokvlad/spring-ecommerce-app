@@ -21,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +41,15 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity) {
+        return createProduct(categoryId, image, images, name, description, price, stockQuantity, null, null);
+    }
+
+    public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, String variantsJson) {
+        return createProduct(categoryId, image, images, name, description, price, stockQuantity, variantsJson, null);
+    }
+
+    @Override
+    public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
 
         List<String> uploadedImageUrls = new ArrayList<>();
@@ -60,6 +71,8 @@ public class ProductServiceImpl implements IProductService {
         }
         product.setStockQuantity(stockQuantity != null ? stockQuantity : 0);
 
+        processVariantsJson(product, variantsJson, variantImagesMap);
+
         productRepo.save(product);
 
         return Response.builder()
@@ -70,11 +83,20 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
-        return updateProduct(productId, categoryId, image, null, name, description, price, stockQuantity, null);
+        return updateProduct(productId, categoryId, image, null, name, description, price, stockQuantity, null, null, null);
     }
 
     @Override
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls) {
+        return updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls, null, null);
+    }
+
+    public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls, String variantsJson) {
+        return updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls, variantsJson, null);
+    }
+
+    @Override
+    public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
         Product product = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
         Category category = null;
@@ -116,11 +138,69 @@ public class ProductServiceImpl implements IProductService {
             product.setImageUrls(finalImageUrls);
         }
 
+        if (variantsJson != null) {
+            processVariantsJson(product, variantsJson, variantImagesMap);
+        }
+
         productRepo.save(product);
         return Response.builder()
                 .status(200)
                 .message("Product updated successfully")
                 .build();
+    }
+
+    private void processVariantsJson(Product product, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
+        if (variantsJson != null && !variantsJson.isBlank()) {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                List<com.shv.Ecommerce.dto.ProductVariantDto> vDtos = mapper.readValue(
+                        variantsJson,
+                        new com.fasterxml.jackson.core.type.TypeReference<List<com.shv.Ecommerce.dto.ProductVariantDto>>() {}
+                );
+                product.getVariants().clear();
+                int totalStock = 0;
+                for (int i = 0; i < vDtos.size(); i++) {
+                    com.shv.Ecommerce.dto.ProductVariantDto dto = vDtos.get(i);
+                    com.shv.Ecommerce.entity.ProductVariant variant = new com.shv.Ecommerce.entity.ProductVariant();
+                    variant.setTitle(dto.getTitle());
+                    if (dto.getAttributes() != null) {
+                        variant.setAttributes(new HashMap<>(dto.getAttributes()));
+                    }
+                    variant.setPrice(dto.getPrice());
+                    int vStock = dto.getStockQuantity() != null ? dto.getStockQuantity() : 0;
+                    variant.setStockQuantity(vStock);
+                    totalStock += vStock;
+
+                    List<String> variantUrls = new ArrayList<>();
+                    if (dto.getImageUrls() != null) {
+                        variantUrls.addAll(dto.getImageUrls());
+                    }
+                    if (variantImagesMap != null && variantImagesMap.containsKey(i)) {
+                        List<MultipartFile> vFiles = variantImagesMap.get(i);
+                        if (vFiles != null && !vFiles.isEmpty()) {
+                            variantUrls.addAll(awsS3Service.saveImagesToS3(vFiles));
+                        }
+                    }
+                    variant.setImageUrls(variantUrls);
+                    variant.setProduct(product);
+                    product.getVariants().add(variant);
+                }
+
+                if (!product.getVariants().isEmpty()) {
+                    product.setStockQuantity(totalStock);
+                    com.shv.Ecommerce.entity.ProductVariant firstVariant = product.getVariants().get(0);
+                    if (firstVariant.getPrice() != null) {
+                        product.setPrice(firstVariant.getPrice());
+                    }
+                    if (firstVariant.getImageUrls() != null && !firstVariant.getImageUrls().isEmpty()) {
+                        product.setImageUrl(firstVariant.getImageUrls().get(0));
+                        product.setImageUrls(new ArrayList<>(firstVariant.getImageUrls()));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error parsing variantsJson", e);
+            }
+        }
     }
 
     @Override

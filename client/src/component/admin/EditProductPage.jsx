@@ -2,20 +2,53 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import '../../style/addProduct.css';
 import ApiService from "../../service/ApiService";
+import BlueprintManagerModal, { getStoredBlueprints, saveStoredBlueprints } from "./BlueprintManagerModal";
+
+const BUILT_IN_BLUEPRINTS = [
+    {
+        name: "Phone Blueprint",
+        attributes: ["Memory", "Color", "RAM"]
+    },
+    {
+        name: "Laptop Blueprint",
+        attributes: ["Processor", "Storage", "RAM", "Color"]
+    },
+    {
+        name: "Watch Blueprint",
+        attributes: ["Case Size", "Band Type", "Material", "Color"]
+    }
+];
+
+const createEmptyAttribute = (key = '', value = '') => ({
+    id: `attr-${Date.now()}-${Math.random()}`,
+    key,
+    value
+});
+
+const createEmptyVariant = (index = 1) => ({
+    id: `variant-${Date.now()}-${Math.random()}`,
+    title: `Configuration #${index}`,
+    price: '',
+    stockQuantity: '',
+    attributes: [createEmptyAttribute()],
+    copyPhotosFromIndex: "",
+    existingImageUrls: [],
+    newImages: []
+});
 
 const EditProductPage = () => {
     const { productId } = useParams();
-    // Unified list of images: { id, type: 'existing' | 'new', url, file?: File }
-    const [images, setImages] = useState([]);
-    const [draggedIndex, setDraggedIndex] = useState(null);
-
     const [categories, setCategories] = useState([]);
     const [categoryId, setCategoryId] = useState('');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [message, setMessage] = useState('');
-    const [price, setPrice] = useState('');
-    const [stockQuantity, setStockQuantity] = useState('');
+
+    const [variants, setVariants] = useState([]);
+    const [customBlueprints, setCustomBlueprints] = useState([]);
+    const [isBlueprintModalOpen, setIsBlueprintModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const navigate = useNavigate();
 
     const fetchProductData = useCallback(async () => {
@@ -25,19 +58,46 @@ const EditProductPage = () => {
             const prod = response.product;
             setName(prod.name || '');
             setDescription(prod.description || '');
-            setPrice(prod.price || '');
-            setStockQuantity(prod.stockQuantity ?? '');
             setCategoryId(prod.category?.id || '');
 
-            const urls = (prod.imageUrls && prod.imageUrls.length > 0)
-                ? prod.imageUrls
-                : (prod.imageUrl ? [prod.imageUrl] : []);
-
-            setImages(urls.map((url, idx) => ({
-                id: `existing-${idx}-${Date.now()}`,
-                type: 'existing',
-                url: url
-            })));
+            if (prod.variants && prod.variants.length > 0) {
+                setVariants(prod.variants.map((v, idx) => {
+                    const attrsList = [];
+                    if (v.attributes) {
+                        Object.entries(v.attributes).forEach(([k, val]) => {
+                            attrsList.push({
+                                id: `attr-${idx}-${k}-${Math.random()}`,
+                                key: k,
+                                value: val
+                            });
+                        });
+                    }
+                    if (attrsList.length === 0) {
+                        attrsList.push(createEmptyAttribute());
+                    }
+                    return {
+                        id: v.id || `v-${idx}-${Date.now()}`,
+                        title: v.title || `Configuration #${idx + 1}`,
+                        price: v.price ?? '',
+                        stockQuantity: v.stockQuantity ?? '',
+                        attributes: attrsList,
+                        copyPhotosFromIndex: "",
+                        existingImageUrls: v.imageUrls ? [...v.imageUrls] : [],
+                        newImages: []
+                    };
+                }));
+            } else {
+                setVariants([{
+                    id: `default-v-${Date.now()}`,
+                    title: 'Configuration #1',
+                    price: prod.price || '',
+                    stockQuantity: prod.stockQuantity || '',
+                    attributes: [createEmptyAttribute()],
+                    copyPhotosFromIndex: "",
+                    existingImageUrls: prod.imageUrls ? [...prod.imageUrls] : (prod.imageUrl ? [prod.imageUrl] : []),
+                    newImages: []
+                }]);
+            }
         } catch (err) {
             console.error(err);
         }
@@ -45,10 +105,120 @@ const EditProductPage = () => {
 
     useEffect(() => {
         ApiService.getAllCategory().then((res) => setCategories(res.categoryList || []));
+        setCustomBlueprints(getStoredBlueprints());
         fetchProductData();
     }, [fetchProductData]);
 
-    const handleNewImagesChange = (e) => {
+    const scrollToNewVariant = () => {
+        setTimeout(() => {
+            const cards = document.querySelectorAll(".admin-variant-card");
+            if (cards.length > 0) {
+                const lastCard = cards[cards.length - 1];
+                lastCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                const titleInput = lastCard.querySelector(".variant-title-input");
+                if (titleInput) titleInput.focus();
+            }
+        }, 80);
+    };
+
+    const addVariant = () => {
+        setVariants((prev) => [...prev, createEmptyVariant(prev.length + 1)]);
+        scrollToNewVariant();
+    };
+
+    const addVariantFromBlueprint = (blueprint) => {
+        setVariants((prev) => [
+            ...prev,
+            {
+                id: `variant-${Date.now()}-${Math.random()}`,
+                title: `Configuration #${prev.length + 1}`,
+                price: '',
+                stockQuantity: '',
+                attributes: blueprint.attributes.map((keyStr) => createEmptyAttribute(keyStr, '')),
+                copyPhotosFromIndex: "",
+                existingImageUrls: [],
+                newImages: []
+            }
+        ]);
+        scrollToNewVariant();
+    };
+
+    const handleSaveAsBlueprint = (vIndex) => {
+        const v = variants[vIndex];
+        const keys = v.attributes.map(a => a.key ? a.key.trim() : "").filter(Boolean);
+        if (keys.length === 0) {
+            alert("Please type at least one attribute name before saving as a blueprint.");
+            return;
+        }
+        const nameInput = prompt("Enter a name for this Blueprint (e.g. Tablet Specs, Headphone Specs):", `${v.title || 'Custom'} Blueprint`);
+        if (nameInput && nameInput.trim()) {
+            const current = getStoredBlueprints();
+            const updated = [...current.filter(b => b.name !== nameInput.trim()), {
+                id: `bp-${Date.now()}-${Math.random()}`,
+                name: nameInput.trim(),
+                attributes: keys
+            }];
+            saveStoredBlueprints(updated);
+            setCustomBlueprints(updated);
+            alert(`Blueprint "${nameInput.trim()}" saved successfully!`);
+        }
+    };
+
+    const updateVariantField = (vIndex, field, value) => {
+        let finalValue = value;
+        if (field === 'stockQuantity') {
+            if (value !== '' && parseInt(value, 10) < 0) {
+                finalValue = '0';
+            }
+        }
+        setVariants((prev) => {
+            const next = [...prev];
+            next[vIndex] = { ...next[vIndex], [field]: finalValue };
+            return next;
+        });
+    };
+
+    const removeVariant = (vIndex) => {
+        if (variants.length <= 1) {
+            alert("At least one product configuration is required.");
+            return;
+        }
+        setVariants((prev) => prev.filter((_, idx) => idx !== vIndex));
+    };
+
+    const addVariantAttribute = (vIndex) => {
+        setVariants((prev) => {
+            const next = [...prev];
+            const updatedAttrs = [...next[vIndex].attributes, createEmptyAttribute()];
+            next[vIndex] = { ...next[vIndex], attributes: updatedAttrs };
+            return next;
+        });
+    };
+
+    const updateVariantAttribute = (vIndex, attrId, field, value) => {
+        setVariants((prev) => {
+            const next = [...prev];
+            const updatedAttrs = next[vIndex].attributes.map((attr) => {
+                if (attr.id === attrId) {
+                    return { ...attr, [field]: value };
+                }
+                return attr;
+            });
+            next[vIndex] = { ...next[vIndex], attributes: updatedAttrs };
+            return next;
+        });
+    };
+
+    const removeVariantAttribute = (vIndex, attrId) => {
+        setVariants((prev) => {
+            const next = [...prev];
+            const updatedAttrs = next[vIndex].attributes.filter((attr) => attr.id !== attrId);
+            next[vIndex] = { ...next[vIndex], attributes: updatedAttrs };
+            return next;
+        });
+    };
+
+    const handleVariantFilesChange = (vIndex, e) => {
         const selectedFiles = Array.from(e.target.files);
         const newItems = [];
 
@@ -58,71 +228,133 @@ const EditProductPage = () => {
                 continue;
             }
             newItems.push({
-                id: `new-${Date.now()}-${Math.random()}`,
-                type: 'new',
-                url: URL.createObjectURL(file),
-                file: file
+                file,
+                url: URL.createObjectURL(file)
             });
         }
 
-        setImages((prev) => [...prev, ...newItems]);
+        setVariants((prev) => {
+            const next = [...prev];
+            next[vIndex] = {
+                ...next[vIndex],
+                copyPhotosFromIndex: "",
+                newImages: [...next[vIndex].newImages, ...newItems]
+            };
+            return next;
+        });
         e.target.value = null;
     };
 
-    // Drag & Drop Handlers
-    const handleDragStart = (e, index) => {
-        setDraggedIndex(index);
-        e.dataTransfer.effectAllowed = "move";
+    const [draggedPhoto, setDraggedPhoto] = useState(null);
+
+    const handlePhotoDragStart = (vIndex, type, imgIdx) => {
+        setDraggedPhoto({ vIndex, type, imgIdx });
     };
 
-    const handleDragOver = (e, index) => {
+    const handlePhotoDragOver = (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
     };
 
-    const handleDrop = (e, dropIndex) => {
-        e.preventDefault();
-        if (draggedIndex === null || draggedIndex === dropIndex) return;
-        setImages((prev) => {
+    const handlePhotoDrop = (targetVIndex, targetType, targetImgIdx) => {
+        if (!draggedPhoto) return;
+        const { vIndex: srcVIndex, type: srcType, imgIdx: srcImgIdx } = draggedPhoto;
+        if (srcVIndex !== targetVIndex || srcType !== targetType || srcImgIdx === targetImgIdx) return;
+
+        setVariants((prev) => {
             const next = [...prev];
-            const [movedItem] = next.splice(draggedIndex, 1);
-            next.splice(dropIndex, 0, movedItem);
+            const v = { ...next[srcVIndex] };
+
+            if (srcType === 'existing') {
+                const updatedList = [...v.existingImageUrls];
+                const [moved] = updatedList.splice(srcImgIdx, 1);
+                updatedList.splice(targetImgIdx, 0, moved);
+                v.existingImageUrls = updatedList;
+            } else if (srcType === 'new') {
+                const updatedList = [...v.newImages];
+                const [moved] = updatedList.splice(srcImgIdx, 1);
+                updatedList.splice(targetImgIdx, 0, moved);
+                v.newImages = updatedList;
+            }
+
+            next[srcVIndex] = v;
             return next;
         });
-        setDraggedIndex(null);
+        setDraggedPhoto(null);
     };
 
-    const handleDragEnd = () => {
-        setDraggedIndex(null);
+    const removeVariantExistingImage = (vIndex, urlToRemove) => {
+        setVariants((prev) => {
+            const next = [...prev];
+            const updatedExisting = next[vIndex].existingImageUrls.filter(u => u !== urlToRemove);
+            next[vIndex] = { ...next[vIndex], existingImageUrls: updatedExisting };
+            return next;
+        });
     };
 
-    const removeImage = (indexToRemove) => {
-        setImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    const removeVariantNewImage = (vIndex, imgIndex) => {
+        setVariants((prev) => {
+            const next = [...prev];
+            const updatedNew = next[vIndex].newImages.filter((_, idx) => idx !== imgIndex);
+            next[vIndex] = { ...next[vIndex], newImages: updatedNew };
+            return next;
+        });
     };
+
+    const totalStockSum = variants.reduce((sum, v) => {
+        const stock = parseInt(v.stockQuantity, 10);
+        return sum + (isNaN(stock) ? 0 : stock);
+    }, 0);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             const formData = new FormData();
             formData.append('productId', productId);
             if (categoryId) formData.append('categoryId', categoryId);
             if (name) formData.append('name', name);
             if (description) formData.append('description', description);
-            if (price) formData.append('price', price);
-            if (stockQuantity !== '') formData.append('stockQuantity', stockQuantity);
+            formData.append('stockQuantity', totalStockSum);
 
-            // Send images in their exact user drag-reordered sequence
-            images.forEach((item) => {
-                if (item.type === 'existing') {
-                    formData.append('existingImageUrls', item.url);
-                } else if (item.type === 'new' && item.file) {
-                    formData.append('images', item.file);
-                }
+            const formattedVariants = variants.map((v, vIndex) => {
+                const attrMap = {};
+                v.attributes.forEach((attr) => {
+                    if (attr.key && attr.key.trim() && attr.value && attr.value.trim()) {
+                        attrMap[attr.key.trim()] = attr.value.trim();
+                    }
+                });
+
+                const isCopying = v.copyPhotosFromIndex !== "" && v.copyPhotosFromIndex != null;
+                const srcIndex = isCopying ? parseInt(v.copyPhotosFromIndex, 10) : null;
+                const srcVariant = isCopying ? variants[srcIndex] : null;
+
+                const targetNewImages = srcVariant ? srcVariant.newImages : v.newImages;
+                const targetExistingUrls = srcVariant ? srcVariant.existingImageUrls : v.existingImageUrls;
+
+                targetNewImages.forEach((imgObj) => {
+                    if (imgObj.file) {
+                        formData.append(`variant_images_${vIndex}`, imgObj.file);
+                    }
+                });
+
+                return {
+                    title: v.title || `Configuration #${vIndex + 1}`,
+                    attributes: attrMap,
+                    price: v.price ? parseFloat(v.price) : 0,
+                    stockQuantity: v.stockQuantity ? parseInt(v.stockQuantity, 10) : 0,
+                    imageUrls: targetExistingUrls || []
+                };
             });
+
+            const firstPrice = formattedVariants[0]?.price || 0;
+            formData.append('price', firstPrice);
+
+            formData.append('variantsJson', JSON.stringify(formattedVariants));
 
             const response = await ApiService.updateProduct(formData);
             if (response.status === 200) {
                 setMessage(response.message || "Product updated successfully!");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 await fetchProductData();
                 setTimeout(() => {
                     setMessage('');
@@ -130,6 +362,9 @@ const EditProductPage = () => {
             }
         } catch (error) {
             setMessage(error.response?.data?.message || error.message || 'Unable to update product');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -157,85 +392,322 @@ const EditProductPage = () => {
             {message && <div className="message">{message}</div>}
 
             <div className="form-group">
-                <label>Add New Photos (Drag to reorder)</label>
-                <input type="file" multiple accept="image/*" onChange={handleNewImagesChange} />
+                <label>Category</label>
+                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                        <option value={cat.id} key={cat.id}>{cat.name}</option>
+                    ))}
+                </select>
             </div>
 
-            {/* Gallery Previews Container with Drag & Drop Reordering */}
-            {images.length > 0 && (
-                <div className="admin-image-previews">
-                    {images.map((item, idx) => (
-                        <div
-                            className={`admin-preview-item ${item.type === 'new' ? 'new-preview' : ''} ${draggedIndex === idx ? 'dragging' : ''}`}
-                            key={item.id || idx}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, idx)}
-                            onDragOver={(e) => handleDragOver(e, idx)}
-                            onDrop={(e) => handleDrop(e, idx)}
-                            onDragEnd={handleDragEnd}
-                            title="Drag to reorder"
+            <div className="form-group">
+                <label>Product Name</label>
+                <input
+                    type="text"
+                    placeholder="Product name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+            </div>
+
+            <div className="form-group">
+                <label>Description</label>
+                <textarea
+                    placeholder="Description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                />
+            </div>
+
+            <div className="admin-variants-section">
+                <div className="admin-variants-header">
+                    <div>
+                        <h3 style={{ margin: 0 }}>Product Configurations ({variants.length})</h3>
+                        <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "#64748b" }}>
+                            Total Stock Across All Configurations: <strong>{totalStockSum} units</strong>
+                        </p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                        <button type="button" className="add-variant-btn" onClick={addVariant}>
+                            + Add Configuration
+                        </button>
+
+                        {/* Blueprint Selector Dropdown */}
+                        <select
+                            className="add-variant-btn"
+                            style={{ background: "var(--paper)", color: "var(--ink)", border: "1.5px solid var(--line)" }}
+                            onChange={(e) => {
+                                if (!e.target.value) return;
+                                const allBp = [...BUILT_IN_BLUEPRINTS, ...customBlueprints];
+                                const selectedBp = allBp.find(b => b.name === e.target.value);
+                                if (selectedBp) {
+                                    addVariantFromBlueprint(selectedBp);
+                                }
+                                e.target.value = "";
+                            }}
                         >
-                            <img src={item.url} alt={`Thumbnail ${idx + 1}`} />
-
-                            <button
-                                type="button"
-                                className="remove-img-btn"
-                                onClick={() => removeImage(idx)}
-                                title="Remove photo"
-                            >
-                                ✕
-                            </button>
-
-                            {idx === 0 ? (
-                                <span className="main-photo-tag">Main</span>
-                            ) : (
-                                <span className={item.type === 'new' ? 'new-photo-tag' : 'photo-num-tag'}>
-                                    {item.type === 'new' ? 'New' : `#${idx + 1}`}
-                                </span>
+                            <option value="">+ Add from Blueprint</option>
+                            <optgroup label="Built-in Blueprints">
+                                {BUILT_IN_BLUEPRINTS.map(b => (
+                                    <option key={b.name} value={b.name}>{b.name} ({b.attributes.join(", ")})</option>
+                                ))}
+                            </optgroup>
+                            {customBlueprints.length > 0 && (
+                                <optgroup label="My Saved Blueprints">
+                                    {customBlueprints.map(b => (
+                                        <option key={b.id || b.name} value={b.name}>{b.name} ({b.attributes.join(", ")})</option>
+                                    ))}
+                                </optgroup>
                             )}
-                        </div>
-                    ))}
+                        </select>
+
+                        <button
+                            type="button"
+                            className="add-attr-btn"
+                            onClick={() => setIsBlueprintModalOpen(true)}
+                            style={{ padding: "6px 12px" }}
+                        >
+                            Manage Blueprints
+                        </button>
+                    </div>
                 </div>
-            )}
 
-            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                    <option value={cat.id} key={cat.id}>{cat.name}</option>
-                ))}
-            </select>
+                <div className="admin-variants-list">
+                    {variants.map((v, vIdx) => {
+                        const isCopying = v.copyPhotosFromIndex !== "" && v.copyPhotosFromIndex != null;
+                        const srcIndex = isCopying ? parseInt(v.copyPhotosFromIndex, 10) : null;
+                        const srcVariant = isCopying ? variants[srcIndex] : null;
 
-            <input
-                type="text"
-                placeholder="Product name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                        const displayExisting = srcVariant ? srcVariant.existingImageUrls : v.existingImageUrls;
+                        const displayNew = srcVariant ? srcVariant.newImages : v.newImages;
+
+                        return (
+                            <div className="admin-variant-card" key={v.id}>
+                                <div className="variant-card-header">
+                                    <input
+                                        type="text"
+                                        className="variant-title-input"
+                                        placeholder={`Configuration #${vIdx + 1} Title (e.g. White / 128GB)`}
+                                        value={v.title}
+                                        onChange={(e) => updateVariantField(vIdx, 'title', e.target.value)}
+                                    />
+
+                                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                        <button
+                                            type="button"
+                                            className="add-attr-btn"
+                                            onClick={() => handleSaveAsBlueprint(vIdx)}
+                                            title="Save attribute structure as a reusable Blueprint"
+                                        >
+                                            Save Blueprint
+                                        </button>
+
+                                        {variants.length > 1 && (
+                                            <button
+                                                type="button"
+                                                className="remove-variant-btn"
+                                                onClick={() => removeVariant(vIdx)}
+                                            >
+                                                ✕ Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="variant-attributes-builder">
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155" }}>
+                                            Custom Attributes (e.g. Color, Storage, Case Size, Band Type)
+                                        </label>
+                                        <button
+                                            type="button"
+                                            className="add-attr-btn"
+                                            onClick={() => addVariantAttribute(vIdx)}
+                                        >
+                                            + Add Attribute
+                                        </button>
+                                    </div>
+
+                                    {v.attributes.map((attr) => (
+                                        <div className="attr-row" key={attr.id}>
+                                            <input
+                                                type="text"
+                                                placeholder="Type e.g. Color, Memory, Size"
+                                                value={attr.key}
+                                                onChange={(e) => updateVariantAttribute(vIdx, attr.id, 'key', e.target.value)}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Value e.g. White, 128GB, 44mm"
+                                                value={attr.value}
+                                                onChange={(e) => updateVariantAttribute(vIdx, attr.id, 'value', e.target.value)}
+                                            />
+                                            {v.attributes.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    className="remove-attr-btn"
+                                                    onClick={() => removeVariantAttribute(vIdx, attr.id)}
+                                                    title="Remove attribute"
+                                                >
+                                                    ✕
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="variant-price-stock-row">
+                                    <div>
+                                        <label>Price (€)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="Price (€)"
+                                            value={v.price}
+                                            onChange={(e) => updateVariantField(vIdx, 'price', e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label>Stock Quantity</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            placeholder="Stock"
+                                            value={v.stockQuantity}
+                                            onChange={(e) => updateVariantField(vIdx, 'stockQuantity', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="variant-photo-upload-section">
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                                        <label style={{ fontSize: "0.82rem", fontWeight: 600, color: "#334155" }}>
+                                            Photos for Configuration #{vIdx + 1}
+                                        </label>
+
+                                        {variants.length > 1 && (
+                                            <select
+                                                value={v.copyPhotosFromIndex}
+                                                onChange={(e) => updateVariantField(vIdx, 'copyPhotosFromIndex', e.target.value)}
+                                                style={{ fontSize: "0.78rem", padding: "4px 8px", borderRadius: "6px", border: "1px solid #cbd5e1", background: "#ffffff" }}
+                                            >
+                                                <option value="">+ Upload Custom Photos</option>
+                                                {variants.map((otherV, otherIdx) => {
+                                                    if (otherIdx === vIdx) return null;
+                                                    return (
+                                                        <option key={otherIdx} value={otherIdx}>
+                                                            Reuse Photos from #{otherIdx + 1} ({otherV.title || `Config #${otherIdx + 1}`})
+                                                        </option>
+                                                    );
+                                                })}
+                                            </select>
+                                        )}
+                                    </div>
+
+                                    {!isCopying ? (
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            onChange={(e) => handleVariantFilesChange(vIdx, e)}
+                                        />
+                                    ) : (
+                                        <p style={{ fontSize: "0.8rem", color: "var(--ink)", fontWeight: 600, margin: "4px 0 0" }}>
+                                            ✓ Reusing photo set from Configuration #{srcIndex + 1} ({variants[srcIndex]?.title || `Config #${srcIndex + 1}`})
+                                        </p>
+                                    )}
+
+                                    {(displayExisting.length > 0 || displayNew.length > 0) && (
+                                        <div className="admin-image-previews" style={{ marginTop: "8px" }}>
+                                            {displayExisting.map((url, imgIdx) => {
+                                                const isBeingDragged = draggedPhoto?.vIndex === vIdx && draggedPhoto?.type === 'existing' && draggedPhoto?.imgIdx === imgIdx;
+                                                return (
+                                                    <div
+                                                        className={`admin-preview-item ${isBeingDragged ? 'dragging' : ''}`}
+                                                        key={`ext-${imgIdx}`}
+                                                        draggable={!isCopying}
+                                                        onDragStart={() => handlePhotoDragStart(vIdx, 'existing', imgIdx)}
+                                                        onDragOver={handlePhotoDragOver}
+                                                        onDrop={() => handlePhotoDrop(vIdx, 'existing', imgIdx)}
+                                                        style={{ cursor: isCopying ? "default" : "grab" }}
+                                                        title={!isCopying ? "Drag to reorder photo" : ""}
+                                                    >
+                                                        <img src={url} alt={`Saved ${imgIdx + 1}`} />
+                                                        {!isCopying && (
+                                                            <button
+                                                                type="button"
+                                                                className="remove-img-btn"
+                                                                onClick={() => removeVariantExistingImage(vIdx, url)}
+                                                                title="Remove photo"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        )}
+                                                        {imgIdx === 0 && <span className="main-photo-tag">Config Main</span>}
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {displayNew.map((imgObj, imgIdx) => {
+                                                const isBeingDragged = draggedPhoto?.vIndex === vIdx && draggedPhoto?.type === 'new' && draggedPhoto?.imgIdx === imgIdx;
+                                                return (
+                                                    <div
+                                                        className={`admin-preview-item new-preview ${isBeingDragged ? 'dragging' : ''}`}
+                                                        key={`new-${imgIdx}`}
+                                                        draggable={!isCopying}
+                                                        onDragStart={() => handlePhotoDragStart(vIdx, 'new', imgIdx)}
+                                                        onDragOver={handlePhotoDragOver}
+                                                        onDrop={() => handlePhotoDrop(vIdx, 'new', imgIdx)}
+                                                        style={{ cursor: isCopying ? "default" : "grab" }}
+                                                        title={!isCopying ? "Drag to reorder photo" : ""}
+                                                    >
+                                                        <img src={imgObj.url} alt={`New ${imgIdx + 1}`} />
+                                                        {!isCopying && (
+                                                            <button
+                                                                type="button"
+                                                                className="remove-img-btn"
+                                                                onClick={() => removeVariantNewImage(vIdx, imgIdx)}
+                                                                title="Remove photo"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        )}
+                                                        <span className="new-photo-tag">New</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {message && <div className="message" style={{ marginTop: "12px" }}>{message}</div>}
+            <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{ marginTop: "16px", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+            >
+                {isSubmitting ? (
+                    <>
+                        <span className="button-spinner" /> Updating Product...
+                    </>
+                ) : (
+                    "Update Product"
+                )}
+            </button>
+
+            <BlueprintManagerModal
+                isOpen={isBlueprintModalOpen}
+                onClose={() => setIsBlueprintModalOpen(false)}
+                onBlueprintsUpdated={(updated) => setCustomBlueprints(updated)}
             />
-
-            <textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-            />
-
-            <input
-                type="number"
-                placeholder="Price"
-                step="0.01"
-                min="0"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-            />
-
-            <input
-                type="number"
-                placeholder="Stock quantity"
-                min="0"
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
-            />
-
-            <button type="submit">Update Product</button>
         </form>
     );
 };
