@@ -18,9 +18,10 @@ const FavoritesPage = () => {
             <h2>My Favorites</h2>
 
             {favorites.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "48px 0" }}>
-                    <p style={{ fontSize: "1.1rem", color: "#64748b" }}>You haven't saved any favorite products yet.</p>
-                    <Link to="/categories" className="btn-primary" style={{ marginTop: "16px", display: "inline-block" }}>
+                <div className="favorites-empty" style={{ textAlign: "center", padding: "48px 0" }}>
+                    <h3 style={{ margin: "0 0 8px", color: "var(--ink)", fontSize: "1.3rem", fontWeight: 700 }}>You haven't saved any favorite products yet</h3>
+                    <p style={{ margin: "0 0 24px", color: "var(--muted)", fontSize: "0.95rem" }}>Explore our catalog and save your favorite items here.</p>
+                    <Link to="/categories" className="btn-primary" style={{ padding: "10px 24px", borderRadius: "10px" }}>
                         Browse Categories
                     </Link>
                 </div>

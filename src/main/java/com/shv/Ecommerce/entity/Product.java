@@ -35,6 +35,9 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private java.util.List<ProductVariant> variants = new java.util.ArrayList<>();
+
     @Column(name = "created_at")
     private final LocalDateTime createdAt = LocalDateTime.now();
 

@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, WebRequest request) {
         Response errorResponse = Response.builder()
                 .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
-                .message("File size exceeds the maximum allowed upload limit (10MB). Please select a smaller file.")
+                .message("File size exceeds the maximum allowed upload limit (25MB per file, 250MB per request). Please select smaller files.")
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE);

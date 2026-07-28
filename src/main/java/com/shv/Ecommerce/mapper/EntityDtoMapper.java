@@ -64,6 +64,22 @@ public class EntityDtoMapper {
     }
 
 
+    // ProductVariant to DTO Basic
+    public com.shv.Ecommerce.dto.ProductVariantDto mapProductVariantToDtoBasic(com.shv.Ecommerce.entity.ProductVariant variant) {
+        com.shv.Ecommerce.dto.ProductVariantDto dto = new com.shv.Ecommerce.dto.ProductVariantDto();
+        dto.setId(variant.getId());
+        dto.setTitle(variant.getTitle());
+        if (variant.getAttributes() != null && !variant.getAttributes().isEmpty()) {
+            dto.setAttributes(new java.util.HashMap<>(variant.getAttributes()));
+        }
+        dto.setPrice(variant.getPrice());
+        dto.setStockQuantity(variant.getStockQuantity());
+        if (variant.getImageUrls() != null && !variant.getImageUrls().isEmpty()) {
+            dto.setImageUrls(new java.util.ArrayList<>(variant.getImageUrls()));
+        }
+        return dto;
+    }
+
     // Product to DTO Basic
     public ProductDto mapProductToDtoBasic(Product product) {
         ProductDto productDto = new ProductDto();
@@ -78,6 +94,12 @@ public class EntityDtoMapper {
             productDto.setImageUrls(new java.util.ArrayList<>(product.getImageUrls()));
         } else if (product.getImageUrl() != null && !product.getImageUrl().isBlank()) {
             productDto.setImageUrls(java.util.List.of(product.getImageUrl()));
+        }
+
+        if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+            productDto.setVariants(product.getVariants().stream()
+                    .map(this::mapProductVariantToDtoBasic)
+                    .toList());
         }
 
         return productDto;

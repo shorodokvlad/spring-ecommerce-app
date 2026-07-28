@@ -4,6 +4,7 @@ import "../../style/adminBanner.css";
 
 const AdminBannerPage = () => {
     const [banners, setBanners] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingBannerId, setEditingBannerId] = useState(null);
 
@@ -22,10 +23,13 @@ const AdminBannerPage = () => {
 
     const fetchBanners = async () => {
         try {
+            setLoading(true);
             const res = await ApiService.getAllBanners();
             setBanners(res.bannerList || []);
         } catch (err) {
             console.error("Failed to fetch banners", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -155,14 +159,14 @@ const AdminBannerPage = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Upload Image File (Max 10MB)</label>
+                                <label>Upload Image File (Max 25MB)</label>
                                 <input
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => {
                                         const file = e.target.files[0];
-                                        if (file && file.size > 10 * 1024 * 1024) {
-                                            alert("File size exceeds 10MB limit. Please select a smaller image.");
+                                        if (file && file.size > 25 * 1024 * 1024) {
+                                            alert("File size exceeds 25MB limit. Please select a smaller image.");
                                             e.target.value = null;
                                             setImageFile(null);
                                             return;
@@ -205,55 +209,62 @@ const AdminBannerPage = () => {
                 </div>
             )}
 
-            <table className="banner-table">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Title / Details</th>
-                        <th>Link URL</th>
-                        <th>Order</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {banners.length === 0 ? (
+            {loading ? (
+                <div style={{ textAlign: "center", padding: "48px 0", color: "var(--muted)" }}>
+                    <span className="button-spinner" style={{ width: "26px", height: "26px", borderColor: "var(--line)", borderTopColor: "var(--ink)" }} />
+                    <p style={{ marginTop: "12px", fontSize: "0.9rem" }}>Loading banners...</p>
+                </div>
+            ) : (
+                <table className="banner-table">
+                    <thead>
                         <tr>
-                            <td colSpan="6" style={{ textAlign: "center", padding: "24px", color: "#64748b" }}>
-                                No custom banners created yet. The carousel is using default fallback banners.
-                            </td>
+                            <th>Image</th>
+                            <th>Title / Details</th>
+                            <th>Link URL</th>
+                            <th>Order</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
-                    ) : (
-                        banners.map((banner) => (
-                            <tr key={banner.id}>
-                                <td>
-                                    <img src={banner.imageUrl} alt={banner.title || "Banner"} className="banner-thumb" />
-                                </td>
-                                <td>
-                                    <strong>{banner.title || "Untitled Banner"}</strong>
-                                </td>
-                                <td>{banner.linkUrl || "-"}</td>
-                                <td>{banner.displayOrder}</td>
-                                <td>
-                                    <span className={`status-badge ${banner.active ? "active" : "inactive"}`}>
-                                        {banner.active ? "Active" : "Inactive"}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div className="action-btns">
-                                        <button className="btn-edit" onClick={() => handleEditClick(banner)}>
-                                            Edit
-                                        </button>
-                                        <button className="btn-delete" onClick={() => handleDelete(banner.id)}>
-                                            Delete
-                                        </button>
-                                    </div>
+                    </thead>
+                    <tbody>
+                        {banners.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" style={{ textAlign: "center", padding: "24px", color: "#64748b" }}>
+                                    No custom banners created yet. The carousel is using default fallback banners.
                                 </td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+                            banners.map((banner) => (
+                                <tr key={banner.id}>
+                                    <td>
+                                        <img src={banner.imageUrl} alt={banner.title || "Banner"} className="banner-thumb" />
+                                    </td>
+                                    <td>
+                                        <strong>{banner.title || "Untitled Banner"}</strong>
+                                    </td>
+                                    <td>{banner.linkUrl || "-"}</td>
+                                    <td>{banner.displayOrder}</td>
+                                    <td>
+                                        <span className={`status-badge ${banner.active ? "active" : "inactive"}`}>
+                                            {banner.active ? "Active" : "Inactive"}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="action-btns">
+                                            <button className="btn-edit" onClick={() => handleEditClick(banner)}>
+                                                Edit
+                                            </button>
+                                            <button className="btn-delete" onClick={() => handleDelete(banner.id)}>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };

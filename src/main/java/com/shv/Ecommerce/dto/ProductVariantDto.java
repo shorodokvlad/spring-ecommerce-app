@@ -6,19 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDto {
+public class ProductVariantDto {
     private Long id;
-    private String name;
-    private String description;
+    private String title;
+    private Map<String, String> attributes;
     private BigDecimal price;
-    private String imageUrl;
-    private java.util.List<String> imageUrls;
     private Integer stockQuantity;
-    private CategoryDto category;
-    private java.util.List<ProductVariantDto> variants;
+    private List<String> imageUrls;
 }
