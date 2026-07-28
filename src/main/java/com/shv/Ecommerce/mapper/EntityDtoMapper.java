@@ -74,6 +74,12 @@ public class EntityDtoMapper {
         productDto.setImageUrl(product.getImageUrl());
         productDto.setStockQuantity(product.getStockQuantity());
 
+        if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
+            productDto.setImageUrls(new java.util.ArrayList<>(product.getImageUrls()));
+        } else if (product.getImageUrl() != null && !product.getImageUrl().isBlank()) {
+            productDto.setImageUrls(java.util.List.of(product.getImageUrl()));
+        }
+
         return productDto;
     }
 

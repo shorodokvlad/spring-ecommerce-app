@@ -59,4 +59,17 @@ public class AwsS3Service {
             throw new RuntimeException("Unable to upload images to s3 bucket " + bucketName + e.getMessage());
         }
     }
+
+    public java.util.List<String> saveImagesToS3(java.util.List<MultipartFile> photos) {
+        if (photos == null || photos.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        java.util.List<String> imageUrls = new java.util.ArrayList<>();
+        for (MultipartFile photo : photos) {
+            if (photo != null && !photo.isEmpty()) {
+                imageUrls.add(saveImageToS3(photo));
+            }
+        }
+        return imageUrls;
+    }
 }

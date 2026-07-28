@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,15 +34,30 @@ public class ProductServiceImpl implements IProductService {
     private final AwsS3Service awsS3Service;
     @Override
     public Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
-        Category category = categoryRepo.findById(categoryId).orElseThrow(()->new NotFoundException("Category not found"));
-        String productImageUrl = awsS3Service.saveImageToS3(image);
+        return createProduct(categoryId, image, null, name, description, price, stockQuantity);
+    }
+
+    @Override
+    public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity) {
+        Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
+
+        List<String> uploadedImageUrls = new ArrayList<>();
+        if (image != null && !image.isEmpty()) {
+            uploadedImageUrls.add(awsS3Service.saveImageToS3(image));
+        }
+        if (images != null && !images.isEmpty()) {
+            uploadedImageUrls.addAll(awsS3Service.saveImagesToS3(images));
+        }
 
         Product product = new Product();
         product.setCategory(category);
         product.setPrice(price);
         product.setName(name);
         product.setDescription(description);
-        product.setImageUrl(productImageUrl);
+        if (!uploadedImageUrls.isEmpty()) {
+            product.setImageUrl(uploadedImageUrls.get(0));
+            product.setImageUrls(uploadedImageUrls);
+        }
         product.setStockQuantity(stockQuantity != null ? stockQuantity : 0);
 
         productRepo.save(product);
@@ -54,30 +70,56 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
-        Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
+        return updateProduct(productId, categoryId, image, null, name, description, price, stockQuantity, null);
+    }
+
+    @Override
+    public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls) {
+        Product product = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
         Category category = null;
-        String productImageUrl = null;
-
         if (categoryId != null) {
             category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
         }
 
+        List<String> finalImageUrls = new ArrayList<>();
+        if (existingImageUrls != null) {
+            finalImageUrls.addAll(existingImageUrls);
+        } else if (product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
+            finalImageUrls.addAll(product.getImageUrls());
+        }
+
         if (image != null && !image.isEmpty()) {
-            productImageUrl = awsS3Service.saveImageToS3(image);
+            String primaryUrl = awsS3Service.saveImageToS3(image);
+            if (!finalImageUrls.contains(primaryUrl)) {
+                finalImageUrls.add(0, primaryUrl);
+            }
+        }
+
+        if (images != null && !images.isEmpty()) {
+            List<String> newUrls = awsS3Service.saveImagesToS3(images);
+            for (String url : newUrls) {
+                if (!finalImageUrls.contains(url)) {
+                    finalImageUrls.add(url);
+                }
+            }
         }
 
         if (category != null) product.setCategory(category);
         if (name != null) product.setName(name);
         if (price != null) product.setPrice(price);
         if (description != null) product.setDescription(description);
-        if (productImageUrl != null) product.setImageUrl(productImageUrl);
         if (stockQuantity != null) product.setStockQuantity(stockQuantity);
+
+        if (!finalImageUrls.isEmpty()) {
+            product.setImageUrl(finalImageUrls.get(0));
+            product.setImageUrls(finalImageUrls);
+        }
 
         productRepo.save(product);
         return Response.builder()
                 .status(200)
-                .message("Product updated successfully ")
+                .message("Product updated successfully")
                 .build();
     }
 

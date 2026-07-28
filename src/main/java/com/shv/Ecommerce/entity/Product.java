@@ -19,6 +19,12 @@ public class Product {
     private String name;
     private String description;
     private String imageUrl;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url")
+    private java.util.List<String> imageUrls = new java.util.ArrayList<>();
+
     private BigDecimal price;
 
     @Column(name = "stock_quantity")
