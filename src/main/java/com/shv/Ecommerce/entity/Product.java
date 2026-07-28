@@ -17,7 +17,10 @@ public class Product {
     private Long id;
 
     private String name;
+
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
     private String imageUrl;
 
     @ElementCollection(fetch = FetchType.EAGER)

@@ -58,6 +58,8 @@ const AdminBannerPage = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this banner?")) {
             try {
+                sessionStorage.removeItem("shv_home_banners");
+                sessionStorage.removeItem("shv_home_banners_time");
                 await ApiService.deleteBanner(id);
                 fetchBanners();
             } catch (err) {
@@ -84,6 +86,8 @@ const AdminBannerPage = () => {
 
         try {
             setIsUploading(true);
+            sessionStorage.removeItem("shv_home_banners");
+            sessionStorage.removeItem("shv_home_banners_time");
             if (editingBannerId) {
                 await ApiService.updateBanner(editingBannerId, formData);
                 setMessage("Banner updated successfully!");

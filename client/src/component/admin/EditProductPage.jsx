@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import '../../style/addProduct.css';
 import ApiService from "../../service/ApiService";
 import BlueprintManagerModal, { getStoredBlueprints, saveStoredBlueprints } from "./BlueprintManagerModal";
+import SpecBuilder from "./SpecBuilder";
+import { parseSpecifications } from "../../utils/specParser";
+import '../../style/addProduct.css';
 
 const BUILT_IN_BLUEPRINTS = [
     {
@@ -51,6 +53,8 @@ const EditProductPage = () => {
 
     const navigate = useNavigate();
 
+    const [specSections, setSpecSections] = useState([]);
+
     const fetchProductData = useCallback(async () => {
         if (!productId) return;
         try {
@@ -59,6 +63,11 @@ const EditProductPage = () => {
             setName(prod.name || '');
             setDescription(prod.description || '');
             setCategoryId(prod.category?.id || '');
+
+            const parsedSpecs = parseSpecifications(prod.description);
+            if (parsedSpecs && parsedSpecs.length > 0) {
+                setSpecSections(parsedSpecs);
+            }
 
             if (prod.variants && prod.variants.length > 0) {
                 setVariants(prod.variants.map((v, idx) => {
@@ -313,7 +322,11 @@ const EditProductPage = () => {
             formData.append('productId', productId);
             if (categoryId) formData.append('categoryId', categoryId);
             if (name) formData.append('name', name);
-            if (description) formData.append('description', description);
+            let finalDescription = description;
+            if (specSections && specSections.length > 0) {
+                finalDescription = JSON.stringify(specSections);
+            }
+            formData.append('description', finalDescription);
             formData.append('stockQuantity', totalStockSum);
 
             const formattedVariants = variants.map((v, vIndex) => {
@@ -353,6 +366,7 @@ const EditProductPage = () => {
 
             const response = await ApiService.updateProduct(formData);
             if (response.status === 200) {
+                sessionStorage.clear();
                 setMessage(response.message || "Product updated successfully!");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 await fetchProductData();
@@ -412,13 +426,7 @@ const EditProductPage = () => {
             </div>
 
             <div className="form-group">
-                <label>Description</label>
-                <textarea
-                    placeholder="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
-                />
+                <SpecBuilder sections={specSections} onChange={setSpecSections} />
             </div>
 
             <div className="admin-variants-section">

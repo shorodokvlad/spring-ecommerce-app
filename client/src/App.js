@@ -17,6 +17,7 @@ import ForgotPasswordPage from './component/pages/ForgotPasswordPage';
 import ResetPasswordPage from './component/pages/ResetPasswordPage';
 import VerifyEmailPage from './component/pages/VerifyEmailPage';
 import ProfilePage from './component/pages/ProfilePage';
+import StorePolicyPage from './component/pages/StorePolicyPage';
 import AddressPage from './component/pages/AddressPage';
 import AdminPage from './component/admin/AdminPage';
 import AdminCategoryPage from './component/admin/AdminCategoryPage';
@@ -44,6 +45,7 @@ function App() {
           <Route path='/category/:categoryId' element={<CategoryProductsPage/>} />
           <Route path='/cart' element={<CartPage/>}/>
           <Route path='/favorites' element={<FavoritesPage/>}/>
+          <Route path='/store-features' element={<StorePolicyPage/>}/>
           <Route path='/register' element={<RegisterPage/>}/>
           <Route path='/login' element={<LoginPage/>}/>
           <Route path='/forgot-password' element={<ForgotPasswordPage/>}/>

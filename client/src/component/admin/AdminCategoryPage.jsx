@@ -32,6 +32,8 @@ const AdminCategoryPage = () => {
         const confirmed = window.confirm("Are you sure you want to delete this category?");
         if (confirmed) {
             try {
+                sessionStorage.removeItem("shv_categories_list");
+                sessionStorage.removeItem("shv_categories_list_time");
                 await ApiService.deleteCategory(id);
                 fetchCategories();
             } catch (error) {

@@ -13,9 +13,9 @@
     flex-direction: column;
     transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: sticky;
-    top: 0;
-    height: calc(100vh - 70px);
-    z-index: 100;
+    top: 68px;
+    height: calc(100vh - 68px);
+    z-index: 900;
     flex-shrink: 0;
 }
 
@@ -171,11 +171,12 @@
 @media (max-width: 768px) {
     .admin-sidebar {
         position: fixed;
-        top: 60px;
+        top: 68px;
         left: 0;
         bottom: 0;
-        height: auto;
+        height: calc(100vh - 68px);
         box-shadow: 4px 0 16px rgba(0,0,0,0.1);
+        z-index: 900;
     }
     
     .admin-layout-shell.sidebar-collapsed .admin-sidebar {

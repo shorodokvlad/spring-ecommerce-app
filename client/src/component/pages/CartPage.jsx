@@ -73,7 +73,7 @@ const CartPage = () => {
                 <div className="cart-empty" style={{ textAlign: "center", padding: "48px 0" }}>
                     <h3 style={{ margin: "0 0 8px", color: "var(--ink)", fontSize: "1.3rem", fontWeight: 700 }}>Your cart is empty</h3>
                     <p style={{ margin: "0 0 24px", color: "var(--muted)", fontSize: "0.95rem" }}>Explore our catalog to find your favorite products and place your order.</p>
-                    <Link to="/" className="btn-primary" style={{ padding: "10px 24px", borderRadius: "10px" }}>
+                    <Link to="/" className="btn-primary" style={{ padding: "10px 24px", borderRadius: "10px", background: "var(--ink)", color: "#ffffff", textDecoration: "none" }}>
                         Browse the Catalogue
                     </Link>
                 </div>
@@ -85,7 +85,6 @@ const CartPage = () => {
                                 <img src={item.imageUrl} alt={item.name} />
                                 <div className="cart-item-info">
                                     <h2>{item.name}</h2>
-                                    <p className="cart-item-desc">{item.description}</p>
                                     <div className="cart-item-row">
                                         <div className="quantity-controls">
                                             <button onClick={()=> decrementItem(item)} aria-label={`Remove one ${item.name}`}>−</button>

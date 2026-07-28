@@ -32,7 +32,12 @@ const ProfilePage = () => {
     }
 
     if (!userInfo) {
-        return <div>Loading...</div>
+        return (
+            <div style={{ textAlign: "center", padding: "80px 0", color: "var(--muted)" }}>
+                <span className="button-spinner" style={{ width: "32px", height: "32px", borderColor: "var(--line)", borderTopColor: "var(--ink)" }} />
+                <p style={{ marginTop: "14px", fontSize: "0.95rem", fontWeight: 600 }}>Loading profile...</p>
+            </div>
+        );
     }
 
     const handleAddressClick = () => {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import '../../style/addProduct.css';
 import ApiService from "../../service/ApiService";
 import BlueprintManagerModal, { getStoredBlueprints, saveStoredBlueprints } from "./BlueprintManagerModal";
+import SpecBuilder from "./SpecBuilder";
+import '../../style/addProduct.css';
 
 const BUILT_IN_BLUEPRINTS = [
     {
@@ -39,7 +40,8 @@ const AddProductPage = () => {
     const [categories, setCategories] = useState([]);
     const [categoryId, setCategoryId] = useState('');
     const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
+    const [description] = useState('');
+    const [specSections, setSpecSections] = useState([]);
     const [message, setMessage] = useState('');
 
     const [variants, setVariants] = useState([createEmptyVariant(1)]);
@@ -251,7 +253,12 @@ const AddProductPage = () => {
             const formData = new FormData();
             formData.append('categoryId', categoryId);
             formData.append('name', name);
-            formData.append('description', description);
+
+            let finalDescription = description;
+            if (specSections && specSections.length > 0) {
+                finalDescription = JSON.stringify(specSections);
+            }
+            formData.append('description', finalDescription);
             formData.append('stockQuantity', totalStockSum);
 
             const formattedVariants = variants.map((v, vIndex) => {
@@ -288,6 +295,7 @@ const AddProductPage = () => {
 
             const response = await ApiService.addProduct(formData);
             if (response.status === 200) {
+                sessionStorage.clear();
                 setMessage(response.message);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 setTimeout(() => {
@@ -331,14 +339,7 @@ const AddProductPage = () => {
                 </div>
 
                 <div className="form-group">
-                    <label>Description</label>
-                    <textarea
-                        placeholder="Enter detailed product description..."
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                        rows={3}
-                    />
+                    <SpecBuilder sections={specSections} onChange={setSpecSections} />
                 </div>
 
                 <div className="admin-variants-section">
