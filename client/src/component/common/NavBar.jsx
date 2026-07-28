@@ -8,9 +8,15 @@ import { useFavorites } from "../context/FavoritesContext";
 const Navbar = () => {
     const [searchValue, setSearchValue] = useState("");
     const navigate = useNavigate();
-    useLocation();
+    const location = useLocation();
     const { cart } = useCart();
     const { favoritesCount } = useFavorites();
+
+    React.useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const searchParam = queryParams.get("search");
+        setSearchValue(searchParam || "");
+    }, [location.search]);
 
     const isAdmin = ApiService.isAdmin();
     const isAuthenticated = ApiService.isAuthenticated();
@@ -18,12 +24,17 @@ const Navbar = () => {
 
     const handleSearchChange = (e) => {
         setSearchValue(e.target.value);
-    }
+    };
 
     const handleSearchSubmit = async (e) => {
         e.preventDefault();
-        navigate(`/?search=${searchValue}`)
-    }
+        const trimmed = searchValue.trim();
+        if (trimmed) {
+            navigate(`/?search=${encodeURIComponent(trimmed)}`);
+        } else {
+            navigate("/");
+        }
+    };
 
     return (
         <header className="navbar-header">

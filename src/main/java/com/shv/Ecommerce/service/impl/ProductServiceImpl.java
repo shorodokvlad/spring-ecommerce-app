@@ -191,12 +191,20 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Response searchProduct(String searchValue, Integer page, Integer size) {
+        String query = (searchValue != null) ? searchValue.trim() : "";
+
         if (page != null && size != null && page >= 0 && size > 0) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-            Page<Product> productPage = productRepo.findByNameContainingOrDescriptionContaining(searchValue, searchValue, pageable);
+            Page<Product> productPage = productRepo.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query, pageable);
 
             if (productPage.isEmpty()) {
-                throw new NotFoundException("No Products found");
+                return Response.builder()
+                        .status(200)
+                        .message("No products found")
+                        .totalPage(0)
+                        .totalElement(0)
+                        .productList(java.util.Collections.emptyList())
+                        .build();
             }
 
             List<ProductDto> productDtoList = productPage.getContent().stream()
@@ -211,10 +219,16 @@ public class ProductServiceImpl implements IProductService {
                     .build();
         }
 
-        List<Product> products = productRepo.findByNameContainingOrDescriptionContaining(searchValue, searchValue);
+        List<Product> products = productRepo.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
 
         if (products.isEmpty()) {
-            throw new NotFoundException("No Products found");
+            return Response.builder()
+                    .status(200)
+                    .message("No products found")
+                    .totalPage(0)
+                    .totalElement(0)
+                    .productList(java.util.Collections.emptyList())
+                    .build();
         }
 
         List<ProductDto> productDtoList = products.stream()

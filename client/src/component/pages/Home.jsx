@@ -22,9 +22,9 @@ const Home = () => {
     }, [location.search]);
 
     useEffect(()=> {
-
         const fetchProducts = async () => {
             try{
+                setError(null);
                 let response;
                 const pageIndex = currentPage - 1;
 
@@ -61,12 +61,21 @@ const Home = () => {
 
             {error ? (
                 <p className="error-message">{error}</p>
-            ):(
+            ) : products.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "48px 0", color: "#64748b" }}>
+                    <p style={{ fontSize: "1.1rem" }}>No products found matching "{searchItem}".</p>
+                    <Link to="/" className="btn-primary" style={{ marginTop: "12px", display: "inline-block" }}>
+                        View All Products
+                    </Link>
+                </div>
+            ) : (
                 <div>
                     <ProductList products={products}/>
-                    <Pagination  currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={(page)=> setCurrentPage(page)}/>
+                    {totalPages > 1 && (
+                        <Pagination  currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={(page)=> setCurrentPage(page)}/>
+                    )}
                 </div>
             )}
         </div>
