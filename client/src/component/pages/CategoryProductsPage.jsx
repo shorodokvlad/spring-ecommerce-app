@@ -11,7 +11,7 @@ const CategoryProductsPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [error, setError] = useState(null);
-    const itemsPerPage = 8;
+    const itemsPerPage = 15;
 
     useEffect(() => {
         const fetchProducts = async () => {

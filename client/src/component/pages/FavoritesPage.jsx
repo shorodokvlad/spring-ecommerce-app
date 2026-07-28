@@ -21,7 +21,7 @@ const FavoritesPage = () => {
                 <div className="favorites-empty" style={{ textAlign: "center", padding: "48px 0" }}>
                     <h3 style={{ margin: "0 0 8px", color: "var(--ink)", fontSize: "1.3rem", fontWeight: 700 }}>You haven't saved any favorite products yet</h3>
                     <p style={{ margin: "0 0 24px", color: "var(--muted)", fontSize: "0.95rem" }}>Explore our catalog and save your favorite items here.</p>
-                    <Link to="/categories" className="btn-primary" style={{ padding: "10px 24px", borderRadius: "10px" }}>
+                    <Link to="/categories" className="btn-primary" style={{ padding: "10px 24px", borderRadius: "10px", background: "var(--ink)", color: "#ffffff", textDecoration: "none" }}>
                         Browse Categories
                     </Link>
                 </div>
@@ -60,7 +60,6 @@ const FavoritesPage = () => {
                                     </div>
                                     <div className="product-body">
                                         <h3>{product.name}</h3>
-                                        <p className="product-desc">{product.description}</p>
                                         <div className="product-meta">
                                             <span className="price-ticket">€{(product.price || 0).toFixed(2)}</span>
                                             <StockBadge stockQuantity={product.stockQuantity} />

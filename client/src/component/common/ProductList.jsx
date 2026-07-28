@@ -1,37 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 import StockBadge from "./StockBadge";
+import AddToCartModal from "./AddToCartModal";
 import '../../style/productList.css';
 
 const ProductList = ({ products }) => {
-    const { cart, dispatch } = useCart();
+    const { dispatch } = useCart();
     const { isFavorite, toggleFavorite } = useFavorites();
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const addToCart = (product) => {
+    const handleAddToCart = (product) => {
         dispatch({ type: 'ADD_ITEM', payload: product });
-    };
-
-    const incrementItem = (product) => {
-        dispatch({ type: 'INCREMENT_ITEM', payload: product });
-    };
-
-    const decrementItem = (product) => {
-        const cartItem = cart.find(item => item.id === product.id);
-        if (cartItem && cartItem.quantity > 1) {
-            dispatch({ type: 'DECREMENT_ITEM', payload: product });
-        } else {
-            dispatch({ type: 'REMOVE_ITEM', payload: product });
-        }
+        setSelectedProduct(product);
+        setIsModalOpen(true);
     };
 
     return (
         <div className="product-list">
             {products.map((product) => {
-                const cartItem = cart.find(item => item.id === product.id);
                 const outOfStock = product.stockQuantity === 0;
-                const atStockLimit = product.stockQuantity != null && cartItem && cartItem.quantity >= product.stockQuantity;
                 const favorited = isFavorite(product.id);
 
                 return (
@@ -69,33 +59,28 @@ const ProductList = ({ products }) => {
                             </div>
                             <div className="product-body">
                                 <h3>{product.name}</h3>
-                                <p className="product-desc">{product.description}</p>
                                 <div className="product-meta">
                                     <span className="price-ticket">€{(product.price || 0).toFixed(2)}</span>
                                     <StockBadge stockQuantity={product.stockQuantity} />
                                 </div>
                             </div>
                         </Link>
-                        {cartItem ? (
-                            <div className="quantity-controls">
-                                <button onClick={() => decrementItem(product)} aria-label={`Remove one ${product.name}`}>−</button>
-                                <span>{cartItem.quantity}</span>
-                                <button
-                                    onClick={() => incrementItem(product)}
-                                    disabled={atStockLimit}
-                                    aria-label={`Add one ${product.name}`}
-                                >
-                                    +
-                                </button>
-                            </div>
-                        ) : (
-                            <button className="add-to-cart" onClick={() => addToCart(product)} disabled={outOfStock}>
-                                {outOfStock ? 'Out of stock' : 'Add to cart'}
-                            </button>
-                        )}
+
+                        <button className="add-to-cart" onClick={() => handleAddToCart(product)} disabled={outOfStock}>
+                            {outOfStock ? 'Out of stock' : 'Add to cart'}
+                        </button>
                     </article>
                 );
             })}
+
+            {/* Added to Cart Popup Modal */}
+            <AddToCartModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                product={selectedProduct}
+                price={selectedProduct?.price}
+                imageUrl={selectedProduct?.imageUrl}
+            />
         </div>
     );
 };

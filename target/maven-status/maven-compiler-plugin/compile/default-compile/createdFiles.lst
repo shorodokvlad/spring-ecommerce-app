@@ -49,6 +49,7 @@ com/shv/Ecommerce/dto/ForgotPasswordRequest.class
 com/shv/Ecommerce/security/JwtUtils.class
 com/shv/Ecommerce/service/MailService.class
 com/shv/Ecommerce/security/AuthUser$AuthUserBuilder.class
+com/shv/Ecommerce/security/DatabaseInitializer.class
 com/shv/Ecommerce/controller/UserController.class
 com/shv/Ecommerce/service/impl/CategoryServiceImpl.class
 com/shv/Ecommerce/security/SecurityConfig.class
