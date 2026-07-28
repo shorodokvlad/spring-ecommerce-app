@@ -56,9 +56,18 @@ const AdminProductPage = () => {
                     <ul>
                         {products.map((product)=>(
                             <li key={product.id}>
-                                <span>{product.name}</span>
-                                <button className="product-btn" onClick={()=> handleEdit(product.id)}>Edit</button>
-                                <button className="product-btn-delete" onClick={()=> handleDelete(product.id)}>Delete</button>
+                                <div className="admin-product-info">
+                                    {product.imageUrl ? (
+                                        <img src={product.imageUrl} alt={product.name} className="admin-product-thumb" />
+                                    ) : (
+                                        <div className="admin-product-thumb-placeholder">📷</div>
+                                    )}
+                                    <span className="admin-product-name">{product.name}</span>
+                                </div>
+                                <div className="admin-product-actions">
+                                    <button className="product-btn" onClick={()=> handleEdit(product.id)}>Edit</button>
+                                    <button className="product-btn-delete" onClick={()=> handleDelete(product.id)}>Delete</button>
+                                </div>
                             </li>
                         ))}
                     </ul>

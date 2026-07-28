@@ -21,17 +21,19 @@ public class ProductController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> createProduct(
             @RequestParam Long categoryId,
-            @RequestParam MultipartFile image,
+            @RequestParam(required = false) MultipartFile image,
+            @RequestParam(required = false) java.util.List<MultipartFile> images,
             @RequestParam String name,
             @RequestParam String description,
             @RequestParam BigDecimal price,
             @RequestParam(required = false) Integer stockQuantity
     ) {
-        if (categoryId == null || image.isEmpty() || name.isEmpty() || description.isEmpty() || price == null) {
+        boolean hasImage = (image != null && !image.isEmpty()) || (images != null && !images.isEmpty());
+        if (categoryId == null || !hasImage || name == null || name.isEmpty() || description == null || description.isEmpty() || price == null) {
             throw new InvalidCredentialsException("All fields are required");
         }
 
-        return ResponseEntity.ok(productService.createProduct(categoryId, image, name, description, price, stockQuantity));
+        return ResponseEntity.ok(productService.createProduct(categoryId, image, images, name, description, price, stockQuantity));
     }
 
     @PutMapping("/update")
@@ -40,12 +42,14 @@ public class ProductController {
             @RequestParam Long productId,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) MultipartFile image,
+            @RequestParam(required = false) java.util.List<MultipartFile> images,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) BigDecimal price,
-            @RequestParam(required = false) Integer stockQuantity
+            @RequestParam(required = false) Integer stockQuantity,
+            @RequestParam(required = false) java.util.List<String> existingImageUrls
     ) {
-        return ResponseEntity.ok(productService.updateProduct(productId, categoryId, image, name, description, price, stockQuantity));
+        return ResponseEntity.ok(productService.updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls));
     }
 
     @DeleteMapping("/delete/{productId}")

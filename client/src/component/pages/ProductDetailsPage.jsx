@@ -50,20 +50,47 @@ const ProductDetailsPage = () => {
         }
     }
 
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+    const cartItem = cart.find(item => item.id === product?.id);
+    const outOfStock = product?.stockQuantity === 0;
+    const atStockLimit = product?.stockQuantity != null
+        && cartItem && cartItem.quantity >= product.stockQuantity;
+    const favorited = product ? isFavorite(product.id) : false;
+
     if (!product) {
         return <p className="loading-product-details">Loading product details…</p>
     }
 
-    const cartItem = cart.find(item => item.id === product.id);
-    const outOfStock = product.stockQuantity === 0;
-    const atStockLimit = product.stockQuantity != null
-        && cartItem && cartItem.quantity >= product.stockQuantity;
-    const favorited = isFavorite(product.id);
+    const images = (product.imageUrls && product.imageUrls.length > 0)
+        ? product.imageUrls
+        : [product.imageUrl];
+
+    const currentImage = images[activeImageIndex] || product.imageUrl;
 
     return(
         <div className="product-detail">
-            <div className="product-detail-media">
-                <img src={product.imageUrl} alt={product.name} />
+            <div className="product-detail-media-container">
+                <div className="product-detail-media">
+                    <img src={currentImage} alt={product.name} />
+                </div>
+
+                {images.length > 1 && (
+                    <div className="gallery-thumbnails">
+                        {images.map((imgUrl, idx) => (
+                            <button
+                                key={idx}
+                                className={`gallery-thumb-btn ${idx === activeImageIndex ? 'active' : ''}`}
+                                onMouseEnter={() => setActiveImageIndex(idx)}
+                                onClick={() => setActiveImageIndex(idx)}
+                                type="button"
+                                aria-label={`View photo ${idx + 1}`}
+                            >
+                                <img src={imgUrl} alt={`${product.name} ${idx + 1}`} />
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
             <div className="product-detail-info">
                 {product.category?.name && <span className="product-eyebrow">{product.category.name}</span>}

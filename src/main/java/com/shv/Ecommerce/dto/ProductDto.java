@@ -17,6 +17,7 @@ public class ProductDto {
     private String description;
     private BigDecimal price;
     private String imageUrl;
+    private java.util.List<String> imageUrls;
     private Integer stockQuantity;
     private CategoryDto category;
 }
