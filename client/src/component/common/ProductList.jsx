@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 import StockBadge from "./StockBadge";
 import AddToCartModal from "./AddToCartModal";
+import { configureProduct } from "../../utils/productVariant";
 import '../../style/productList.css';
 
 const ProductList = ({ products }) => {
@@ -21,8 +22,10 @@ const ProductList = ({ products }) => {
     return (
         <div className="product-list">
             {products.map((product) => {
-                const outOfStock = product.stockQuantity === 0;
-                const favorited = isFavorite(product.id);
+                const defaultVariant = product.variants?.[0] || null;
+                const configuredProduct = configureProduct(product, defaultVariant);
+                const outOfStock = configuredProduct.stockQuantity === 0;
+                const favorited = isFavorite(configuredProduct.favoriteKey);
 
                 return (
                     <article className="product-item" key={product.id} style={{ position: "relative" }}>
@@ -30,7 +33,7 @@ const ProductList = ({ products }) => {
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                toggleFavorite(product);
+                                toggleFavorite(configuredProduct);
                             }}
                             title={favorited ? "Remove from favorites" : "Add to favorites"}
                             style={{
@@ -53,20 +56,20 @@ const ProductList = ({ products }) => {
                             <img src="/favorite.svg" alt="Favorite" style={{ width: "18px", height: "18px", opacity: favorited ? 1 : 0.6 }} />
                         </button>
 
-                        <Link to={`/product/${product.id}`} className="product-link">
+                        <Link to={configuredProduct.productUrl} className="product-link">
                             <div className="product-media">
-                                <img src={product.imageUrl} alt={product.name} className="product-image" />
+                                <img src={configuredProduct.imageUrl} alt={product.name} className="product-image" />
                             </div>
                             <div className="product-body">
                                 <h3>{product.name}</h3>
                                 <div className="product-meta">
-                                    <span className="price-ticket">€{(product.price || 0).toFixed(2)}</span>
-                                    <StockBadge stockQuantity={product.stockQuantity} />
+                                    <span className="price-ticket">€{(configuredProduct.price || 0).toFixed(2)}</span>
+                                    <StockBadge stockQuantity={configuredProduct.stockQuantity} />
                                 </div>
                             </div>
                         </Link>
 
-                        <button className="add-to-cart" onClick={() => handleAddToCart(product)} disabled={outOfStock}>
+                        <button className="add-to-cart" onClick={() => handleAddToCart(configuredProduct)} disabled={outOfStock}>
                             {outOfStock ? 'Out of stock' : 'Add to cart'}
                         </button>
                     </article>

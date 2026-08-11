@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 import StockBadge from "../common/StockBadge";
@@ -7,6 +7,7 @@ import SpecificationsTable from "../common/SpecificationsTable";
 import AddToCartModal from "../common/AddToCartModal";
 import ApiService from "../../service/ApiService";
 import { parseSpecifications } from "../../utils/specParser";
+import { configureProduct, findVariantFromSearch, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
 import '../../style/productDetailsPage.css';
 
 const getColorHex = (colorName) => {
@@ -41,7 +42,10 @@ const getColorHex = (colorName) => {
 };
 
 const ProductDetailsPage = () => {
-    const { productId } = useParams();
+    const { productId: productRoute } = useParams();
+    const productId = getProductIdFromRoute(productRoute);
+    const location = useLocation();
+    const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
     const [selectedAttributes, setSelectedAttributes] = useState({});
@@ -65,12 +69,6 @@ const ProductDetailsPage = () => {
             try {
                 const fetchedProduct = JSON.parse(cachedData);
                 setProduct(fetchedProduct);
-                if (fetchedProduct?.variants && fetchedProduct.variants.length > 0) {
-                    const firstVariant = fetchedProduct.variants[0];
-                    if (firstVariant.attributes) {
-                        setSelectedAttributes({ ...firstVariant.attributes });
-                    }
-                }
             } catch (e) {
                 // Ignore parse errors
             }
@@ -82,13 +80,6 @@ const ProductDetailsPage = () => {
                 const fetchedProduct = response.product;
                 setProduct(fetchedProduct);
 
-                if (fetchedProduct?.variants && fetchedProduct.variants.length > 0) {
-                    const firstVariant = fetchedProduct.variants[0];
-                    if (firstVariant.attributes) {
-                        setSelectedAttributes({ ...firstVariant.attributes });
-                    }
-                }
-
                 sessionStorage.setItem(cacheKey, JSON.stringify(fetchedProduct));
                 sessionStorage.setItem(cacheTimeKey, Date.now().toString());
             } catch (error) {
@@ -98,6 +89,18 @@ const ProductDetailsPage = () => {
 
         fetchProduct();
     }, [productId]);
+
+    useEffect(() => {
+        if (!product?.variants?.length) return;
+
+        const requestedVariant = findVariantFromSearch(product, location.search);
+        const nextVariant = requestedVariant || product.variants[0];
+        const nextIndex = product.variants.findIndex((variant) => variant.id === nextVariant.id);
+
+        setSelectedVariantIndex(nextIndex >= 0 ? nextIndex : 0);
+        setSelectedAttributes({ ...(nextVariant.attributes || {}) });
+        setActiveImageIndex(0);
+    }, [product, location.search]);
 
     // Group available attributes across all variants
     const attributeGroups = useMemo(() => {
@@ -171,26 +174,28 @@ const ProductDetailsPage = () => {
 
     const activePrice = activeVariant?.price ?? product?.price ?? 0;
     const activeStock = activeVariant?.stockQuantity ?? product?.stockQuantity ?? 0;
+    const configuredProduct = useMemo(
+        () => configureProduct(product, activeVariant),
+        [product, activeVariant]
+    );
+
+    useEffect(() => {
+        if (!product) return;
+        const canonicalPath = getProductPath(product, activeVariant);
+        const currentPath = `${location.pathname}${location.search}`;
+        if (canonicalPath !== currentPath) {
+            navigate(canonicalPath, { replace: true });
+        }
+    }, [activeVariant, location.pathname, location.search, navigate, product]);
 
     const specSections = useMemo(() => parseSpecifications(product?.description), [product?.description]);
 
     const outOfStock = activeStock === 0;
-    const favorited = product ? isFavorite(product.id) : false;
+    const favorited = configuredProduct ? isFavorite(configuredProduct.favoriteKey) : false;
 
     const addToCart = () => {
         if (!product || outOfStock) return;
-        const cartItemKey = activeVariant ? `${product?.id}-v-${activeVariant.id}` : product?.id;
-        const itemToAdd = {
-            ...product,
-            id: product.id,
-            cartKey: cartItemKey,
-            variantId: activeVariant?.id || null,
-            name: activeVariant?.title ? `${product.name} (${activeVariant.title})` : product.name,
-            price: activePrice,
-            stockQuantity: activeStock,
-            imageUrl: currentImages[0] || product.imageUrl
-        };
-        dispatch({ type: 'ADD_ITEM', payload: itemToAdd });
+        dispatch({ type: 'ADD_ITEM', payload: configuredProduct });
         setIsCartModalOpen(true);
     };
 
@@ -400,7 +405,7 @@ const ProductDetailsPage = () => {
                         </button>
 
                         <button
-                            onClick={() => toggleFavorite(product)}
+                            onClick={() => toggleFavorite(configuredProduct)}
                             title={favorited ? "Remove from favorites" : "Add to favorites"}
                             style={{
                                 width: "100%",

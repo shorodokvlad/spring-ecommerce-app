@@ -12,7 +12,7 @@ const AddToCartModal = ({ isOpen, onClose, product, activeVariant, price, imageU
         navigate("/cart");
     };
 
-    const variantTitle = activeVariant?.title || "";
+    const variantTitle = activeVariant?.title || product?.variantTitle || "";
 
     return (
         <div className="add-to-cart-modal-backdrop" onClick={onClose}>

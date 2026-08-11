@@ -4,6 +4,7 @@ import { useFavorites } from "../context/FavoritesContext";
 import { useCart } from "../context/CartContext";
 import StockBadge from "../common/StockBadge";
 import "../../style/productList.css";
+import { getProductPath } from "../../utils/productVariant";
 
 const FavoritesPage = () => {
     const { favorites, removeFromFavorites } = useFavorites();
@@ -31,9 +32,9 @@ const FavoritesPage = () => {
                         const outOfStock = product.stockQuantity === 0;
 
                         return (
-                            <article className="product-item" key={product.id} style={{ position: "relative" }}>
+                            <article className="product-item" key={product.favoriteKey || product.id} style={{ position: "relative" }}>
                                 <button
-                                    onClick={() => removeFromFavorites(product.id)}
+                                    onClick={() => removeFromFavorites(product.favoriteKey || product.id)}
                                     title="Remove from favorites"
                                     style={{
                                         position: "absolute",
@@ -54,12 +55,13 @@ const FavoritesPage = () => {
                                     <img src="/favorite.svg" alt="Remove favorite" style={{ width: "16px", height: "16px" }} />
                                 </button>
 
-                                <Link to={`/product/${product.id}`} className="product-link">
+                                <Link to={product.productUrl || getProductPath(product)} className="product-link">
                                     <div className="product-media">
                                         <img src={product.imageUrl} alt={product.name} className="product-image" />
                                     </div>
                                     <div className="product-body">
                                         <h3>{product.name}</h3>
+                                        {product.variantTitle && <p className="product-variant-title">{product.variantTitle}</p>}
                                         <div className="product-meta">
                                             <span className="price-ticket">€{(product.price || 0).toFixed(2)}</span>
                                             <StockBadge stockQuantity={product.stockQuantity} />

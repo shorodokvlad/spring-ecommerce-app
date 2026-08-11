@@ -58,6 +58,12 @@ public class EntityDtoMapper {
         orderItemDto.setQuantity(orderItem.getQuantity());
         orderItemDto.setPrice(orderItem.getPrice());
         orderItemDto.setStatus(orderItem.getStatus().name());
+        orderItemDto.setVariantId(orderItem.getVariantId());
+        orderItemDto.setVariantTitle(orderItem.getVariantTitle());
+        orderItemDto.setVariantImageUrl(orderItem.getVariantImageUrl());
+        if (orderItem.getVariantAttributes() != null && !orderItem.getVariantAttributes().isEmpty()) {
+            orderItemDto.setVariantAttributes(new java.util.HashMap<>(orderItem.getVariantAttributes()));
+        }
         orderItemDto.setCreatedAt(orderItem.getCreatedAt());
 
         return orderItemDto;

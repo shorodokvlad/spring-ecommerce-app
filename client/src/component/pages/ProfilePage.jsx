@@ -111,9 +111,13 @@ const ProfilePage = () => {
                         const product = order.product || order.productDto;
                         return (
                         <li key={order.id}>
-                            <img src={product?.imageUrl} alt={product?.name || 'Product'} />
+                            <img src={order.variantImageUrl || product?.imageUrl} alt={product?.name || 'Product'} />
                             <div>
                                 <p><strong>Name: </strong>{product?.name || 'Unknown Product'}</p>
+                                {order.variantTitle && <p><strong>Configuration: </strong>{order.variantTitle}</p>}
+                                {order.variantAttributes && Object.entries(order.variantAttributes).map(([key, value]) => (
+                                    <p key={key}><strong>{key}: </strong>{value}</p>
+                                ))}
                                 <p><strong>Status: </strong>{order.status}</p>
                                 <p><strong>Quantity: </strong>{order.quantity}</p>
                                 <p><strong>Price: </strong>{(order.price || 0).toFixed(2)}</p>

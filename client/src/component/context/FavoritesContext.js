@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 
 const FavoritesContext = createContext();
+const favoriteIdentity = (item) => item.favoriteKey || item.cartKey || String(item.id);
 
 export const FavoritesProvider = ({ children }) => {
     const [favorites, setFavorites] = useState(() => {
@@ -16,23 +17,24 @@ export const FavoritesProvider = ({ children }) => {
         localStorage.setItem("favorites", JSON.stringify(favorites));
     }, [favorites]);
 
-    const isFavorite = (productId) => {
-        return favorites.some((item) => item.id === productId);
+    const isFavorite = (favoriteKey) => {
+        return favorites.some((item) => favoriteIdentity(item) === String(favoriteKey));
     };
 
     const toggleFavorite = (product) => {
         setFavorites((prev) => {
-            const exists = prev.some((item) => item.id === product.id);
+            const productKey = favoriteIdentity(product);
+            const exists = prev.some((item) => favoriteIdentity(item) === productKey);
             if (exists) {
-                return prev.filter((item) => item.id !== product.id);
+                return prev.filter((item) => favoriteIdentity(item) !== productKey);
             } else {
                 return [...prev, product];
             }
         });
     };
 
-    const removeFromFavorites = (productId) => {
-        setFavorites((prev) => prev.filter((item) => item.id !== productId));
+    const removeFromFavorites = (favoriteKey) => {
+        setFavorites((prev) => prev.filter((item) => favoriteIdentity(item) !== String(favoriteKey)));
     };
 
     return (

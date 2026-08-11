@@ -14,7 +14,7 @@ const CartPage = () => {
     }
 
     const decrementItem = (product) => {
-        const cartItem = cart.find(item => item.id === product.id);
+        const cartItem = cart.find(item => (item.cartKey || String(item.id)) === (product.cartKey || String(product.id)));
         if (cartItem && cartItem.quantity > 1) {
             dispatch({ type: 'DECREMENT_ITEM', payload: product });
         } else {
@@ -36,6 +36,7 @@ const CartPage = () => {
 
         const orderItems = cart.map(item => ({
             productId: item.id,
+            variantId: item.variantId || null,
             quantity: item.quantity
         }));
 
@@ -81,10 +82,11 @@ const CartPage = () => {
                 <div className="cart-layout">
                     <ul className="cart-items">
                         {cart.map(item => (
-                            <li key={item.id} className="cart-item">
+                            <li key={item.cartKey || item.id} className="cart-item">
                                 <img src={item.imageUrl} alt={item.name} />
                                 <div className="cart-item-info">
                                     <h2>{item.name}</h2>
+                                    {item.variantTitle && <p className="cart-item-variant">{item.variantTitle}</p>}
                                     <div className="cart-item-row">
                                         <div className="quantity-controls">
                                             <button onClick={()=> decrementItem(item)} aria-label={`Remove one ${item.name}`}>−</button>

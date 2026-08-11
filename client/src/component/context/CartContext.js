@@ -2,6 +2,8 @@ import React, {createContext, useReducer, useContext, useEffect} from "react";
 
 const CartContext = createContext();
 
+const itemIdentity = (item) => item.cartKey || String(item.id);
+
 // Quantity can never exceed available stock (unknown stock = no cap)
 const cappedQuantity = (wanted, stockQuantity) =>
     stockQuantity == null ? wanted : Math.min(wanted, stockQuantity);
@@ -11,16 +13,17 @@ const initialState = {
 }
 
 
-const cartReducer = (state, action) =>{
+export const cartReducer = (state, action) =>{
     switch(action.type){
         case 'ADD_ITEM': {
             //identify exisitng item
-            const existingItem = state.cart.find(item => item.id === action.payload.id);
+            const payloadKey = itemIdentity(action.payload);
+            const existingItem = state.cart.find(item => itemIdentity(item) === payloadKey);
             let newCart;
 
             if(existingItem){
                 newCart = state.cart.map(item =>
-                    item.id === action.payload.id
+                    itemIdentity(item) === payloadKey
                     ? {...item, quantity: cappedQuantity(item.quantity + 1, item.stockQuantity)}
                     : item
                 );
@@ -32,14 +35,16 @@ const cartReducer = (state, action) =>{
         }
 
         case 'REMOVE_ITEM':{
-            const newCart = state.cart.filter(item=> item.id !== action.payload.id);
+            const payloadKey = itemIdentity(action.payload);
+            const newCart = state.cart.filter(item => itemIdentity(item) !== payloadKey);
             localStorage.setItem('cart', JSON.stringify(newCart));
             return {...state, cart:newCart};
         }
 
         case 'INCREMENT_ITEM': {
+            const payloadKey = itemIdentity(action.payload);
             const newCart = state.cart.map(item=>
-                item.id === action.payload.id
+                itemIdentity(item) === payloadKey
                 ? {...item, quantity: cappedQuantity(item.quantity + 1, item.stockQuantity)}
                 :item
             );
@@ -48,8 +53,9 @@ const cartReducer = (state, action) =>{
         }
 
         case 'DECREMENT_ITEM': {
+            const payloadKey = itemIdentity(action.payload);
             const newCart = state.cart.map(item =>
-                item.id === action.payload.id && item.quantity > 1
+                itemIdentity(item) === payloadKey && item.quantity > 1
                 ? {...item, quantity: item.quantity -1}
                 :item
             )

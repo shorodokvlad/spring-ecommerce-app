@@ -79,8 +79,12 @@ const AdminOrderDetailsPage = () => {
                         </div>
                         <div>
                             <h2>Product Information</h2>
-                            <img src={product.imageUrl} alt={product.name} />
+                            <img src={orderItem.variantImageUrl || product.imageUrl} alt={product.name} />
                             <p><strong>Name:</strong>{product.name}</p>
+                            {orderItem.variantTitle && <p><strong>Configuration:</strong>{orderItem.variantTitle}</p>}
+                            {orderItem.variantAttributes && Object.entries(orderItem.variantAttributes).map(([key, value]) => (
+                                <p key={key}><strong>{key}:</strong>{value}</p>
+                            ))}
                             <p><strong>Description:</strong>{product.description}</p>
                             <p><strong>Price:</strong>{product.price}</p>
                         </div>
