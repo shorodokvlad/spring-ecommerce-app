@@ -19,7 +19,7 @@ export const AdminRoute = ({ element }) => {
     if (ApiService.isAdmin()) {
         return <AdminLayout>{element}</AdminLayout>;
     }
-    // Logged in but not an admin: send home; not logged in: send to login
+    // Signed in but not an admin: send home; otherwise send to sign in.
     return ApiService.isAuthenticated() ? (
         <Navigate to="/" replace />
     ) : (

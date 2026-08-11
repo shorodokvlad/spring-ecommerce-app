@@ -12,9 +12,9 @@ const LoginPage = () => {
         password: ''
     });
 
-    const [message, setMessage] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
+    const [message, setMessage] = useState(location.state?.message || null);
     const googleButtonRef = useRef(null);
 
     const finishLogin = useCallback((response) => {
@@ -77,13 +77,13 @@ const LoginPage = () => {
                 finishLogin(response);
             }
         } catch (error) {
-            setMessage(error.response?.data.message || error.message || "Unable to log in — check your email and password");
+            setMessage(error.response?.data.message || error.message || "Unable to sign in — check your email and password");
         }
     }
 
     return (
         <div className="register-page">
-            <h2>Login</h2>
+            <h2>Sign in</h2>
             {message && <p className="message">{message}</p>}
             <form onSubmit={handleSubmit}>
                 <label>Email: </label>
@@ -106,7 +106,7 @@ const LoginPage = () => {
                         <Link to="/forgot-password">Forgot password?</Link>
                     </p>
 
-                    <button type="submit">Login</button>
+                    <button type="submit">Sign in</button>
 
                     {GOOGLE_CLIENT_ID && (
                         <>
@@ -116,7 +116,7 @@ const LoginPage = () => {
                     )}
 
                     <p className="register-link">
-                        Don't have an account? <Link to="/register">Register</Link>
+                        Don't have an account? <Link to="/register">Sign up</Link>
                     </p>
             </form>
         </div>

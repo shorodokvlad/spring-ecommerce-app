@@ -345,6 +345,7 @@
     .product-detail-3col {
         grid-template-columns: 360px 1fr;
     }
+
     .product-buy-sidebar-col {
         grid-column: span 2;
         position: static;
@@ -356,14 +357,17 @@
         grid-template-columns: 1fr;
         gap: 24px;
     }
+
     .product-media-stage {
         flex-direction: column-reverse;
     }
+
     .vertical-thumbnails-strip {
         flex-direction: row;
         max-height: none;
         overflow-x: auto;
     }
+
     .product-guarantees {
         grid-template-columns: 1fr;
     }

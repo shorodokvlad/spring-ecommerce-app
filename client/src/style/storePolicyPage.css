@@ -196,6 +196,7 @@
     .policy-tabs {
         grid-template-columns: 1fr;
     }
+
     .policy-card {
         padding: 20px;
     }

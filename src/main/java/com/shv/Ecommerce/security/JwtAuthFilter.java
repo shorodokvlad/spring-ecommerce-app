@@ -1,5 +1,6 @@
 package com.shv.Ecommerce.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -29,20 +31,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = getTokenFromRequest(request);
 
         if (token != null) {
-            String username = jwtUtils.getUsernameFromToken(token);
+            try {
+                String username = jwtUtils.getUsernameFromToken(token);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-
-            if (StringUtils.hasText(username) && jwtUtils.isTokenValid(token, userDetails)) {
-                log.info("VALID JWT FOR: {}", username);
-
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-
-                );
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                if (StringUtils.hasText(username) && jwtUtils.isTokenValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
+            } catch (JwtException | UsernameNotFoundException | IllegalArgumentException exception) {
+                SecurityContextHolder.clearContext();
+                log.debug("Ignoring invalid or expired JWT: {}", exception.getClass().getSimpleName());
             }
         }
         filterChain.doFilter(request, response);

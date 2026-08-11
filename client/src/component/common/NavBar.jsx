@@ -86,7 +86,7 @@ const Navbar = () => {
                     </NavLink>
 
                     {/* Account */}
-                    <NavLink to={isAuthenticated ? "/profile" : "/login"} className="nav-item-link" title={isAuthenticated ? "Profile" : "Log In"}>
+                    <NavLink to={isAuthenticated ? "/profile" : "/login"} className="nav-item-link" title={isAuthenticated ? "Profile" : "Sign in"}>
                         <img src="/account.svg" alt="" className="nav-icon" />
                         <span>My Account</span>
                     </NavLink>

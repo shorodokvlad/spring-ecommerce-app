@@ -29,12 +29,14 @@ import EditProductPage from './component/admin/EditProductPage';
 import AdminOrdersPage from './component/admin/AdminOrderPage';
 import AdminOrderDetailsPage from './component/admin/AdminOrderDetailsPage';
 import AdminBannerPage from './component/admin/AdminBannerPage';
+import SessionExpiryHandler from './component/common/SessionExpiryHandler';
 
 function App() {
   return (
     <BrowserRouter>
     <CartProvider>
     <FavoritesProvider>
+      <SessionExpiryHandler />
       <div className="app-shell">
       <Navbar/>
       <main className="app-main">

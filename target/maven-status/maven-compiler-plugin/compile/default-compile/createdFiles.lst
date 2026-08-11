@@ -20,7 +20,9 @@ com/shv/Ecommerce/security/JwtAuthFilter.class
 com/shv/Ecommerce/security/CorsConfig$1.class
 com/shv/Ecommerce/controller/CategoryController.class
 com/shv/Ecommerce/service/impl/OrderItemServiceImpl.class
+com/shv/Ecommerce/dto/ProductVariantDto.class
 com/shv/Ecommerce/entity/Category.class
+com/shv/Ecommerce/service/impl/ProductServiceImpl$1.class
 com/shv/Ecommerce/mapper/EntityDtoMapper.class
 com/shv/Ecommerce/security/CorsConfig.class
 com/shv/Ecommerce/repository/CategoryRepo.class
@@ -42,6 +44,7 @@ com/shv/Ecommerce/dto/VerifyEmailRequest.class
 com/shv/Ecommerce/dto/UserDto.class
 com/shv/Ecommerce/service/impl/UserServiceImpl.class
 com/shv/Ecommerce/dto/OrderRequest.class
+com/shv/Ecommerce/entity/ProductVariant.class
 com/shv/Ecommerce/service/interf/ICategoryService.class
 com/shv/Ecommerce/entity/Banner.class
 com/shv/Ecommerce/EcommerceApplication.class

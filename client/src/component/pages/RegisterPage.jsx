@@ -27,25 +27,25 @@ const RegisterPage = () => {
         try {
             const response = await ApiService.registerUser(formData);
             if (response.status === 200) {
-                setMessage(response.message || "Registration successful! Please check your email to verify your account.");
+                setMessage(response.message || "Sign-up successful! Please check your email to verify your account.");
                 setIsRegistered(true);
             }
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message || "Unable to register user");
+            setMessage(error.response?.data?.message || error.message || "Unable to sign up");
         }
     }
 
     return (
         <div className="register-page">
-            <h2>Register</h2>
+            <h2>Sign up</h2>
             {message && <p className="message">{message}</p>}
 
             {isRegistered ? (
                 <div className="registration-success" style={{ marginTop: '20px', textAlign: 'center' }}>
                     <p>We sent a verification link to <strong>{formData.email}</strong>.</p>
-                    <p style={{ marginTop: '10px' }}>Please open your email inbox and click the verification link before logging in.</p>
+                    <p style={{ marginTop: '10px' }}>Please open your email inbox and click the verification link before signing in.</p>
                     <div style={{ marginTop: '20px' }}>
-                        <Link to="/login" style={{ textDecoration: 'underline', color: '#0070f3' }}>Already verified? Go to Login</Link>
+                        <Link to="/login" style={{ textDecoration: 'underline', color: '#0070f3' }}>Already verified? Go to Sign in</Link>
                     </div>
                 </div>
             ) : (
@@ -83,9 +83,9 @@ const RegisterPage = () => {
                         onChange={handleChange}
                         required />
 
-                    <button type="submit">Register</button>
+                    <button type="submit">Sign up</button>
                     <p className="register-link">
-                        Already have an account? <Link to="/login">Login</Link>
+                        Already have an account? <Link to="/login">Sign in</Link>
                     </p>
                 </form>
             )}

@@ -44,7 +44,7 @@ const ForgotPasswordPage = () => {
                 </button>
 
                 <p className="register-link">
-                    Remembered it? <Link to="/login">Log in</Link>
+                    Remembered it? <Link to="/login">Sign in</Link>
                 </p>
             </form>
         </div>

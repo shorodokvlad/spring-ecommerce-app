@@ -51,7 +51,7 @@ const VerifyEmailPage = () => {
             <p className="message">{message}</p>
 
             {status === 'success' && (
-                <p>Redirecting to login page...</p>
+                <p>Redirecting to the sign-in page...</p>
             )}
 
             {(status === 'error' || status === 'no-token') && (
@@ -73,7 +73,7 @@ const VerifyEmailPage = () => {
             )}
 
             <div style={{ marginTop: '15px' }}>
-                <Link to="/login">Back to Login</Link>
+                <Link to="/login">Back to Sign in</Link>
             </div>
         </div>
     );

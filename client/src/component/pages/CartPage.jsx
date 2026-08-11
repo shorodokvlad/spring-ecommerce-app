@@ -26,7 +26,7 @@ const CartPage = () => {
 
     const handleCheckout = async () => {
         if (!ApiService.isAuthenticated()) {
-            setMessage("Log in to place your order");
+            setMessage("Sign in to place your order");
             setTimeout(() => {
                 setMessage('')
                 navigate("/login")

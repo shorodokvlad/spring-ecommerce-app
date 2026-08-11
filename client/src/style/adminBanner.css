@@ -4,7 +4,7 @@
     padding: 24px;
     background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .admin-banner-header {
@@ -177,8 +177,13 @@
     font-size: 0.85rem;
 }
 
-.btn-edit:hover { background: #2563eb; }
-.btn-delete:hover { background: #dc2626; }
+.btn-edit:hover {
+    background: #2563eb;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}
 
 /* Upload Loading Overlay */
 .upload-overlay {
@@ -233,12 +238,23 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes popIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
 
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

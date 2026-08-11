@@ -138,7 +138,7 @@ Distributed under the MIT License. See `LICENSE.md` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Vladislav Shorodok - [@shorodokvlad](https://twitter.com/shorodokvlad) - vlad.shorodoc@gmail.com
+Vladislav Shorodok - [@shorodokvlad](https://twitter.com/shorodokvlad) - vlad.shorodok14@gmail.com
 
 Project Link: [https://github.com/shorodokvlad/spring-ecommerce-app](https://github.com/shorodokvlad/spring-ecommerce-app)
 

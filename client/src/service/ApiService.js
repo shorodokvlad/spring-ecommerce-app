@@ -1,5 +1,48 @@
 import axios from "axios"
 
+export const SESSION_EXPIRED_EVENT = "auth:session-expired";
+
+const clearSession = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+};
+
+const isJwtExpired = (token) => {
+    if (!token) return true;
+
+    try {
+        const payloadPart = token.split('.')[1];
+        if (!payloadPart) return true;
+
+        const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+        const payload = JSON.parse(window.atob(base64 + padding));
+
+        return !payload.exp || payload.exp * 1000 <= Date.now();
+    } catch {
+        return true;
+    }
+};
+
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        const status = error.response?.status;
+        const requestHadToken = Boolean(error.config?.headers?.Authorization);
+        const storedToken = localStorage.getItem('token');
+        const expiredTokenRejected = status === 403 && isJwtExpired(storedToken);
+        const profileSessionRejected = status === 403
+            && error.config?.url?.includes('/user/my-info');
+
+        if (requestHadToken && (status === 401 || expiredTokenRejected || profileSessionRejected)) {
+            clearSession();
+            window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export default class ApiService {
     static BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:2424"
 
@@ -234,17 +277,16 @@ export default class ApiService {
 
     /***AUTHEMNTICATION CHECKER */
     static logout(){
-        localStorage.removeItem('token')
-        localStorage.removeItem('role')
+        clearSession()
     }
 
     static isAuthenticated(){
         const token = localStorage.getItem('token')
-        return !!token
+        return Boolean(token) && !isJwtExpired(token)
     }
 
     static isAdmin(){
         const role = localStorage.getItem('role')
-        return role === 'ADMIN'
+        return this.isAuthenticated() && role === 'ADMIN'
     }
 }
