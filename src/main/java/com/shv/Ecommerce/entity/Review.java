@@ -7,16 +7,23 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_review_product_user", columnNames = {"product_id", "user_id"})
+}, indexes = {
+        @Index(name = "idx_review_product", columnList = "product_id")
+})
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
+
     private int rating;
 
     @ManyToOne
-    @JoinColumn(name = "column_id")
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne

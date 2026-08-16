@@ -21,4 +21,6 @@ public class ProductDto {
     private Integer stockQuantity;
     private CategoryDto category;
     private java.util.List<ProductVariantDto> variants;
+    private BigDecimal averageRating;
+    private Integer reviewCount;
 }

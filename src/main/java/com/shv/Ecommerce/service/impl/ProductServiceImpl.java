@@ -4,10 +4,12 @@ import com.shv.Ecommerce.dto.ProductDto;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.entity.Category;
 import com.shv.Ecommerce.entity.Product;
+import com.shv.Ecommerce.entity.Review;
 import com.shv.Ecommerce.exception.NotFoundException;
 import com.shv.Ecommerce.mapper.EntityDtoMapper;
 import com.shv.Ecommerce.repository.CategoryRepo;
 import com.shv.Ecommerce.repository.ProductRepo;
+import com.shv.Ecommerce.repository.ReviewRepo;
 import com.shv.Ecommerce.service.AwsS3Service;
 import com.shv.Ecommerce.service.interf.IProductService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +37,25 @@ public class ProductServiceImpl implements IProductService {
     private final CategoryRepo categoryRepo;
     private final EntityDtoMapper entityDtoMapper;
     private final AwsS3Service awsS3Service;
+    private final ReviewRepo reviewRepo;
+
+    private ProductDto mapProductToDtoWithReviewStats(Product product) {
+        ProductDto productDto = entityDtoMapper.mapProductToDtoBasic(product);
+
+        List<Review> reviews = reviewRepo.findByProductId(product.getId());
+        if (reviews.isEmpty()) {
+            productDto.setReviewCount(0);
+        } else {
+            productDto.setReviewCount(reviews.size());
+            double average = reviews.stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0);
+            productDto.setAverageRating(BigDecimal.valueOf(average).setScale(1, RoundingMode.HALF_UP));
+        }
+
+        return productDto;
+    }
     @Override
     public Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
         return createProduct(categoryId, image, null, name, description, price, stockQuantity);
@@ -217,7 +239,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Response getProductById(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
-        ProductDto productDto = entityDtoMapper.mapProductToDtoBasic(product);
+        ProductDto productDto = mapProductToDtoWithReviewStats(product);
 
         return Response.builder()
                 .status(200)
@@ -237,7 +259,7 @@ public class ProductServiceImpl implements IProductService {
             Page<Product> productPage = productRepo.findAll(pageable);
             List<ProductDto> productDtoList = productPage.getContent()
                     .stream()
-                    .map(entityDtoMapper::mapProductToDtoBasic)
+                    .map(this::mapProductToDtoWithReviewStats)
                     .toList();
 
             return Response.builder()
@@ -250,7 +272,7 @@ public class ProductServiceImpl implements IProductService {
 
         List<ProductDto> productList = productRepo.findAll(Sort.by(Sort.Direction.DESC, "id"))
                 .stream()
-                .map(entityDtoMapper::mapProductToDtoBasic)
+                .map(this::mapProductToDtoWithReviewStats)
                 .toList();
 
         return Response.builder()
@@ -277,7 +299,7 @@ public class ProductServiceImpl implements IProductService {
             }
 
             List<ProductDto> productDtoList = productPage.getContent().stream()
-                    .map(entityDtoMapper::mapProductToDtoBasic)
+                    .map(this::mapProductToDtoWithReviewStats)
                     .toList();
 
             return Response.builder()
@@ -295,7 +317,7 @@ public class ProductServiceImpl implements IProductService {
         }
 
         List<ProductDto> productDtoList = products.stream()
-                .map(entityDtoMapper::mapProductToDtoBasic)
+                .map(this::mapProductToDtoWithReviewStats)
                 .toList();
 
         return Response.builder()
@@ -330,7 +352,7 @@ public class ProductServiceImpl implements IProductService {
             }
 
             List<ProductDto> productDtoList = productPage.getContent().stream()
-                    .map(entityDtoMapper::mapProductToDtoBasic)
+                    .map(this::mapProductToDtoWithReviewStats)
                     .toList();
 
             return Response.builder()
@@ -354,7 +376,7 @@ public class ProductServiceImpl implements IProductService {
         }
 
         List<ProductDto> productDtoList = products.stream()
-                .map(entityDtoMapper::mapProductToDtoBasic)
+                .map(this::mapProductToDtoWithReviewStats)
                 .toList();
 
         return Response.builder()

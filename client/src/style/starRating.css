@@ -1,0 +1,79 @@
+.star-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+.star-rating-stars {
+    position: relative;
+    display: inline-flex;
+    line-height: 1;
+}
+
+.star-rating-layer {
+    display: flex;
+    gap: 2px;
+    white-space: nowrap;
+}
+
+.star-rating-layer span {
+    flex: 0 0 auto;
+    line-height: 1;
+}
+
+.star-rating-back span {
+    color: #d1d5db;
+}
+
+.star-rating-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    white-space: nowrap;
+}
+
+.star-rating-fill span {
+    color: #f59e0b;
+}
+
+.star-rating-value {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--ink, #1F4E63);
+}
+
+.star-rating-count {
+    font-size: 0.8rem;
+    color: var(--muted, #64748b);
+    font-weight: 600;
+}
+
+/* Interactive star picker used in the review form */
+.star-input {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.star-input-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #d1d5db;
+    line-height: 1;
+    transition: color 120ms ease, transform 120ms ease;
+}
+
+.star-input-btn.filled {
+    color: #f59e0b;
+}
+
+.star-input-btn:hover {
+    color: #f59e0b;
+    transform: scale(1.12);
+}

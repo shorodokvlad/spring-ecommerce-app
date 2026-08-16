@@ -5,6 +5,7 @@ import { useFavorites } from "../context/FavoritesContext";
 import StockBadge from "../common/StockBadge";
 import SpecificationsTable from "../common/SpecificationsTable";
 import AddToCartModal from "../common/AddToCartModal";
+import StarRating, { StarInput } from "../common/StarRating";
 import ApiService from "../../service/ApiService";
 import { parseSpecifications } from "../../utils/specParser";
 import { configureProduct, findVariantFromSearch, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
@@ -52,8 +53,48 @@ const ProductDetailsPage = () => {
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
+    const [reviews, setReviews] = useState([]);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewContent, setReviewContent] = useState("");
+    const [reviewMessage, setReviewMessage] = useState(null);
+    const [reviewError, setReviewError] = useState(null);
+    const [currentUserId, setCurrentUserId] = useState(null);
+
     const { dispatch } = useCart();
     const { isFavorite, toggleFavorite } = useFavorites();
+
+    const isAuthenticated = ApiService.isAuthenticated();
+    const isAdmin = ApiService.isAdmin();
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const response = await ApiService.getReviewsByProductId(productId);
+                setReviews(response.reviewList || []);
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+            }
+        };
+        fetchReviews();
+    }, [productId]);
+
+    useEffect(() => {
+        let active = true;
+        if (!isAuthenticated) {
+            setCurrentUserId(null);
+            return;
+        }
+        ApiService.getLoggedInUserInfo()
+            .then((response) => {
+                if (active) setCurrentUserId(response.user?.id ?? null);
+            })
+            .catch(() => {
+                if (active) setCurrentUserId(null);
+            });
+        return () => {
+            active = false;
+        };
+    }, [isAuthenticated]);
 
     useEffect(() => {
         const cacheKey = `shv_product_details_${productId}`;
@@ -190,6 +231,53 @@ const ProductDetailsPage = () => {
 
     const specSections = useMemo(() => parseSpecifications(product?.description), [product?.description]);
 
+    const overallRating = useMemo(() => {
+        if (!reviews.length) return null;
+        const sum = reviews.reduce((acc, review) => acc + (review.rating || 0), 0);
+        return sum / reviews.length;
+    }, [reviews]);
+
+    const displayRating = overallRating ?? (product?.reviewCount > 0 ? product.averageRating : null);
+    const displayCount = reviews.length > 0 ? reviews.length : (product?.reviewCount || 0);
+
+    const submitReview = async (e) => {
+        e.preventDefault();
+        setReviewMessage(null);
+        setReviewError(null);
+        if (reviewRating < 1) {
+            setReviewError("Please select a star rating (1–5) before submitting.");
+            return;
+        }
+        try {
+            await ApiService.createReview(productId, { rating: reviewRating, content: reviewContent.trim() });
+            setReviewMessage("Thank you! Your review has been saved.");
+            setReviewRating(0);
+            setReviewContent("");
+            const response = await ApiService.getReviewsByProductId(productId);
+            setReviews(response.reviewList || []);
+        } catch (error) {
+            setReviewError(error.response?.data?.message || "Unable to submit your review");
+        }
+    };
+
+    const handleDeleteReview = async (reviewId) => {
+        setReviewMessage(null);
+        setReviewError(null);
+        try {
+            await ApiService.deleteReview(reviewId);
+            const response = await ApiService.getReviewsByProductId(productId);
+            setReviews(response.reviewList || []);
+        } catch (error) {
+            setReviewError(error.response?.data?.message || "Unable to delete review");
+        }
+    };
+
+    const formatReviewDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    };
+
     const outOfStock = activeStock === 0;
     const favorited = configuredProduct ? isFavorite(configuredProduct.favoriteKey) : false;
 
@@ -280,6 +368,16 @@ const ProductDetailsPage = () => {
                 <div className="product-options-col">
                     {product.category?.name && <span className="product-eyebrow">{product.category.name}</span>}
                     <h1>{product.name}</h1>
+
+                    {displayRating != null && (
+                        <div className="product-overall-rating">
+                            <span className="product-overall-score">{displayRating.toFixed(1)}</span>
+                            <StarRating value={displayRating} size={16} />
+                            <span className="product-overall-count">
+                                {displayCount} review{displayCount === 1 ? '' : 's'}
+                            </span>
+                        </div>
+                    )}
 
                     {!specSections && <p className="product-detail-desc">{product.description}</p>}
 
@@ -449,6 +547,76 @@ const ProductDetailsPage = () => {
                     <SpecificationsTable sections={specSections} />
                 </div>
             )}
+
+            {/* Reviews Section */}
+            <div className="product-reviews-section" id="reviews">
+                <div className="reviews-heading">
+                    <h2>Customer Reviews</h2>
+                    {displayRating != null && (
+                        <div className="reviews-overall">
+                            <span className="reviews-overall-score">{displayRating.toFixed(1)}</span>
+                            <StarRating value={displayRating} size={18} />
+                            <span className="reviews-overall-count">
+                                Based on {displayCount} review{displayCount === 1 ? '' : 's'}
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {reviewMessage && <p className="message">{reviewMessage}</p>}
+                {reviewError && <p className="error-message">{reviewError}</p>}
+
+                {isAuthenticated ? (
+                    <form className="review-form-card" onSubmit={submitReview}>
+                        <h3>Write a review</h3>
+                        <div className="review-form-row">
+                            <span className="review-form-label">Your rating:</span>
+                            <StarInput value={reviewRating} onChange={setReviewRating} />
+                        </div>
+                        <textarea
+                            className="review-textarea"
+                            placeholder="Share your experience with this product..."
+                            value={reviewContent}
+                            onChange={(e) => setReviewContent(e.target.value)}
+                        />
+                        <div className="review-form-actions">
+                            <button type="submit" className="review-submit-btn" disabled={reviewRating < 1}>
+                                Submit Review
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <p className="reviews-login-hint">
+                        <Link to="/login">Sign in</Link> to write a review.
+                    </p>
+                )}
+
+                <div className="reviews-list">
+                    {reviews.length === 0 ? (
+                        <p className="reviews-empty">No reviews yet — be the first to review this product.</p>
+                    ) : (
+                        reviews.map((review) => (
+                            <article className="review-card" key={review.id}>
+                                <div className="review-card-head">
+                                    <StarRating value={review.rating} size={13} />
+                                    <span className="review-author">{review.userName || 'Anonymous'}</span>
+                                    <span className="review-date">{formatReviewDate(review.createdAt)}</span>
+                                    {(isAdmin || currentUserId === review.userId) && (
+                                        <button
+                                            type="button"
+                                            className="review-delete-btn"
+                                            onClick={() => handleDeleteReview(review.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
+                                </div>
+                                {review.content && <p className="review-content">{review.content}</p>}
+                            </article>
+                        ))
+                    )}
+                </div>
+            </div>
 
             {/* Added to Cart Popup Modal */}
             <AddToCartModal

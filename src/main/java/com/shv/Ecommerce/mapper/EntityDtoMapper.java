@@ -173,4 +173,20 @@ public class EntityDtoMapper {
         bannerDto.setCreatedAt(banner.getCreatedAt());
         return bannerDto;
     }
+
+    // Review entity to Review DTO
+    public ReviewDto mapReviewToDtoBasic(Review review) {
+        ReviewDto reviewDto = new ReviewDto();
+        reviewDto.setId(review.getId());
+        reviewDto.setContent(review.getContent());
+        reviewDto.setRating(review.getRating());
+        reviewDto.setCreatedAt(review.getCreatedAt());
+
+        if (review.getUser() != null) {
+            reviewDto.setUserId(review.getUser().getId());
+            reviewDto.setUserName(review.getUser().getName());
+        }
+
+        return reviewDto;
+    }
 }
