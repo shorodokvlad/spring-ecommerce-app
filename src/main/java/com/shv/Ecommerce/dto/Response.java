@@ -39,4 +39,7 @@ public class Response {
 
     private BannerDto banner;
     private List<BannerDto> bannerList;
+
+    private ReviewDto review;
+    private List<ReviewDto> reviewList;
 }

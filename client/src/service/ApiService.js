@@ -155,6 +155,26 @@ export default class ApiService {
         return response.data;
     }
 
+    /* REVIEW ENDPOINTS */
+    static async getReviewsByProductId(productId) {
+        const response = await axios.get(`${this.BASE_URL}/review/get-by-product-id/${productId}`);
+        return response.data;
+    }
+
+    static async createReview(productId, body) {
+        const response = await axios.post(`${this.BASE_URL}/review/create/${productId}`, body, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async deleteReview(reviewId) {
+        const response = await axios.delete(`${this.BASE_URL}/review/delete/${reviewId}`, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
     /**CATEGORY */
     static async createCategory(body) {
         const response = await axios.post(`${this.BASE_URL}/category/create`, body, {

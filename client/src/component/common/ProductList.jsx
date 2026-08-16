@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 import StockBadge from "./StockBadge";
 import AddToCartModal from "./AddToCartModal";
+import StarRating from "./StarRating";
 import { configureProduct } from "../../utils/productVariant";
 import '../../style/productList.css';
 
@@ -62,6 +63,11 @@ const ProductList = ({ products }) => {
                             </div>
                             <div className="product-body">
                                 <h3>{product.name}</h3>
+                                {(product.averageRating != null || (product.reviewCount ?? 0) > 0) && (
+                                    <div className="product-rating-row">
+                                        <StarRating value={product.averageRating} count={product.reviewCount} size={13} showValue />
+                                    </div>
+                                )}
                                 <div className="product-meta">
                                     <span className="price-ticket">€{(configuredProduct.price || 0).toFixed(2)}</span>
                                     <StockBadge stockQuantity={configuredProduct.stockQuantity} />

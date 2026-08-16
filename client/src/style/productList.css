@@ -59,6 +59,11 @@
     margin: 0 0 4px;
 }
 
+.product-rating-row {
+    margin: 2px 0 6px;
+    min-height: 15px;
+}
+
 .product-item:hover .product-body h3 {
     color: var(--accent);
 }
