@@ -1,0 +1,119 @@
+import React, { useState } from "react";
+import ApiService from "../../service/ApiService";
+import { useNavigate } from "react-router-dom";
+import '../../style/adminWarehouse.css';
+
+const AddWarehousePage = () => {
+    const [form, setForm] = useState({
+        name: '',
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: ''
+    });
+    const [message, setMessage] = useState('');
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await ApiService.createWarehouse(form);
+            if (response.status === 200) {
+                setMessage(response.message);
+                setTimeout(() => {
+                    setMessage('');
+                    navigate("/admin/warehouses")
+                }, 2000)
+            }
+        } catch (error) {
+            setMessage(error.response?.data?.message || error.message || "Failed to save a warehouse")
+        }
+    }
+
+    return (
+        <div className="warehouse-form-page">
+            {message && <p className="message">{message}</p>}
+            <form onSubmit={handleSubmit} className="warehouse-form">
+                <h2>Add Warehouse</h2>
+
+                <div className="warehouse-form-group">
+                    <label>Warehouse Name *</label>
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="e.g. Main Depot Amsterdam"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div className="warehouse-form-row">
+                    <div className="warehouse-form-group">
+                        <label>Street</label>
+                        <input
+                            type="text"
+                            name="street"
+                            placeholder="e.g. Industrieweg 12"
+                            value={form.street}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <div className="warehouse-form-group">
+                        <label>City</label>
+                        <input
+                            type="text"
+                            name="city"
+                            placeholder="e.g. Amsterdam"
+                            value={form.city}
+                            onChange={handleChange}
+                        />
+                    </div>
+                </div>
+
+                <div className="warehouse-form-row">
+                    <div className="warehouse-form-group">
+                        <label>State / Region</label>
+                        <input
+                            type="text"
+                            name="state"
+                            placeholder="e.g. North Holland"
+                            value={form.state}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <div className="warehouse-form-group">
+                        <label>Zip Code</label>
+                        <input
+                            type="text"
+                            name="zipCode"
+                            placeholder="e.g. 1013"
+                            value={form.zipCode}
+                            onChange={handleChange}
+                        />
+                    </div>
+                </div>
+
+                <div className="warehouse-form-group">
+                    <label>Country</label>
+                    <input
+                        type="text"
+                        name="country"
+                        placeholder="e.g. Netherlands"
+                        value={form.country}
+                        onChange={handleChange}
+                    />
+                </div>
+
+                <button type="submit">Add Warehouse</button>
+            </form>
+        </div>
+    )
+}
+
+export default AddWarehousePage;

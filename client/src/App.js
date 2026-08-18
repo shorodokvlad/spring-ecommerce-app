@@ -29,6 +29,9 @@ import EditProductPage from './component/admin/EditProductPage';
 import AdminOrdersPage from './component/admin/AdminOrderPage';
 import AdminOrderDetailsPage from './component/admin/AdminOrderDetailsPage';
 import AdminBannerPage from './component/admin/AdminBannerPage';
+import AdminWarehousePage from './component/admin/AdminWarehousePage';
+import AddWarehousePage from './component/admin/AddWarehousePage';
+import EditWarehousePage from './component/admin/EditWarehousePage';
 import SessionExpiryHandler from './component/common/SessionExpiryHandler';
 
 function App() {
@@ -69,6 +72,9 @@ function App() {
            <Route path='/admin/orders' element={<AdminRoute element={<AdminOrdersPage/>} />} />
            <Route path='/admin/order-details/:itemId' element={<AdminRoute element={<AdminOrderDetailsPage/>} />} />
            <Route path='/admin/banners' element={<AdminRoute element={<AdminBannerPage/>} />} />
+           <Route path='/admin/warehouses' element={<AdminRoute element={<AdminWarehousePage/>} />} />
+           <Route path='/admin/add-warehouse' element={<AdminRoute element={<AddWarehousePage/>} />} />
+           <Route path='/admin/edit-warehouse/:warehouseId' element={<AdminRoute element={<EditWarehousePage/>} />} />
         </Routes>
       </main>
       <Footer/>

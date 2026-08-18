@@ -42,4 +42,7 @@ public class Response {
 
     private ReviewDto review;
     private List<ReviewDto> reviewList;
+
+    private WarehouseDto warehouse;
+    private List<WarehouseDto> warehouseList;
 }
