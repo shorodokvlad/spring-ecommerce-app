@@ -295,12 +295,26 @@ export default class ApiService {
         return response.data;
     }
 
+    /* DELIVERY ESTIMATE ENDPOINTS */
+    static async getDeliveryEstimate(params) {
+        const response = await axios.get(`${this.BASE_URL}/delivery/estimate`, { params });
+        return response.data;
+    }
+
+    static async getDeliveryCounties() {
+        const response = await axios.get(`${this.BASE_URL}/delivery/counties`);
+        return response.data;
+    }
+
+    static async getDeliveryLocalities(county) {
+        const response = await axios.get(`${this.BASE_URL}/delivery/localities`, { params: { county } });
+        return response.data;
+    }
+
     /***AUTHEMNTICATION CHECKER */
     static logout(){
         clearSession()
-    }
-
-    static isAuthenticated(){
+    }    static isAuthenticated(){
         const token = localStorage.getItem('token')
         return Boolean(token) && !isJwtExpired(token)
     }

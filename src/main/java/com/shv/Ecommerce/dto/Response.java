@@ -42,4 +42,8 @@ public class Response {
 
     private ReviewDto review;
     private List<ReviewDto> reviewList;
+
+    private DeliveryEstimateDto deliveryEstimate;
+    private List<String> countyList;
+    private List<LocalityDto> localityList;
 }
