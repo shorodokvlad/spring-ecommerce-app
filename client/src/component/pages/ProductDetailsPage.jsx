@@ -6,6 +6,7 @@ import StockBadge from "../common/StockBadge";
 import SpecificationsTable from "../common/SpecificationsTable";
 import AddToCartModal from "../common/AddToCartModal";
 import StarRating, { StarInput } from "../common/StarRating";
+import DeliveryEstimate from "../delivery/DeliveryEstimate";
 import ApiService from "../../service/ApiService";
 import { parseSpecifications } from "../../utils/specParser";
 import { configureProduct, findVariantFromSearch, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
@@ -445,25 +446,8 @@ const ProductDetailsPage = () => {
                         </div>
                     )}
 
-                    {/* Store Guarantees Links directly below Configurations */}
-                    <div className="product-guarantees">
-                        <Link to="/store-features?section=shipping" className="guarantee-item">
-                            <span className="guarantee-icon"><img src="/truck.svg" alt="Shipping" style={{ width: "18px", height: "18px" }} /></span>
-                            <span>Free Express Shipping</span>
-                        </Link>
-                        <Link to="/store-features?section=warranty" className="guarantee-item">
-                            <span className="guarantee-icon"><img src="/shield.svg" alt="Warranty" style={{ width: "18px", height: "18px" }} /></span>
-                            <span>2-Year Official Warranty</span>
-                        </Link>
-                        <Link to="/store-features?section=returns" className="guarantee-item">
-                            <span className="guarantee-icon"><img src="/calendar.svg" alt="Returns" style={{ width: "18px", height: "18px" }} /></span>
-                            <span>30-Day Money Back</span>
-                        </Link>
-                        <Link to="/store-features?section=secure" className="guarantee-item">
-                            <span className="guarantee-icon"><img src="/lock.svg" alt="Secure" style={{ width: "18px", height: "18px" }} /></span>
-                            <span>Secure 256-Bit Checkout</span>
-                        </Link>
-                    </div>
+                    {/* Delivery Estimate below Configuration Variants */}
+                    <DeliveryEstimate defaultSubtotal={activePrice} />
                 </div>
 
                 {/* Column 3: Compact Purchasing Sidebar Card on Right Side */}
@@ -531,11 +515,11 @@ const ProductDetailsPage = () => {
                     <div className="delivery-info-card">
                         <div className="delivery-line">
                             <img src="/truck.svg" alt="Shipping" style={{ width: "20px", height: "20px" }} />
-                            <span>Express Shipping: <strong>Free delivery (1–3 business days)</strong></span>
+                            <span>Shipping: <strong>Free Express Shipping</strong></span>
                         </div>
                         <div className="delivery-line">
-                            <img src="/shield.svg" alt="Protection" style={{ width: "20px", height: "20px" }} />
-                            <span>Sold & Shipped directly by <strong>SHV Store</strong></span>
+                            <img src="/shield.svg" alt="Warranty" style={{ width: "20px", height: "20px" }} />
+                            <span>Warranty: <strong>2-Year Official Warranty</strong></span>
                         </div>
                     </div>
                 </div>
