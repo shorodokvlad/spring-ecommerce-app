@@ -20,4 +20,5 @@ public class ProductVariantDto {
     private BigDecimal price;
     private Integer stockQuantity;
     private List<String> imageUrls;
+    private List<WarehouseStockDto> stockByWarehouse;
 }

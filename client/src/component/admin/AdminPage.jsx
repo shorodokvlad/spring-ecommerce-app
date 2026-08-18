@@ -31,6 +31,13 @@ const AdminPage = () => {
             code: "BAN",
             link: "/admin/banners",
             color: "#C08A16"
+        },
+        {
+            title: "Manage Warehouses",
+            desc: "Add, edit, or remove warehouses and track stock locations.",
+            code: "WH",
+            link: "/admin/warehouses",
+            color: "#4A7086"
         }
     ];
 

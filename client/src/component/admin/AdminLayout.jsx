@@ -14,6 +14,7 @@ const AdminLayout = ({ children }) => {
         { path: "/admin/products", label: "Manage Products", icon: "/product.svg" },
         { path: "/admin/orders", label: "Manage Orders", icon: "/order.svg" },
         { path: "/admin/banners", label: "Manage Banners", icon: "/banner.svg" },
+        { path: "/admin/warehouses", label: "Manage Warehouses", icon: "/warehouse.svg" },
     ];
 
     const toggleSidebar = () => {
