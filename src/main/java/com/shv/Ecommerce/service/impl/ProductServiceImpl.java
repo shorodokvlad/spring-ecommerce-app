@@ -5,11 +5,14 @@ import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.entity.Category;
 import com.shv.Ecommerce.entity.Product;
 import com.shv.Ecommerce.entity.Review;
+import com.shv.Ecommerce.entity.Warehouse;
+import com.shv.Ecommerce.entity.WarehouseStock;
 import com.shv.Ecommerce.exception.NotFoundException;
 import com.shv.Ecommerce.mapper.EntityDtoMapper;
 import com.shv.Ecommerce.repository.CategoryRepo;
 import com.shv.Ecommerce.repository.ProductRepo;
 import com.shv.Ecommerce.repository.ReviewRepo;
+import com.shv.Ecommerce.repository.WarehouseRepo;
 import com.shv.Ecommerce.service.AwsS3Service;
 import com.shv.Ecommerce.service.interf.IProductService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,7 @@ public class ProductServiceImpl implements IProductService {
     private final EntityDtoMapper entityDtoMapper;
     private final AwsS3Service awsS3Service;
     private final ReviewRepo reviewRepo;
+    private final WarehouseRepo warehouseRepo;
 
     private ProductDto mapProductToDtoWithReviewStats(Product product) {
         ProductDto productDto = entityDtoMapper.mapProductToDtoBasic(product);
@@ -189,7 +193,28 @@ public class ProductServiceImpl implements IProductService {
                         variant.setAttributes(new HashMap<>(dto.getAttributes()));
                     }
                     variant.setPrice(dto.getPrice());
-                    int vStock = dto.getStockQuantity() != null ? dto.getStockQuantity() : 0;
+
+                    int vStock = 0;
+                    List<WarehouseStock> warehouseStocks = new ArrayList<>();
+                    if (dto.getStockByWarehouse() != null && !dto.getStockByWarehouse().isEmpty()) {
+                        for (com.shv.Ecommerce.dto.WarehouseStockDto stockDto : dto.getStockByWarehouse()) {
+                            if (stockDto.getWarehouseId() == null || stockDto.getQuantity() == null || stockDto.getQuantity() <= 0) {
+                                continue;
+                            }
+                            Warehouse warehouse = warehouseRepo.findById(stockDto.getWarehouseId())
+                                    .orElseThrow(() -> new NotFoundException("Warehouse not found"));
+                            WarehouseStock warehouseStock = new WarehouseStock();
+                            warehouseStock.setWarehouse(warehouse);
+                            warehouseStock.setVariant(variant);
+                            warehouseStock.setQuantity(stockDto.getQuantity());
+                            warehouseStocks.add(warehouseStock);
+                            vStock += stockDto.getQuantity();
+                        }
+                    }
+                    variant.setWarehouseStocks(warehouseStocks);
+                    if (vStock == 0 && dto.getStockQuantity() != null && dto.getStockQuantity() > 0) {
+                        vStock = dto.getStockQuantity();
+                    }
                     variant.setStockQuantity(vStock);
                     totalStock += vStock;
 

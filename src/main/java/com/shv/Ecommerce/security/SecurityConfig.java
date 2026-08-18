@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/delivery/**").permitAll()
+                        .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/warehouse/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, exception) -> {

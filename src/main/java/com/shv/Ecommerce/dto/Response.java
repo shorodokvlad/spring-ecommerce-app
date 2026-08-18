@@ -46,4 +46,6 @@ public class Response {
     private DeliveryEstimateDto deliveryEstimate;
     private List<String> countyList;
     private List<LocalityDto> localityList;
+    private WarehouseDto warehouse;
+    private List<WarehouseDto> warehouseList;
 }

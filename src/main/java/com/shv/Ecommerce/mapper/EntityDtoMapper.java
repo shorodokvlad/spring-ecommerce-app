@@ -83,6 +83,11 @@ public class EntityDtoMapper {
         if (variant.getImageUrls() != null && !variant.getImageUrls().isEmpty()) {
             dto.setImageUrls(new java.util.ArrayList<>(variant.getImageUrls()));
         }
+        if (variant.getWarehouseStocks() != null && !variant.getWarehouseStocks().isEmpty()) {
+            dto.setStockByWarehouse(variant.getWarehouseStocks().stream()
+                    .map(this::mapWarehouseStockToDtoBasic)
+                    .toList());
+        }
         return dto;
     }
 
@@ -172,6 +177,43 @@ public class EntityDtoMapper {
         bannerDto.setDisplayOrder(banner.getDisplayOrder());
         bannerDto.setCreatedAt(banner.getCreatedAt());
         return bannerDto;
+    }
+
+    // WarehouseStock to DTO Basic
+    public WarehouseStockDto mapWarehouseStockToDtoBasic(WarehouseStock warehouseStock) {
+        WarehouseStockDto dto = new WarehouseStockDto();
+        dto.setId(warehouseStock.getId());
+        dto.setQuantity(warehouseStock.getQuantity());
+
+        if (warehouseStock.getWarehouse() != null) {
+            dto.setWarehouseId(warehouseStock.getWarehouse().getId());
+            dto.setWarehouseName(warehouseStock.getWarehouse().getName());
+        }
+
+        if (warehouseStock.getVariant() != null) {
+            dto.setVariantId(warehouseStock.getVariant().getId());
+            dto.setVariantTitle(warehouseStock.getVariant().getTitle());
+            if (warehouseStock.getVariant().getProduct() != null) {
+                dto.setProductId(warehouseStock.getVariant().getProduct().getId());
+                dto.setProductName(warehouseStock.getVariant().getProduct().getName());
+                dto.setProductImageUrl(warehouseStock.getVariant().getProduct().getImageUrl());
+            }
+        }
+
+        return dto;
+    }
+
+    // Warehouse to DTO Basic
+    public WarehouseDto mapWarehouseToDtoBasic(Warehouse warehouse) {
+        WarehouseDto dto = new WarehouseDto();
+        dto.setId(warehouse.getId());
+        dto.setName(warehouse.getName());
+        dto.setStreet(warehouse.getStreet());
+        dto.setCity(warehouse.getCity());
+        dto.setState(warehouse.getState());
+        dto.setZipCode(warehouse.getZipCode());
+        dto.setCountry(warehouse.getCountry());
+        return dto;
     }
 
     // Review entity to Review DTO

@@ -40,4 +40,8 @@ public class ProductVariant {
     @JoinColumn(name = "product_id")
     @JsonIgnore
     private Product product;
+
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private java.util.List<WarehouseStock> warehouseStocks = new ArrayList<>();
 }

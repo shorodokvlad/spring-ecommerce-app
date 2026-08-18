@@ -8,6 +8,7 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/controller/ProductController.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/controller/ReviewController.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/controller/UserController.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/controller/WarehouseController.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/AddressDto.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/BannerDto.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/CategoryDto.java
@@ -30,6 +31,8 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/ReviewRequest.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/UserDto.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/VerifyEmailRequest.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/WarehouseDto.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/dto/WarehouseStockDto.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Address.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Banner.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Category.java
@@ -44,6 +47,8 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/ProductVariant.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Review.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/User.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/Warehouse.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/entity/WarehouseStock.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/enums/OrderStatus.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/enums/UserRole.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/exception/GlobalExceptionHandler.java
@@ -63,6 +68,8 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/ProductVariantRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/ReviewRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/UserRepo.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/WarehouseRepo.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/repository/WarehouseStockRepo.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/security/AuthUser.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/security/CorsConfig.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/security/CustomUserDetailsService.java
@@ -81,6 +88,7 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/impl/ProductServiceImpl.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/impl/ReviewServiceImpl.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/impl/UserServiceImpl.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/impl/WarehouseServiceImpl.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/IAddressService.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/IBannerService.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/ICategoryService.java
@@ -89,5 +97,6 @@
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/IProductService.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/IReviewService.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/IUserService.java
+/Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/service/interf/IWarehouseService.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/specification/OrderItemSpecification.java
 /Users/vladshorodok/Desktop/home/projects/Java/repo/ecommerce/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/util/LocalityNormalizer.java

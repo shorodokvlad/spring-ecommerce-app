@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import BlueprintManagerModal, { getStoredBlueprints, saveStoredBlueprints } from "./BlueprintManagerModal";
 import SpecBuilder from "./SpecBuilder";
@@ -32,6 +32,7 @@ const createEmptyVariant = (index = 1) => ({
     title: `Configuration #${index}`,
     price: '',
     stockQuantity: '',
+    stockAllocations: [],
     attributes: [createEmptyAttribute()],
     copyPhotosFromIndex: "",
     existingImageUrls: [],
@@ -41,6 +42,7 @@ const createEmptyVariant = (index = 1) => ({
 const EditProductPage = () => {
     const { productId } = useParams();
     const [categories, setCategories] = useState([]);
+    const [warehouses, setWarehouses] = useState([]);
     const [categoryId, setCategoryId] = useState('');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -89,6 +91,9 @@ const EditProductPage = () => {
                         title: v.title || `Configuration #${idx + 1}`,
                         price: v.price ?? '',
                         stockQuantity: v.stockQuantity ?? '',
+                        stockAllocations: v.stockByWarehouse
+                            ? v.stockByWarehouse.map((s) => ({ warehouseId: s.warehouseId, quantity: s.quantity ?? '' }))
+                            : [],
                         attributes: attrsList,
                         copyPhotosFromIndex: "",
                         existingImageUrls: v.imageUrls ? [...v.imageUrls] : [],
@@ -101,6 +106,7 @@ const EditProductPage = () => {
                     title: 'Configuration #1',
                     price: prod.price || '',
                     stockQuantity: prod.stockQuantity || '',
+                    stockAllocations: [],
                     attributes: [createEmptyAttribute()],
                     copyPhotosFromIndex: "",
                     existingImageUrls: prod.imageUrls ? [...prod.imageUrls] : (prod.imageUrl ? [prod.imageUrl] : []),
@@ -114,6 +120,7 @@ const EditProductPage = () => {
 
     useEffect(() => {
         ApiService.getAllCategory().then((res) => setCategories(res.categoryList || []));
+        ApiService.getAllWarehouses().then((res) => setWarehouses(res.warehouseList || []));
         setCustomBlueprints(getStoredBlueprints());
         fetchProductData();
     }, [fetchProductData]);
@@ -143,6 +150,7 @@ const EditProductPage = () => {
                 title: `Configuration #${prev.length + 1}`,
                 price: '',
                 stockQuantity: '',
+                stockAllocations: [],
                 attributes: blueprint.attributes.map((keyStr) => createEmptyAttribute(keyStr, '')),
                 copyPhotosFromIndex: "",
                 existingImageUrls: [],
@@ -185,6 +193,52 @@ const EditProductPage = () => {
             next[vIndex] = { ...next[vIndex], [field]: finalValue };
             return next;
         });
+    };
+
+    const updateVariantStockAllocation = (vIndex, warehouseId, value) => {
+        let finalValue = value;
+        if (value !== '' && parseInt(value, 10) < 0) {
+            finalValue = '0';
+        }
+        setVariants((prev) => {
+            const next = [...prev];
+            const allocations = [...next[vIndex].stockAllocations];
+            const existing = allocations.findIndex((a) => a.warehouseId === warehouseId);
+            if (existing >= 0) {
+                allocations[existing] = { warehouseId, quantity: finalValue };
+            } else {
+                allocations.push({ warehouseId, quantity: finalValue });
+            }
+            next[vIndex] = { ...next[vIndex], stockAllocations: allocations };
+            return next;
+        });
+    };
+
+    const allocateLegacyStock = (vIndex) => {
+        if (warehouses.length === 0) return;
+        const qty = parseInt(variants[vIndex].stockQuantity, 10);
+        if (isNaN(qty) || qty <= 0) return;
+        setVariants((prev) => {
+            const next = [...prev];
+            next[vIndex] = {
+                ...next[vIndex],
+                stockQuantity: '',
+                stockAllocations: [{ warehouseId: warehouses[0].id, quantity: qty }]
+            };
+            return next;
+        });
+    };
+
+    const variantStockTotal = (v) => {
+        if (warehouses.length > 0 && v.stockAllocations.length > 0) {
+            return v.stockAllocations.reduce((sum, a) => {
+                if (!warehouses.some((w) => w.id === a.warehouseId)) return sum;
+                const qty = parseInt(a.quantity, 10);
+                return sum + (isNaN(qty) ? 0 : qty);
+            }, 0);
+        }
+        const stock = parseInt(v.stockQuantity, 10);
+        return isNaN(stock) ? 0 : stock;
     };
 
     const removeVariant = (vIndex) => {
@@ -310,8 +364,7 @@ const EditProductPage = () => {
     };
 
     const totalStockSum = variants.reduce((sum, v) => {
-        const stock = parseInt(v.stockQuantity, 10);
-        return sum + (isNaN(stock) ? 0 : stock);
+        return sum + variantStockTotal(v);
     }, 0);
 
     const handleSubmit = async (e) => {
@@ -350,11 +403,19 @@ const EditProductPage = () => {
                     }
                 });
 
+                const stockByWarehouse = warehouses.length > 0
+                    ? v.stockAllocations
+                        .filter((a) => warehouses.some((w) => w.id === a.warehouseId))
+                        .filter((a) => a.quantity !== '' && parseInt(a.quantity, 10) > 0)
+                        .map((a) => ({ warehouseId: a.warehouseId, quantity: parseInt(a.quantity, 10) }))
+                    : [];
+
                 return {
                     title: v.title || `Configuration #${vIndex + 1}`,
                     attributes: attrMap,
                     price: v.price ? parseFloat(v.price) : 0,
-                    stockQuantity: v.stockQuantity ? parseInt(v.stockQuantity, 10) : 0,
+                    stockQuantity: variantStockTotal(v),
+                    stockByWarehouse,
                     imageUrls: targetExistingUrls || []
                 };
             });
@@ -580,13 +641,56 @@ const EditProductPage = () => {
                                     </div>
                                     <div>
                                         <label>Stock Quantity</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            placeholder="Stock"
-                                            value={v.stockQuantity}
-                                            onChange={(e) => updateVariantField(vIdx, 'stockQuantity', e.target.value)}
-                                        />
+                                        {warehouses.length > 0 && v.stockAllocations.length > 0 ? (
+                                            <div className="variant-warehouse-stock-list">
+                                                {warehouses.map((wh) => {
+                                                    const allocation = v.stockAllocations.find((a) => a.warehouseId === wh.id);
+                                                    return (
+                                                        <div className="warehouse-stock-row" key={wh.id}>
+                                                            <label title={wh.city || wh.name}>{wh.name}</label>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                placeholder="0"
+                                                                value={allocation ? allocation.quantity : ''}
+                                                                onChange={(e) => updateVariantStockAllocation(vIdx, wh.id, e.target.value)}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                                <p className="variant-warehouse-hint">
+                                                    Allocating stock to warehouses: <strong>{variantStockTotal(v)}</strong> units total for this configuration.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    placeholder="Stock"
+                                                    value={v.stockQuantity}
+                                                    onChange={(e) => updateVariantField(vIdx, 'stockQuantity', e.target.value)}
+                                                />
+                                                {warehouses.length > 0 ? (
+                                                    <p className="variant-warehouse-hint">
+                                                        This configuration is not allocated to any warehouse yet.{" "}
+                                                        <button
+                                                            type="button"
+                                                            className="add-attr-btn"
+                                                            style={{ padding: "3px 8px", fontSize: "0.75rem" }}
+                                                            onClick={() => allocateLegacyStock(vIdx)}
+                                                            disabled={!(parseInt(v.stockQuantity, 10) > 0)}
+                                                        >
+                                                            Allocate to {warehouses[0].name}
+                                                        </button>
+                                                    </p>
+                                                ) : (
+                                                    <p className="variant-warehouse-hint">
+                                                        No warehouses yet — <Link to="/admin/add-warehouse">create one</Link> to distribute stock across locations.
+                                                    </p>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 

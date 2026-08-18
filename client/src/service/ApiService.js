@@ -308,6 +308,35 @@ export default class ApiService {
 
     static async getDeliveryLocalities(county) {
         const response = await axios.get(`${this.BASE_URL}/delivery/localities`, { params: { county } });
+    /* WAREHOUSE ENDPOINTS */
+    static async getAllWarehouses() {
+        const response = await axios.get(`${this.BASE_URL}/warehouse/get-all`);
+        return response.data;
+    }
+
+    static async getWarehouseById(warehouseId) {
+        const response = await axios.get(`${this.BASE_URL}/warehouse/get-by-id/${warehouseId}`);
+        return response.data;
+    }
+
+    static async createWarehouse(body) {
+        const response = await axios.post(`${this.BASE_URL}/warehouse/create`, body, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async updateWarehouse(warehouseId, body) {
+        const response = await axios.put(`${this.BASE_URL}/warehouse/update/${warehouseId}`, body, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async deleteWarehouse(warehouseId) {
+        const response = await axios.delete(`${this.BASE_URL}/warehouse/delete/${warehouseId}`, {
+            headers: this.getHeader()
+        });
         return response.data;
     }
 
