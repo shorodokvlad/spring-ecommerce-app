@@ -308,6 +308,9 @@ export default class ApiService {
 
     static async getDeliveryLocalities(county) {
         const response = await axios.get(`${this.BASE_URL}/delivery/localities`, { params: { county } });
+        return response.data;
+    }
+
     /* WAREHOUSE ENDPOINTS */
     static async getAllWarehouses() {
         const response = await axios.get(`${this.BASE_URL}/warehouse/get-all`);
