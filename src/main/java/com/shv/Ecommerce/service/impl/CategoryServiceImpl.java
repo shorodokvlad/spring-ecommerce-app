@@ -9,6 +9,8 @@ import com.shv.Ecommerce.repository.CategoryRepo;
 import com.shv.Ecommerce.service.interf.ICategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class CategoryServiceImpl implements ICategoryService {
     private final EntityDtoMapper entityDtoMapper;
 
     @Override
+    @CacheEvict(cacheNames = "categories", allEntries = true)
     public Response createCategory(CategoryDto categoryRequest) {
         Category category = new Category();
         category.setName(categoryRequest.getName());
@@ -34,6 +37,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "categories", allEntries = true)
     public Response updateCategory(Long categoryId, CategoryDto categoryRequest) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(()->new NotFoundException("Category not found"));
         category.setName(categoryRequest.getName());
@@ -46,6 +50,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "categories")
     public Response getAllCategories() {
         List<Category> categories = categoryRepo.findAll();
         List<CategoryDto> categoryDtoList = categories.stream()
@@ -58,6 +63,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "categories", key = "#categoryId")
     public Response getCategoryById(Long categoryId) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(()->new NotFoundException("Category not found"));
         CategoryDto categoryDto = entityDtoMapper.mapCategoryToDtoBasic(category);
@@ -69,6 +75,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "categories", allEntries = true)
     public Response deleteCategory(Long categoryId) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(()->new NotFoundException("Category not found"));
         categoryRepo.delete(category);

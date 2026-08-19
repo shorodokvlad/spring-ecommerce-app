@@ -4,6 +4,9 @@ import ApiService from "../../service/ApiService";
 import '../../style/profile.css';
 import Pagination from "../common/Pagination";
 
+const CACHE_KEY = 'profile_user_info_cache';
+const CACHE_TTL_MS = 60 * 1000;
+
 const ProfilePage = () => {
 
     const [userInfo, setUserInfo] = useState(null);
@@ -12,16 +15,42 @@ const ProfilePage = () => {
     const itemsPerPage = 5;
     const navigate = useNavigate();
 
+    const readUserInfoCache = () => {
+        try {
+            const raw = sessionStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            const cached = JSON.parse(raw);
+            if (Date.now() - cached.timestamp > CACHE_TTL_MS) return null;
+            if (cached.token !== localStorage.getItem('token')) return null;
+            return cached.user;
+        } catch {
+            return null;
+        }
+    };
 
     useEffect(() => {
 
         fetchUserInfo();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const fetchUserInfo = async () => {
 
         try {
+            const cachedUser = readUserInfoCache();
+            if (cachedUser) {
+                setUserInfo(cachedUser);
+                return;
+            }
             const response = await ApiService.getLoggedInUserInfo();
             setUserInfo(response.user);
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+                    timestamp: Date.now(),
+                    token: localStorage.getItem('token'),
+                    user: response.user
+                }));
+            } catch {
+            }
         } catch (error) {
             setError(error.response?.data?.message || error.message || 'Unable to fetch user info');
         }
@@ -58,6 +87,7 @@ const ProfilePage = () => {
 
     const handleLogout = () => {
         if (window.confirm("Log out of your account?")) {
+            sessionStorage.removeItem(CACHE_KEY);
             ApiService.logout();
             navigate('/login');
         }

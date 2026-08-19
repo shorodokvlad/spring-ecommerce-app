@@ -10,6 +10,8 @@ import com.shv.Ecommerce.service.AwsS3Service;
 import com.shv.Ecommerce.service.interf.IBannerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +27,7 @@ public class BannerServiceImpl implements IBannerService {
     private final AwsS3Service awsS3Service;
 
     @Override
+    @CacheEvict(cacheNames = "banners", allEntries = true)
     public Response createBanner(MultipartFile image, String imageUrl, String title, String linkUrl, Boolean active, Integer displayOrder) {
         String finalImageUrl = imageUrl;
         if (image != null && !image.isEmpty()) {
@@ -56,6 +59,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "banners", allEntries = true)
     public Response updateBanner(Long bannerId, MultipartFile image, String imageUrl, String title, String linkUrl, Boolean active, Integer displayOrder) {
         Banner banner = bannerRepo.findById(bannerId)
                 .orElseThrow(() -> new NotFoundException("Banner not found"));
@@ -81,6 +85,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "banners", allEntries = true)
     public Response deleteBanner(Long bannerId) {
         Banner banner = bannerRepo.findById(bannerId)
                 .orElseThrow(() -> new NotFoundException("Banner not found"));
@@ -93,6 +98,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
+    @Cacheable(cacheNames = "banners", key = "#bannerId")
     public Response getBannerById(Long bannerId) {
         Banner banner = bannerRepo.findById(bannerId)
                 .orElseThrow(() -> new NotFoundException("Banner not found"));
@@ -115,6 +121,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
+    @Cacheable(cacheNames = "banners")
     public Response getAllBanners() {
         List<Banner> banners = bannerRepo.findAllByOrderByDisplayOrderAsc();
         List<BannerDto> bannerDtos = banners.stream()
@@ -128,6 +135,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
+    @Cacheable(cacheNames = "banners")
     public Response getActiveBanners() {
         List<Banner> banners = bannerRepo.findByActiveTrueOrderByDisplayOrderAsc();
         List<BannerDto> bannerDtos = banners.stream()
