@@ -4,20 +4,48 @@ import '../../style/adminProduct.css';
 import Pagination from "../common/Pagination";
 import ApiService from "../../service/ApiService";
 
+const CACHE_KEY = 'admin_products_cache';
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
 const AdminProductPage = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const itemsPerPage = 10;
 
-    const fetchProducts = async () => {
+    const readCache = () => {
+        try {
+            const raw = sessionStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
+            const cached = JSON.parse(raw);
+            if (Date.now() - cached.timestamp > CACHE_TTL_MS) return null;
+            return cached.products;
+        } catch {
+            return null;
+        }
+    };
+
+    const writeCache = (productList) => {
+        try {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), products: productList }));
+        } catch {
+        }
+    };
+
+    const fetchProducts = async (force) => {
         try {
             setLoading(true);
-            const response = await ApiService.getAllProducts();
-            const productList = response.productList || [];
+            let productList = !force ? readCache() : null;
+            if (!productList) {
+                const response = await ApiService.getAllProducts();
+                productList = response.productList || [];
+                writeCache(productList);
+            }
+            setAllProducts(productList);
             setTotalPages(Math.ceil(productList.length / itemsPerPage));
             setProducts(productList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
         } catch (error) {
@@ -28,9 +56,13 @@ const AdminProductPage = () => {
     };
 
     useEffect(() => {
-        fetchProducts();
+        fetchProducts(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage]);
+    }, []);
+
+    useEffect(() => {
+        setProducts(allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+    }, [currentPage, allProducts]);
 
     const handleEdit = async (id) => {
         navigate(`/admin/edit-product/${id}`);
@@ -41,7 +73,8 @@ const AdminProductPage = () => {
         if (confirmed) {
             try {
                 await ApiService.deleteProduct(id);
-                fetchProducts();
+                sessionStorage.removeItem(CACHE_KEY);
+                fetchProducts(true);
             } catch (error) {
                 setError(error.response?.data?.message || error.message || 'unable to delete product');
             }

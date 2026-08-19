@@ -13,6 +13,7 @@ import com.shv.Ecommerce.util.LocalityNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -87,6 +88,7 @@ public class DeliveryServiceImpl implements IDeliveryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "deliveryRef")
     public Response getCounties() {
         List<String> counties = localityRepo.findDistinctCounties();
         return Response.builder()
@@ -97,6 +99,7 @@ public class DeliveryServiceImpl implements IDeliveryService {
     }
 
     @Override
+    @Cacheable(cacheNames = "deliveryRef", key = "#county")
     public Response getLocalities(String county) {
         List<LocalityDto> localities = new ArrayList<>();
         if (county != null && !county.isBlank()) {

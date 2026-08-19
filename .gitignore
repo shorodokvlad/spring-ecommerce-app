@@ -28,6 +28,7 @@ src/main/resources/application.properties
 target/classes/application.properties
 server/src/main/resources/application.properties
 server/target/classes/application.properties
+target/maven-status/
 
 *.log
 npm-debug.log*

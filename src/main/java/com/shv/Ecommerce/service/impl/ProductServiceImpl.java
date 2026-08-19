@@ -17,6 +17,8 @@ import com.shv.Ecommerce.service.AwsS3Service;
 import com.shv.Ecommerce.service.interf.IProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,20 +63,24 @@ public class ProductServiceImpl implements IProductService {
         return productDto;
     }
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response createProduct(Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
         return createProduct(categoryId, image, null, name, description, price, stockQuantity);
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity) {
         return createProduct(categoryId, image, images, name, description, price, stockQuantity, null, null);
     }
 
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, String variantsJson) {
         return createProduct(categoryId, image, images, name, description, price, stockQuantity, variantsJson, null);
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response createProduct(Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
         Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
 
@@ -108,20 +114,24 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, String name, String description, BigDecimal price, Integer stockQuantity) {
         return updateProduct(productId, categoryId, image, null, name, description, price, stockQuantity, null, null, null);
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls) {
         return updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls, null, null);
     }
 
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls, String variantsJson) {
         return updateProduct(productId, categoryId, image, images, name, description, price, stockQuantity, existingImageUrls, variantsJson, null);
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
         Product product = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -251,6 +261,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @CacheEvict(cacheNames = "products", allEntries = true)
     public Response deleteProduct(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
         productRepo.delete(product);
@@ -262,6 +273,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = "products", key = "#productId")
     public Response getProductById(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
         ProductDto productDto = mapProductToDtoWithReviewStats(product);
@@ -278,6 +290,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = "products", key = "#page + ':' + #size")
     public Response getAllProducts(Integer page, Integer size) {
         if (page != null && size != null && page >= 0 && size > 0) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
@@ -314,6 +327,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = "products", key = "#categoryId + ':' + #page + ':' + #size")
     public Response getProductByCategory(Long categoryId, Integer page, Integer size) {
         if (page != null && size != null && page >= 0 && size > 0) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
@@ -359,6 +373,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = "products", key = "#searchValue + ':' + #page + ':' + #size")
     public Response searchProduct(String searchValue, Integer page, Integer size) {
         String query = (searchValue != null) ? searchValue.trim() : "";
 
