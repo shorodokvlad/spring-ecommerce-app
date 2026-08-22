@@ -1,35 +1,272 @@
-/* Footer — portfolio style: centered, airy, small-caps copyright line */
-.footer {
-    background: var(--paper);
-    padding: 40px 24px 46px;
-    text-align: center;
+/* Site Footer - Reference Image 2 Design */
+.site-footer {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    color: #1e293b;
+    padding-top: 54px;
+    margin-top: 48px;
 }
 
-.footer-links {
+.footer-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 48px;
+}
+
+.footer-column {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px 24px;
-    margin-bottom: 14px;
+    flex-direction: column;
 }
 
-.footer-links a {
+.footer-heading {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 22px;
+}
+
+/* Contact List in Column 1 */
+.footer-contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.footer-contact-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: lowercase;
-    color: var(--ink);
+    color: #475569;
+    line-height: 1.5;
 }
 
-.footer-links a:hover {
-    color: var(--accent);
+.contact-icon-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eef4f6;
+    border: 1px solid #d5e3e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.contact-icon {
+    color: #1F4E63;
+}
+
+.footer-contact-list a {
+    color: #475569;
     text-decoration: none;
+    transition: color 0.15s ease;
 }
 
-.footer-info p {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--faint);
+.footer-contact-list a:hover {
+    color: #1F4E63;
+}
+
+/* Social Links */
+.footer-socials {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.social-link {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e293b;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.social-link:hover {
+    background: #2563eb;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Links List in Columns 2 & 3 */
+.footer-links-list {
+    list-style: none;
+    padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-links-list a {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #475569;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.footer-links-list a:hover {
+    color: #2563eb;
+}
+
+/* App Download Section in Column 4 */
+.app-promo-text {
+    font-size: 0.85rem;
+    color: #475569;
+    margin: 0 0 16px 0;
+}
+
+.app-buttons-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.app-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.app-download-btn:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    opacity: 0.92;
+}
+
+.app-store-btn {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.google-play-btn {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-text-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-subtext {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+    line-height: 1.1;
+}
+
+.btn-maintext {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Bottom Bar */
+.footer-bottom-bar {
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+    padding: 20px 0;
+}
+
+.bottom-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.copyright-text {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.payment-accept-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accept-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.payment-icons-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.payment-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.payment-badge.mastercard {
+    color: #ea580c;
+}
+
+.payment-badge.visa {
+    color: #1d4ed8;
+}
+
+.payment-badge.paypal {
+    color: #0284c7;
+}
+
+.payment-badge.amex {
+    color: #0369a1;
+}
+
+.payment-badge.western {
+    color: #ca8a04;
+}
+
+@media (max-width: 992px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bottom-container {
+        flex-direction: column;
+        text-align: center;
+    }
 }

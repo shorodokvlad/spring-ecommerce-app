@@ -50,7 +50,7 @@ public class DeliveryServiceImpl implements IDeliveryService {
 
         boolean resolvedFromLocality = false;
         if ((county == null || county.isBlank()) && locality != null && !locality.isBlank()) {
-            Optional<Locality> matched = localityRepo.findFirstBySearchNameOrderByPopulationDesc(
+            Optional<Locality> matched = localityRepo.findTop1BySearchNameOrderByPopulationDesc(
                     LocalityNormalizer.normalize(locality));
             if (matched.isPresent()) {
                 county = matched.get().getCounty();

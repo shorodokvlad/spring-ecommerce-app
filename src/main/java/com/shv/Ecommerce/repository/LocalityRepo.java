@@ -11,7 +11,7 @@ public interface LocalityRepo extends JpaRepository<Locality, Long> {
 
     List<Locality> findByCountyIgnoreCaseOrderByNameAsc(String county);
 
-    Optional<Locality> findFirstBySearchNameOrderByPopulationDesc(String searchName);
+    Optional<Locality> findTop1BySearchNameOrderByPopulationDesc(String searchName);
 
     @Query("select distinct l.county from Locality l order by l.county")
     List<String> findDistinctCounties();

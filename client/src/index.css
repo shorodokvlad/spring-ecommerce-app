@@ -222,7 +222,7 @@ button:disabled {
 
 .btn-primary,
 .checkout-button,
-form button[type="submit"],
+/*form button[type="submit"], */
 .profile-button,
 .update-status-button {
     display: inline-block;

@@ -1,20 +1,22 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import ApiService from "../../service/ApiService";
-import '../../style/adminLayout.css';
+import { Link, useLocation } from "react-router-dom";
+import "../../style/adminDashboard.css";
+import { 
+    LayoutDashboard, Layers, Package, ShoppingBag, 
+    Tag, Building2, Users, ArrowLeft, Menu, X 
+} from "lucide-react";
 
 const AdminLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
-    const navigate = useNavigate();
 
     const navItems = [
-        { path: "/admin", label: "Welcome Admin", icon: "/admin.svg" },
-        { path: "/admin/categories", label: "Manage Categories", icon: "/category.svg" },
-        { path: "/admin/products", label: "Manage Products", icon: "/product.svg" },
-        { path: "/admin/orders", label: "Manage Orders", icon: "/order.svg" },
-        { path: "/admin/banners", label: "Manage Banners", icon: "/banner.svg" },
-        { path: "/admin/warehouses", label: "Manage Warehouses", icon: "/warehouse.svg" },
+        { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+        { path: "/admin/categories", label: "Manage Categories", icon: Layers },
+        { path: "/admin/products", label: "Manage Products", icon: Package },
+        { path: "/admin/orders", label: "Manage Orders", icon: ShoppingBag },
+        { path: "/admin/banners", label: "Manage Banners", icon: Tag },
+        { path: "/admin/warehouses", label: "Manage Warehouses", icon: Building2 },
     ];
 
     const toggleSidebar = () => {
@@ -22,66 +24,73 @@ const AdminLayout = ({ children }) => {
     };
 
     return (
-        <div className={`admin-layout-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
-            <aside className="admin-sidebar">
-                <div className="sidebar-header">
-                    {!collapsed && (
-                        <div className="sidebar-brand">
-                            <span className="brand-badge">ADMIN</span>
-                            <span className="brand-title">Control Panel</span>
-                        </div>
-                    )}
-                    <button
-                        type="button"
-                        className="sidebar-toggle-btn"
-                        onClick={toggleSidebar}
-                        title={collapsed ? "Expand Menu" : "Collapse Menu"}
-                    >
-                        {collapsed ? "☰" : "✕"}
-                    </button>
+        <div className={`admin-full-wrapper ${collapsed ? "sidebar-collapsed" : ""}`}>
+            {/* SINGLE UNIFIED ADMIN SIDEBAR */}
+            <aside className={`admin-sidebar-box ${collapsed ? "collapsed" : ""}`}>
+                <div>
+                    {/* BRAND HEADER & HAMBURGER TOGGLE */}
+                    <div className="admin-brand-header-row">
+                        {!collapsed && (
+                            <Link to="/" className="navbar-brand" title="SHV Store Home">
+                                <span className="brand-mark">SHV</span>
+                                <span className="brand-word">Store</span>
+                            </Link>
+                        )}
+                        <button
+                            type="button"
+                            className="admin-sidebar-toggle-btn"
+                            onClick={toggleSidebar}
+                            title={collapsed ? "Expand Menu" : "Collapse Menu"}
+                        >
+                            {collapsed ? <Menu size={20} /> : <X size={20} />}
+                        </button>
+                    </div>
+
+                    {/* NAVIGATION MENU ITEMS WITH NEW LUCIDE ICONS */}
+                    <nav className="admin-nav-menu">
+                        {navItems.map((item) => {
+                            const IconComponent = item.icon;
+                            const isActive = item.exact 
+                                ? location.pathname === "/admin" 
+                                : location.pathname.startsWith(item.path);
+
+                            return (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className={`admin-nav-link ${isActive ? "active" : ""}`}
+                                    title={item.label}
+                                >
+                                    <IconComponent size={18} className="admin-nav-icon" />
+                                    {!collapsed && <span>{item.label}</span>}
+                                </Link>
+                            );
+                        })}
+
+                        {/* MANAGE EMPLOYEES PLACEHOLDER ITEM (NO ACTION ON CLICK) */}
+                        <button
+                            type="button"
+                            className="admin-nav-link"
+                            onClick={(e) => e.preventDefault()}
+                            title="Manage Employees"
+                        >
+                            <Users size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Manage Employees</span>}
+                        </button>
+                    </nav>
                 </div>
 
-                <nav className="sidebar-nav">
-                    {navItems.map((item) => {
-                        const isActive = item.path === "/admin"
-                            ? location.pathname === "/admin"
-                            : location.pathname.startsWith(item.path);
-
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                                title={item.label}
-                            >
-                                <span className="nav-icon-container">
-                                    <img src={item.icon} alt={item.label} className="nav-svg-icon" />
-                                </span>
-                                {!collapsed && <span className="nav-label">{item.label}</span>}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="sidebar-footer">
-                    <button
-                        type="button"
-                        className="sidebar-nav-item logout-item"
-                        onClick={() => {
-                            ApiService.logout();
-                            navigate('/login');
-                        }}
-                        title="Log out"
-                    >
-                        <span className="nav-icon-container">
-                            <span style={{ fontSize: "1.1rem", fontWeight: "bold" }}>←</span>
-                        </span>
-                        {!collapsed && <span className="nav-label">Logout</span>}
-                    </button>
+                {/* SIDEBAR FOOTER: BACK TO STORE */}
+                <div className="admin-sidebar-footer">
+                    <Link to="/" className="back-to-store-btn" title="Back to Store">
+                        <ArrowLeft size={18} />
+                        {!collapsed && <span>Back to Store</span>}
+                    </Link>
                 </div>
             </aside>
 
-            <main className="admin-main-content">
+            {/* MAIN ADMIN CONTENT VIEW */}
+            <main className="admin-main-view">
                 {children}
             </main>
         </div>
