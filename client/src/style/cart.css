@@ -47,6 +47,12 @@
     flex-shrink: 0;
 }
 
+.cart-item-image-link {
+    display: block;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
 .cart-item-info {
     flex: 1;
     min-width: 0;
@@ -55,6 +61,17 @@
 .cart-item-info h2 {
     font-size: 1.05rem;
     margin: 0 0 2px;
+}
+
+.cart-item-title-link {
+    color: var(--ink, #1F4E63);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.cart-item-title-link:hover {
+    color: #17435A;
+    text-decoration: underline;
 }
 
 .cart-item-desc {

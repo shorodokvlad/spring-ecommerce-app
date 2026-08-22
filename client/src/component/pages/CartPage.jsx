@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ApiService from "../../service/ApiService";
 import { useCart } from "../context/CartContext";
+import { getProductPath } from "../../utils/productVariant";
 import '../../style/cart.css'
 
 const CartPage = () => {
@@ -81,12 +82,20 @@ const CartPage = () => {
             ) : (
                 <div className="cart-layout">
                     <ul className="cart-items">
-                        {cart.map(item => (
-                            <li key={item.cartKey || item.id} className="cart-item">
-                                <img src={item.imageUrl} alt={item.name} />
-                                <div className="cart-item-info">
-                                    <h2>{item.name}</h2>
-                                    {item.variantTitle && <p className="cart-item-variant">{item.variantTitle}</p>}
+                        {cart.map(item => {
+                            const productUrl = item.productUrl || getProductPath(item);
+                            return (
+                                <li key={item.cartKey || item.id} className="cart-item">
+                                    <Link to={productUrl} className="cart-item-image-link" title={item.name}>
+                                        <img src={item.imageUrl} alt={item.name} />
+                                    </Link>
+                                    <div className="cart-item-info">
+                                        <h2>
+                                            <Link to={productUrl} className="cart-item-title-link">
+                                                {item.name}
+                                            </Link>
+                                        </h2>
+                                        {item.variantTitle && <p className="cart-item-variant">{item.variantTitle}</p>}
                                     <div className="cart-item-row">
                                         <div className="quantity-controls">
                                             <button onClick={()=> decrementItem(item)} aria-label={`Remove one ${item.name}`}>−</button>
@@ -99,7 +108,8 @@ const CartPage = () => {
                                     </div>
                                 </div>
                             </li>
-                        ))}
+                        );
+                        })}
                     </ul>
                     <aside className="cart-summary">
                         <h2>Summary</h2>

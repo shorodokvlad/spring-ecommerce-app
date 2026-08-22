@@ -4,6 +4,7 @@ import ProductList from "../common/ProductList";
 import Pagination from "../common/Pagination";
 import ApiService from "../../service/ApiService";
 import BannerCarousel from "../common/BannerCarousel";
+import ProductSkeleton from "../common/ProductSkeleton";
 import '../../style/home.css';
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache validity
@@ -15,7 +16,7 @@ const Home = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    const itemsPerPage = 15;
+    const itemsPerPage = 18;
 
     const searchItem = new URLSearchParams(location.search).get('search');
 
@@ -101,24 +102,25 @@ const Home = () => {
             {error && <p className="error-message">{error}</p>}
 
             {loading && products.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "64px 0", color: "var(--muted)" }}>
-                    <span className="button-spinner" style={{ width: "32px", height: "32px", borderColor: "var(--line)", borderTopColor: "var(--ink)" }} />
-                    <p style={{ marginTop: "14px", fontSize: "0.95rem", fontWeight: 600 }}>Loading products...</p>
-                </div>
+                <section className="best-sellers-section">
+                    {!searchItem && <h2 className="section-title emag-section-title">Products chosen for you</h2>}
+                    <ProductSkeleton count={18} />
+                </section>
             ) : products.length === 0 ? (
                 <div className="search-empty-state">
                     <h3>No products found matching "{searchItem || ''}".</h3>
                     <Link to="/" className="shop-band-clear">View All Products</Link>
                 </div>
             ) : (
-                <div>
+                <section className="best-sellers-section">
+                    {!searchItem && <h2 className="section-title emag-section-title">Products chosen for you</h2>}
                     <ProductList products={products} />
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
                         onPageChange={(page) => setCurrentPage(page)}
                     />
-                </div>
+                </section>
             )}
         </div>
     );

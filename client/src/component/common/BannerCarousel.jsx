@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiService from "../../service/ApiService";
+import BannerSkeleton from "./BannerSkeleton";
 import "../../style/bannerCarousel.css";
 
 const CACHE_KEY = "shv_home_banners";
@@ -9,6 +10,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 const BannerCarousel = () => {
     const [banners, setBanners] = useState([]);
+    const [loading, setLoading] = useState(!sessionStorage.getItem(CACHE_KEY));
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const navigate = useNavigate();
@@ -25,6 +27,7 @@ const BannerCarousel = () => {
                 const parsed = JSON.parse(cachedData);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     setBanners(parsed);
+                    setLoading(false);
                 }
             } catch (e) {
                 // Ignore parse errors
@@ -45,6 +48,8 @@ const BannerCarousel = () => {
             if (!sessionStorage.getItem(CACHE_KEY)) {
                 setBanners([]);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,6 +72,10 @@ const BannerCarousel = () => {
             navigate(link);
         }
     };
+
+    if (loading && banners.length === 0) {
+        return <BannerSkeleton />;
+    }
 
     if (!banners || banners.length === 0) return null;
 

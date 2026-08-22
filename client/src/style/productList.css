@@ -1,107 +1,219 @@
-/* Product cards — portfolio work-card feel: rounded, borderless-ish,
-   lift + teal-tinted shadow on hover. */
-.product-list {
+/* eMAG-Style 6-Column Product Grid & Cards (Store Palette Blend) */
+
+.product-list.emag-6-cols {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    margin-top: 20px;
 }
 
-.product-item {
+/* CARD SURFACE */
+.emag-product-card {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #dce7ec;
+    border-radius: 12px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    overflow: hidden;
-    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.product-item:hover {
+.emag-product-card:hover {
     transform: translateY(-4px);
-    border-color: transparent;
-    box-shadow: 0 18px 34px rgb(31 78 99 / 0.22);
+    box-shadow: 0 12px 28px rgba(31, 78, 99, 0.12);
+    border-color: #1F4E63;
 }
 
-.product-link {
+/* CARD TOP BAR: BADGES & FAVORITE HEART */
+.emag-card-top-bar {
     display: flex;
-    flex-direction: column;
-    flex: 1;
-    color: inherit;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 20px;
+    margin-bottom: 2px;
 }
 
-.product-link:hover {
-    text-decoration: none;
+.emag-badge {
+    font-size: 0.66rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
 }
 
-.product-media {
-    aspect-ratio: 4 / 3;
-    background: var(--well);
+.badge-genius {
+    background: #db2777;
+    font-style: italic;
+}
+
+.badge-multi {
+    background: #f97316;
+}
+
+.badge-top-fav {
+    background: #0284c7;
+}
+
+.badge-super-price {
+    background: #dc2626;
+}
+
+.emag-fav-btn {
+    background: transparent;
+    border: none;
+    padding: 3px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
 }
 
-.product-image {
-    max-height: 100%;
-    object-fit: contain;
+.emag-fav-btn:hover {
+    transform: scale(1.2);
 }
 
-.product-body {
-    padding: 14px 16px 6px;
+/* LINK & IMAGE */
+.emag-card-link {
+    text-decoration: none;
+    color: inherit;
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
-.product-body h3 {
-    font-size: 1rem;
-    margin: 0 0 4px;
+.emag-card-link:hover {
+    text-decoration: none;
 }
 
-.product-rating-row {
-    margin: 2px 0 6px;
-    min-height: 15px;
+.emag-image-wrap {
+    width: 100%;
+    height: 145px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin-bottom: 4px;
 }
 
-.product-item:hover .product-body h3 {
-    color: var(--accent);
+.emag-product-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    transition: transform 0.22s ease;
 }
 
-.product-desc {
+.emag-product-card:hover .emag-product-img {
+    transform: scale(1.05);
+}
+
+/* PRODUCT TITLE */
+.emag-product-name {
     font-size: 0.85rem;
-    color: var(--muted);
-    margin: 0 0 12px;
+    font-weight: 500;
+    color: #1F4E63;
+    line-height: 1.3;
+    margin: 0 0 2px 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-.product-meta {
+.emag-product-card:hover .emag-product-name {
+    color: #17435A;
+}
+
+/* RATING */
+.emag-rating-row {
+    margin-bottom: 2px;
+}
+
+/* PRICE & CART ROW */
+.emag-price-cart-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
     margin-top: auto;
+    padding-top: 2px;
+}
+
+.emag-price-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.emag-rrp-price {
+    font-size: 0.7rem;
+    color: #93a3b5;
+    text-decoration: line-through;
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+.emag-main-price {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1F4E63;
+    line-height: 1.15;
+}
+
+.emag-cart-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1F4E63;
+    color: #ffffff;
+    border: none;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(31, 78, 99, 0.25);
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
-.product-item .add-to-cart,
-.product-item .quantity-controls {
-    margin: 12px 16px 16px;
+.emag-cart-btn:hover:not(:disabled) {
+    background: #17435A;
+    transform: scale(1.08);
 }
 
-.product-item .quantity-controls {
-    align-self: flex-start;
+.emag-cart-btn:disabled {
+    background: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
-    .product-list {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 1400px) {
+    .product-list.emag-6-cols {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 1100px) {
+    .product-list.emag-6-cols {
+        grid-template-columns: repeat(4, 1fr);
         gap: 14px;
     }
+}
 
-    .product-media {
-        padding: 10px;
+@media (max-width: 768px) {
+    .product-list.emag-6-cols {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .emag-image-wrap {
+        height: 130px;
+    }
+
+    .emag-main-price {
+        font-size: 1.05rem;
     }
 }

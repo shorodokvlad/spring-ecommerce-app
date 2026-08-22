@@ -93,7 +93,14 @@ export default class ApiService {
     static async getLoggedInUserInfo() {
         const response = await axios.get(`${this.BASE_URL}/user/my-info`, {
             headers: this.getHeader()
-        }) 
+        });
+        if (response.data?.user) {
+            try {
+                sessionStorage.setItem("shv_user_info", JSON.stringify(response.data.user));
+            } catch (e) {
+                // Ignore storage errors
+            }
+        }
         return response.data;
     }
 

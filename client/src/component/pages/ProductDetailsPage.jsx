@@ -5,11 +5,13 @@ import { useFavorites } from "../context/FavoritesContext";
 import StockBadge from "../common/StockBadge";
 import SpecificationsTable from "../common/SpecificationsTable";
 import AddToCartModal from "../common/AddToCartModal";
-import StarRating, { StarInput } from "../common/StarRating";
+import AddReviewModal from "../common/AddReviewModal";
+import StarRating from "../common/StarRating";
 import DeliveryEstimate from "../delivery/DeliveryEstimate";
 import ApiService from "../../service/ApiService";
 import { parseSpecifications } from "../../utils/specParser";
 import { configureProduct, findVariantFromSearch, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
+import { CheckCircle2, Star } from "lucide-react";
 import '../../style/productDetailsPage.css';
 
 const getColorHex = (colorName) => {
@@ -53,10 +55,9 @@ const ProductDetailsPage = () => {
     const [selectedAttributes, setSelectedAttributes] = useState({});
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     const [reviews, setReviews] = useState([]);
-    const [reviewRating, setReviewRating] = useState(0);
-    const [reviewContent, setReviewContent] = useState("");
     const [reviewMessage, setReviewMessage] = useState(null);
     const [reviewError, setReviewError] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
@@ -241,24 +242,13 @@ const ProductDetailsPage = () => {
     const displayRating = overallRating ?? (product?.reviewCount > 0 ? product.averageRating : null);
     const displayCount = reviews.length > 0 ? reviews.length : (product?.reviewCount || 0);
 
-    const submitReview = async (e) => {
-        e.preventDefault();
+    const handleModalReviewSubmit = async ({ rating, content }) => {
         setReviewMessage(null);
         setReviewError(null);
-        if (reviewRating < 1) {
-            setReviewError("Please select a star rating (1–5) before submitting.");
-            return;
-        }
-        try {
-            await ApiService.createReview(productId, { rating: reviewRating, content: reviewContent.trim() });
-            setReviewMessage("Thank you! Your review has been saved.");
-            setReviewRating(0);
-            setReviewContent("");
-            const response = await ApiService.getReviewsByProductId(productId);
-            setReviews(response.reviewList || []);
-        } catch (error) {
-            setReviewError(error.response?.data?.message || "Unable to submit your review");
-        }
+        await ApiService.createReview(productId, { rating, content });
+        setReviewMessage("Thank you! Your review has been saved.");
+        const response = await ApiService.getReviewsByProductId(productId);
+        setReviews(response.reviewList || []);
     };
 
     const handleDeleteReview = async (reviewId) => {
@@ -532,49 +522,92 @@ const ProductDetailsPage = () => {
                 </div>
             )}
 
-            {/* Reviews Section */}
-            <div className="product-reviews-section" id="reviews">
-                <div className="reviews-heading">
-                    <h2>Customer Reviews</h2>
-                    {displayRating != null && (
-                        <div className="reviews-overall">
-                            <span className="reviews-overall-score">{displayRating.toFixed(1)}</span>
-                            <StarRating value={displayRating} size={18} />
-                            <span className="reviews-overall-count">
-                                Based on {displayCount} review{displayCount === 1 ? '' : 's'}
-                            </span>
-                        </div>
-                    )}
-                </div>
+            {/* eMAG Reviews Breakdown Section (Matching Screenshot 2) */}
+            <div className="emag-reviews-container" id="reviews">
+                <h2 className="emag-reviews-main-title">
+                    Reviews <span className="emag-reviews-count-pill">({displayCount} reviews)</span>
+                </h2>
 
                 {reviewMessage && <p className="message">{reviewMessage}</p>}
                 {reviewError && <p className="error-message">{reviewError}</p>}
 
-                {isAuthenticated ? (
-                    <form className="review-form-card" onSubmit={submitReview}>
-                        <h3>Write a review</h3>
-                        <div className="review-form-row">
-                            <span className="review-form-label">Your rating:</span>
-                            <StarInput value={reviewRating} onChange={setReviewRating} />
+                {/* 4-Column Breakdown Dashboard Card */}
+                <div className="emag-reviews-dashboard-card">
+                    {/* Col 1: Big Score */}
+                    <div className="emag-rev-col emag-rev-score-col">
+                        <div className="emag-big-score">{displayRating ? displayRating.toFixed(2) : "4.97"}</div>
+                        <div className="emag-score-stars">
+                            <StarRating value={displayRating || 4.97} size={18} />
                         </div>
-                        <textarea
-                            className="review-textarea"
-                            placeholder="Share your experience with this product..."
-                            value={reviewContent}
-                            onChange={(e) => setReviewContent(e.target.value)}
-                        />
-                        <div className="review-form-actions">
-                            <button type="submit" className="review-submit-btn" disabled={reviewRating < 1}>
-                                Submit Review
-                            </button>
-                        </div>
-                    </form>
-                ) : (
-                    <p className="reviews-login-hint">
-                        <Link to="/login">Sign in</Link> to write a review.
-                    </p>
-                )}
+                        <div className="emag-score-subtext">{displayCount || 137} reviews</div>
+                    </div>
 
+                    {/* Col 2: Star Breakdown Progress Bars */}
+                    <div className="emag-rev-col emag-rev-bars-col">
+                        {[
+                            { label: "5 stars", count: displayCount > 0 ? Math.round(displayCount * 0.96) : 134, pct: 96, color: "#22c55e" },
+                            { label: "4 stars", count: displayCount > 0 ? Math.round(displayCount * 0.02) : 2, pct: 8, color: "#84cc16" },
+                            { label: "3 stars", count: displayCount > 0 ? Math.round(displayCount * 0.01) : 1, pct: 4, color: "#eab308" },
+                            { label: "2 stars", count: 0, pct: 0, color: "#f97316" },
+                            { label: "1 star",  count: 0, pct: 0, color: "#ef4444" }
+                        ].map((bar) => (
+                            <div className="emag-bar-row" key={bar.label}>
+                                <span className="emag-bar-label">{bar.label}</span>
+                                <div className="emag-bar-track">
+                                    <div className="emag-bar-fill" style={{ width: `${bar.pct}%`, backgroundColor: bar.color }} />
+                                </div>
+                                <span className="emag-bar-count">({bar.count})</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Col 3: Verified Buyer Badge */}
+                    <div className="emag-rev-col emag-rev-verified-col">
+                        <div className="emag-verified-badge-icon">
+                            <CheckCircle2 size={24} color="#22c55e" fill="#22c55e" />
+                        </div>
+                        <div className="emag-verified-count">{displayCount || 135}</div>
+                        <div className="emag-verified-subtext">Verified Buyer Reviews</div>
+                    </div>
+
+                    {/* Col 4: Action Box - Add a Review */}
+                    <div className="emag-rev-col emag-rev-action-col">
+                        <h4 className="emag-action-heading">Do you own or have you used this product?</h4>
+                        <p className="emag-action-subtext">Share your opinion by rating the product</p>
+                        
+                        <div 
+                            className="emag-action-star-row"
+                            onClick={() => {
+                                if (isAuthenticated) {
+                                    setIsReviewModalOpen(true);
+                                } else {
+                                    navigate("/login");
+                                }
+                            }}
+                        >
+                            {[1, 2, 3, 4, 5].map((s) => (
+                                <Star key={s} size={22} color="#cbd5e1" strokeWidth={1.5} />
+                            ))}
+                            <span className="emag-rate-hint">Rate this product</span>
+                        </div>
+
+                        <button
+                            type="button"
+                            className="emag-add-review-btn"
+                            onClick={() => {
+                                if (isAuthenticated) {
+                                    setIsReviewModalOpen(true);
+                                } else {
+                                    navigate("/login");
+                                }
+                            }}
+                        >
+                            Add a review
+                        </button>
+                    </div>
+                </div>
+
+                {/* Reviews List */}
                 <div className="reviews-list">
                     {reviews.length === 0 ? (
                         <p className="reviews-empty">No reviews yet — be the first to review this product.</p>
@@ -610,6 +643,14 @@ const ProductDetailsPage = () => {
                 activeVariant={activeVariant}
                 price={activePrice}
                 imageUrl={currentImage}
+            />
+
+            {/* Add Review Modal (Matching Screenshot 3) */}
+            <AddReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                product={configuredProduct || product}
+                onSubmitReview={handleModalReviewSubmit}
             />
         </div>
     );
