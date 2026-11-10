@@ -1,5 +1,7 @@
 package com.shv.Ecommerce.security;
 
+import com.shv.Ecommerce.ai.AiProperties;
+import com.shv.Ecommerce.ai.ServiceTokenFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,12 +27,15 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
+    private final AiProperties aiProperties;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
+                        // Python AI service only (X-Service-Token), never user JWTs
+                        .requestMatchers("/internal/ai/**").hasAuthority(ServiceTokenFilter.AUTHORITY)
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/delivery/**").permitAll()
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/warehouse/**").permitAll()
                         .anyRequest().authenticated())
@@ -48,7 +53,8 @@ public class SecurityConfig {
                             response.getWriter().write("{\"message\":\"You do not have permission to perform this action\"}");
                         }))
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new ServiceTokenFilter(aiProperties), JwtAuthFilter.class);
         return httpSecurity.build();
     }
 

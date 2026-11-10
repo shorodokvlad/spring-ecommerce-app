@@ -4,6 +4,7 @@ import ApiService from "../../service/ApiService";
 import BlueprintManagerModal, { getStoredBlueprints, saveStoredBlueprints } from "./BlueprintManagerModal";
 import SpecBuilder from "./SpecBuilder";
 import { useDemoRestriction } from "./demoRestriction";
+import ProductStepper, { PRODUCT_STEPS } from "./ProductStepper";
 import '../../style/addProduct.css';
 
 const BUILT_IN_BLUEPRINTS = [
@@ -54,6 +55,8 @@ const AddProductPage = () => {
     const { readOnly, permissionMessage, blockWrite } = useDemoRestriction();
 
     const navigate = useNavigate();
+    const [step, setStep] = useState(1);
+    const [maxStep, setMaxStep] = useState(1);
 
     useEffect(() => {
         ApiService.getAllCategory().then((res) => setCategories(res.categoryList || []));
@@ -266,8 +269,62 @@ const AddProductPage = () => {
         return sum + variantStockTotal(v);
     }, 0);
 
+    const show = (n) => (step === n ? "" : " step-hidden");
+
+    const validateStep = (n) => {
+        if (n === 1) {
+            if (!categoryId) return "Please select a category.";
+            if (!name.trim()) return "Please enter a product name.";
+        }
+        if (n === 4) {
+            for (let i = 0; i < variants.length; i++) {
+                const v = variants[i];
+                if (!v.price || parseFloat(v.price) <= 0) return `Please enter a price for configuration #${i + 1}.`;
+                if (warehouses.length === 0 && v.stockQuantity === '') return `Please enter stock for configuration #${i + 1}.`;
+            }
+        }
+        if (n === 5) {
+            const hasPhotos = variants.some((v) => {
+                if (v.images.length > 0) return true;
+                if (v.copyPhotosFromIndex !== "" && v.copyPhotosFromIndex != null) {
+                    return variants[parseInt(v.copyPhotosFromIndex, 10)]?.images?.length > 0;
+                }
+                return false;
+            });
+            if (!hasPhotos) return "Please upload or select at least one photo for a product configuration.";
+        }
+        return null;
+    };
+
+    const goToStep = (n, keepMessage = false) => {
+        if (!keepMessage) setMessage('');
+        setStep(n);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const goNext = () => {
+        const error = validateStep(step);
+        if (error) {
+            setMessage(error);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        setMaxStep((m) => Math.max(m, step + 1));
+        goToStep(step + 1);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (step < PRODUCT_STEPS.length) {
+            goNext();
+            return;
+        }
+        const invalidStep = [1, 4, 5].find((n) => validateStep(n));
+        if (invalidStep) {
+            setMessage(validateStep(invalidStep));
+            goToStep(invalidStep, true);
+            return;
+        }
         if (readOnly) {
             blockWrite();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -360,12 +417,13 @@ const AddProductPage = () => {
 
     return (
         <div>
-            <form onSubmit={handleSubmit} className="product-form">
+            <form onSubmit={handleSubmit} className="product-form" noValidate>
                 <h2>Add Product</h2>
+                <ProductStepper step={step} maxStep={maxStep} onStepClick={(n) => goToStep(n)} />
                 {permissionMessage && <p className="demo-permission-message">{permissionMessage}</p>}
                 {message && <div className="message">{message}</div>}
 
-                <div className="form-group">
+                <div className={`form-group${show(1)}`}>
                     <label>Category</label>
                     <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
                         <option value="">Select Category</option>
@@ -375,7 +433,7 @@ const AddProductPage = () => {
                     </select>
                 </div>
 
-                <div className="form-group">
+                <div className={`form-group${show(1)}`}>
                     <label>Product Name</label>
                     <input
                         type="text"
@@ -385,11 +443,11 @@ const AddProductPage = () => {
                     />
                 </div>
 
-                <div className="form-group">
+                <div className={`form-group${show(2)}`}>
                     <SpecBuilder sections={specSections} onChange={setSpecSections} />
                 </div>
 
-                <div className="admin-variants-section">
+                <div className={`admin-variants-section${step >= 3 && step <= 5 ? "" : " step-hidden"}`}>
                     <div className="admin-variants-header">
                         <div>
                             <h3 style={{ margin: 0 }}>Product Configurations ({variants.length})</h3>
@@ -398,7 +456,7 @@ const AddProductPage = () => {
                             </p>
                         </div>
 
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                        <div className={show(3)} style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                             <button type="button" className="add-variant-btn" onClick={addVariant}>
                                 + Add Configuration
                             </button>
@@ -460,7 +518,7 @@ const AddProductPage = () => {
                                             onChange={(e) => updateVariantField(vIdx, 'title', e.target.value)}
                                         />
 
-                                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                        <div className={show(3)} style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                                             <button
                                                 type="button"
                                                 className="add-attr-btn"
@@ -482,7 +540,7 @@ const AddProductPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="variant-attributes-builder">
+                                    <div className={`variant-attributes-builder${show(3)}`}>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                             <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155" }}>
                                                 Custom Attributes (e.g. Color, Storage, Case Size, Band Type)
@@ -524,7 +582,7 @@ const AddProductPage = () => {
                                         ))}
                                     </div>
 
-                                    <div className="variant-price-stock-row">
+                                    <div className={`variant-price-stock-row${show(4)}`}>
                                         <div>
                                             <label>Price (€)</label>
                                             <input
@@ -577,7 +635,7 @@ const AddProductPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="variant-photo-upload-section">
+                                    <div className={`variant-photo-upload-section${show(5)}`}>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
                                             <label style={{ fontSize: "0.82rem", fontWeight: 600, color: "#334155" }}>
                                                 Photos for Configuration #{vIdx + 1}
@@ -654,9 +712,41 @@ const AddProductPage = () => {
                     </div>
                 </div>
 
+                <div className={`product-review${show(6)}`}>
+                    <h3>Review</h3>
+                    <dl className="product-review-list">
+                        <dt>Category</dt>
+                        <dd>{categories.find((c) => String(c.id) === String(categoryId))?.name || "—"}</dd>
+                        <dt>Name</dt>
+                        <dd>{name || "—"}</dd>
+                        <dt>Specification sections</dt>
+                        <dd>{specSections.length}</dd>
+                        <dt>Configurations</dt>
+                        <dd>{variants.length}</dd>
+                        <dt>Total stock</dt>
+                        <dd>{totalStockSum} units</dd>
+                    </dl>
+                    <ul className="product-review-variants">
+                        {variants.map((v, i) => (
+                            <li key={v.id}>
+                                <strong>{v.title || `Configuration #${i + 1}`}</strong> — €{v.price || "0"} · {variantStockTotal(v)} units
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
                 {message && <div className="message" style={{ marginTop: "12px" }}>{message}</div>}
-                <button
-                    type="submit"
+                <div className="product-step-nav">
+                    <button type="button" className="step-back-btn" onClick={() => goToStep(step - 1)} disabled={step === 1}>
+                        ← Back
+                    </button>
+                    {step < PRODUCT_STEPS.length ? (
+                        <button type="button" className="step-next-btn" onClick={goNext}>
+                            Next →
+                        </button>
+                    ) : (
+                    <button
+                        type="submit"
                     disabled={isSubmitting}
                     className={readOnly ? "demo-no-permission" : ""}
                     aria-disabled={readOnly}
@@ -670,6 +760,8 @@ const AddProductPage = () => {
                         "Save Product"
                     )}
                 </button>
+                    )}
+                </div>
             </form>
 
             <BlueprintManagerModal

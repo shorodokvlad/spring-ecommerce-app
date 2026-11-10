@@ -1,4 +1,13 @@
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/EcommerceApplication.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiCatalogService.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiConfig.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiProperties.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/InternalAiController.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/ServiceTokenFilter.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/dto/AiPage.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/dto/AiProductDto.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/dto/AiReviewDto.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/dto/AiVariantDto.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/config/CacheConfig.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/controller/AddressController.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/controller/AuthController.java
