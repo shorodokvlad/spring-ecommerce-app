@@ -1,27 +1,37 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../../style/adminDashboard.css";
 import { 
     LayoutDashboard, Layers, Package, ShoppingBag, 
-    Tag, Building2, Users, ArrowLeft, Menu, X 
+    Tag, Building2, Users, ArrowLeft, Menu, X,
+    Boxes, FileText, Truck, ChevronDown, ChevronRight
 } from "lucide-react";
 
 const AdminLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
 
-    const navItems = [
-        { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-        { path: "/admin/categories", label: "Manage Categories", icon: Layers },
-        { path: "/admin/products", label: "Manage Products", icon: Package },
-        { path: "/admin/orders", label: "Manage Orders", icon: ShoppingBag },
-        { path: "/admin/banners", label: "Manage Banners", icon: Tag },
-        { path: "/admin/warehouses", label: "Manage Warehouses", icon: Building2 },
-        { path: "/admin/employees", label: "Manage Employees", icon: Users },
-    ];
+    const isInventorySectionActive = 
+        location.pathname.startsWith("/admin/inventory") ||
+        location.pathname.startsWith("/admin/purchase-orders") ||
+        location.pathname.startsWith("/admin/suppliers") ||
+        location.pathname.startsWith("/admin/warehouses") ||
+        location.pathname.startsWith("/admin/add-warehouse") ||
+        location.pathname.startsWith("/admin/edit-warehouse");
+
+    const [inventoryOpen, setInventoryOpen] = useState(isInventorySectionActive);
 
     const toggleSidebar = () => {
         setCollapsed(!collapsed);
+    };
+
+    const handleInventoryToggle = (e) => {
+        e.preventDefault();
+        setInventoryOpen(!inventoryOpen);
+        if (!location.pathname.startsWith("/admin/inventory")) {
+            navigate("/admin/inventory");
+        }
     };
 
     return (
@@ -47,26 +57,106 @@ const AdminLayout = ({ children }) => {
                         </button>
                     </div>
 
-                    {/* NAVIGATION MENU ITEMS WITH NEW LUCIDE ICONS */}
+                    {/* NAVIGATION MENU ITEMS */}
                     <nav className="admin-nav-menu">
-                        {navItems.map((item) => {
-                            const IconComponent = item.icon;
-                            const isActive = item.exact 
-                                ? location.pathname === "/admin" 
-                                : location.pathname.startsWith(item.path);
+                        <Link
+                            to="/admin"
+                            className={`admin-nav-link ${location.pathname === "/admin" ? "active" : ""}`}
+                            title="Dashboard"
+                        >
+                            <LayoutDashboard size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Dashboard</span>}
+                        </Link>
 
-                            return (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    className={`admin-nav-link ${isActive ? "active" : ""}`}
-                                    title={item.label}
-                                >
-                                    <IconComponent size={18} className="admin-nav-icon" />
-                                    {!collapsed && <span>{item.label}</span>}
-                                </Link>
-                            );
-                        })}
+                        <Link
+                            to="/admin/categories"
+                            className={`admin-nav-link ${location.pathname.startsWith("/admin/categories") ? "active" : ""}`}
+                            title="Manage Categories"
+                        >
+                            <Layers size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Manage Categories</span>}
+                        </Link>
+
+                        <Link
+                            to="/admin/products"
+                            className={`admin-nav-link ${location.pathname.startsWith("/admin/products") ? "active" : ""}`}
+                            title="Manage Products"
+                        >
+                            <Package size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Manage Products</span>}
+                        </Link>
+
+                        <Link
+                            to="/admin/orders"
+                            className={`admin-nav-link ${location.pathname.startsWith("/admin/orders") ? "active" : ""}`}
+                            title="Manage Orders"
+                        >
+                            <ShoppingBag size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Manage Orders</span>}
+                        </Link>
+
+                        <Link
+                            to="/admin/banners"
+                            className={`admin-nav-link ${location.pathname.startsWith("/admin/banners") ? "active" : ""}`}
+                            title="Manage Banners"
+                        >
+                            <Tag size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Manage Banners</span>}
+                        </Link>
+
+                        {/* MANAGE INVENTORY ACCORDION */}
+                        <div>
+                            <button
+                                type="button"
+                                className={`admin-nav-link ${isInventorySectionActive ? "active" : ""}`}
+                                onClick={handleInventoryToggle}
+                                title="Manage Inventory"
+                                style={{ justifyContent: "space-between", width: "100%" }}
+                            >
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                    <Boxes size={18} className="admin-nav-icon" />
+                                    {!collapsed && <span>Manage Inventory</span>}
+                                </div>
+                                {!collapsed && (
+                                    inventoryOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />
+                                )}
+                            </button>
+
+                            {!collapsed && inventoryOpen && (
+                                <div className="admin-sub-menu">
+                                    <Link
+                                        to="/admin/purchase-orders"
+                                        className={`admin-sub-link ${location.pathname.startsWith("/admin/purchase-orders") ? "active" : ""}`}
+                                    >
+                                        <FileText size={15} />
+                                        <span>Purchase Orders</span>
+                                    </Link>
+                                    <Link
+                                        to="/admin/suppliers"
+                                        className={`admin-sub-link ${location.pathname.startsWith("/admin/suppliers") ? "active" : ""}`}
+                                    >
+                                        <Truck size={15} />
+                                        <span>Manage Suppliers</span>
+                                    </Link>
+                                    <Link
+                                        to="/admin/warehouses"
+                                        className={`admin-sub-link ${location.pathname.startsWith("/admin/warehouses") || location.pathname.startsWith("/admin/add-warehouse") || location.pathname.startsWith("/admin/edit-warehouse") ? "active" : ""}`}
+                                    >
+                                        <Building2 size={15} />
+                                        <span>Manage Warehouses</span>
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+
+                        <Link
+                            to="/admin/employees"
+                            className={`admin-nav-link ${location.pathname.startsWith("/admin/employees") ? "active" : ""}`}
+                            title="Manage Employees"
+                        >
+                            <Users size={18} className="admin-nav-icon" />
+                            {!collapsed && <span>Manage Employees</span>}
+                        </Link>
                     </nav>
                 </div>
 

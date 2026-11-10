@@ -301,7 +301,8 @@ public class ProductServiceImpl implements IProductService {
     @Cacheable(cacheNames = "products", key = "#productId")
     public Response getProductById(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
-        ProductDto productDto = mapProductToDtoWithReviewStats(product);
+        Set<Long> topSellerProductIds = resolveBestSellerProductIds(productRepo.findAll(), null);
+        ProductDto productDto = mapProductToDtoWithReviewStats(product, topSellerProductIds);
 
         return Response.builder()
                 .status(200)
@@ -480,55 +481,7 @@ public class ProductServiceImpl implements IProductService {
             }
         }
 
-        // Total units sold per product (excluding cancelled/returned orders)
-        Map<Long, Long> totalSoldByProduct = new HashMap<>();
-        for (Object[] row : orderItemRepo.findTotalSoldByProduct(SOLD_EXCLUDED_STATUSES)) {
-            Long productId = row[0] != null ? ((Number) row[0]).longValue() : null;
-            long sold = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-            if (productId != null) {
-                totalSoldByProduct.put(productId, sold);
-            }
-        }
-
-        // Best seller per category (products without a category are their own group)
-        Map<Object, Long> bestSoldPerGroup = new HashMap<>();
-        for (Product p : allProducts) {
-            Object groupKey = p.getCategory() != null ? p.getCategory().getId() : "p" + p.getId();
-            long sold = totalSoldByProduct.getOrDefault(p.getId(), 0L);
-            if (sold > bestSoldPerGroup.getOrDefault(groupKey, 0L)) {
-                bestSoldPerGroup.put(groupKey, sold);
-            }
-        }
-
-        Set<Long> topSellerProductIds = new HashSet<>();
-        for (Product p : allProducts) {
-            Object groupKey = p.getCategory() != null ? p.getCategory().getId() : "p" + p.getId();
-            long sold = totalSoldByProduct.getOrDefault(p.getId(), 0L);
-            if (sold > 0 && sold == bestSoldPerGroup.getOrDefault(groupKey, 0L)) {
-                topSellerProductIds.add(p.getId());
-            }
-        }
-
-        // Ensure best seller representation per category (using sales, or top-rated per category if sales count is small)
-        if (topSellerProductIds.size() < Math.min(4, allProducts.size()) && !allProducts.isEmpty()) {
-            Map<Object, Product> topProductPerGroup = new LinkedHashMap<>();
-            for (Product p : allProducts) {
-                Object groupKey = p.getCategory() != null ? p.getCategory().getId() : "p" + p.getId();
-                Product current = topProductPerGroup.get(groupKey);
-                if (current == null) {
-                    topProductPerGroup.put(groupKey, p);
-                } else {
-                    BigDecimal currentRating = avgRatingByProduct.getOrDefault(current.getId(), BigDecimal.ZERO);
-                    BigDecimal pRating = avgRatingByProduct.getOrDefault(p.getId(), BigDecimal.ZERO);
-                    if (pRating.compareTo(currentRating) > 0) {
-                        topProductPerGroup.put(groupKey, p);
-                    }
-                }
-            }
-            for (Product p : topProductPerGroup.values()) {
-                topSellerProductIds.add(p.getId());
-            }
-        }
+        Set<Long> topSellerProductIds = resolveBestSellerProductIds(allProducts, avgRatingByProduct);
 
         // Priority set = top rated (avg >= 4.8) OR top selling; the rest are fillers
         List<Product> priority = new ArrayList<>();
@@ -598,5 +551,56 @@ public class ProductServiceImpl implements IProductService {
         }
 
         return productDto;
+    }
+
+    private Set<Long> resolveBestSellerProductIds(List<Product> allProducts, Map<Long, BigDecimal> avgRatingByProduct) {
+        Map<Long, Long> totalSoldByProduct = new HashMap<>();
+        for (Object[] row : orderItemRepo.findTotalSoldByProduct(SOLD_EXCLUDED_STATUSES)) {
+            Long productId = row[0] != null ? ((Number) row[0]).longValue() : null;
+            long sold = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+            if (productId != null) {
+                totalSoldByProduct.put(productId, sold);
+            }
+        }
+
+        Map<Object, Long> bestSoldPerGroup = new HashMap<>();
+        for (Product p : allProducts) {
+            Object groupKey = p.getCategory() != null ? p.getCategory().getId() : "p" + p.getId();
+            long sold = totalSoldByProduct.getOrDefault(p.getId(), 0L);
+            if (sold > bestSoldPerGroup.getOrDefault(groupKey, 0L)) {
+                bestSoldPerGroup.put(groupKey, sold);
+            }
+        }
+
+        Set<Long> topSellerProductIds = new HashSet<>();
+        for (Product p : allProducts) {
+            Object groupKey = p.getCategory() != null ? p.getCategory().getId() : "p" + p.getId();
+            long sold = totalSoldByProduct.getOrDefault(p.getId(), 0L);
+            if (sold > 0 && sold == bestSoldPerGroup.getOrDefault(groupKey, 0L)) {
+                topSellerProductIds.add(p.getId());
+            }
+        }
+
+        if (topSellerProductIds.size() < Math.min(4, allProducts.size()) && !allProducts.isEmpty()) {
+            Map<Object, Product> topProductPerGroup = new LinkedHashMap<>();
+            for (Product p : allProducts) {
+                Object groupKey = p.getCategory() != null ? p.getCategory().getId() : "p" + p.getId();
+                Product current = topProductPerGroup.get(groupKey);
+                if (current == null) {
+                    topProductPerGroup.put(groupKey, p);
+                } else {
+                    BigDecimal currentRating = avgRatingByProduct != null ? avgRatingByProduct.getOrDefault(current.getId(), BigDecimal.ZERO) : BigDecimal.ZERO;
+                    BigDecimal pRating = avgRatingByProduct != null ? avgRatingByProduct.getOrDefault(p.getId(), BigDecimal.ZERO) : BigDecimal.ZERO;
+                    if (pRating.compareTo(currentRating) > 0) {
+                        topProductPerGroup.put(groupKey, p);
+                    }
+                }
+            }
+            for (Product p : topProductPerGroup.values()) {
+                topSellerProductIds.add(p.getId());
+            }
+        }
+
+        return topSellerProductIds;
     }
 }

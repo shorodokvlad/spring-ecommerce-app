@@ -114,6 +114,40 @@
     color: #1F4E63;
 }
 
+/* SUB-MENU STYLES FOR EXPANDABLE ACCORDIONS */
+.admin-sub-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 28px;
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+.admin-sub-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: #475569;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.admin-sub-link:hover {
+    background: #f1f5f9;
+    color: #1F4E63;
+}
+
+.admin-sub-link.active {
+    background: #eef4f6;
+    color: #1F4E63;
+    font-weight: 700;
+}
+
 .admin-sidebar-footer {
     padding-top: 16px;
     border-top: 1px solid #f1f5f9;

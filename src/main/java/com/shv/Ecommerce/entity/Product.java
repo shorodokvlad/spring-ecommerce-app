@@ -42,7 +42,23 @@ public class Product {
     @OrderBy("id ASC")
     private java.util.List<ProductVariant> variants = new java.util.ArrayList<>();
 
+    @Column(name = "sku", unique = true)
+    private String sku;
+
+    @Column(name = "cost_price")
+    private BigDecimal costPrice;
+
+    @Column(name = "low_stock_threshold")
+    private Integer lowStockThreshold = 10;
+
     @Column(name = "created_at")
     private final LocalDateTime createdAt = LocalDateTime.now();
 
+    @PrePersist
+    public void generateSku() {
+        if (this.sku == null || this.sku.trim().isEmpty()) {
+            String randomStr = java.util.UUID.randomUUID().toString().replaceAll("-", "").toUpperCase();
+            this.sku = "AFZM" + randomStr.substring(0, 6);
+        }
+    }
 }

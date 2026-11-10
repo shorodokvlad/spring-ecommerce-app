@@ -33,6 +33,8 @@ public class WarehouseServiceImpl implements IWarehouseService {
         warehouse.setState(request.getState());
         warehouse.setZipCode(request.getZipCode());
         warehouse.setCountry(request.getCountry());
+        warehouse.setType(request.getType());
+        warehouse.setManagerContact(request.getManagerContact());
     }
 
     @Override

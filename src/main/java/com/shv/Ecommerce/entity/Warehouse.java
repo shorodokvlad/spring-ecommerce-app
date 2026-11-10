@@ -29,6 +29,11 @@ public class Warehouse {
 
     private String country;
 
+    private String type;
+
+    @Column(name = "manager_contact")
+    private String managerContact;
+
     @OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<WarehouseStock> warehouseStocks = new ArrayList<>();

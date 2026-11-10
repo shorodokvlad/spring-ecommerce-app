@@ -12,6 +12,8 @@ public interface WarehouseStockRepo extends JpaRepository<WarehouseStock, Long> 
 
     List<WarehouseStock> findByWarehouseId(Long warehouseId);
 
+    java.util.Optional<WarehouseStock> findByWarehouseIdAndVariantId(Long warehouseId, Long variantId);
+
     @Query("select coalesce(sum(ws.quantity), 0) from WarehouseStock ws where ws.warehouse.id = :warehouseId")
     Integer sumQuantityByWarehouseId(@Param("warehouseId") Long warehouseId);
 }

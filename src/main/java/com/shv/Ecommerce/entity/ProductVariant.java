@@ -21,6 +21,15 @@ public class ProductVariant {
     private Long id;
 
     private String title; // Custom Configuration Name/Title e.g. "Desert Titanium / 256GB"
+    private String sku; // Configuration SKU e.g. "AFZM6478-V1"
+
+    @PrePersist
+    @PreUpdate
+    public void generateSku() {
+        if ((sku == null || sku.isBlank()) && product != null && product.getSku() != null) {
+            this.sku = product.getSku() + "-V" + (id != null ? id : (int)(Math.random() * 900 + 100));
+        }
+    }
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "variant_attributes", joinColumns = @JoinColumn(name = "variant_id"))

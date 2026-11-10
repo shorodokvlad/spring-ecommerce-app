@@ -75,6 +75,7 @@ public class EntityDtoMapper {
         com.shv.Ecommerce.dto.ProductVariantDto dto = new com.shv.Ecommerce.dto.ProductVariantDto();
         dto.setId(variant.getId());
         dto.setTitle(variant.getTitle());
+        dto.setSku((variant.getSku() != null && !variant.getSku().isBlank()) ? variant.getSku() : null);
         if (variant.getAttributes() != null && !variant.getAttributes().isEmpty()) {
             dto.setAttributes(new java.util.HashMap<>(variant.getAttributes()));
         }
@@ -100,6 +101,9 @@ public class EntityDtoMapper {
         productDto.setPrice(product.getPrice());
         productDto.setImageUrl(product.getImageUrl());
         productDto.setStockQuantity(product.getStockQuantity());
+        productDto.setSku(product.getSku());
+        productDto.setCostPrice(product.getCostPrice());
+        productDto.setLowStockThreshold(product.getLowStockThreshold());
 
         // Only id + name: avoids lazily loading the category's whole product list
         if (product.getCategory() != null) {
@@ -220,6 +224,8 @@ public class EntityDtoMapper {
         dto.setState(warehouse.getState());
         dto.setZipCode(warehouse.getZipCode());
         dto.setCountry(warehouse.getCountry());
+        dto.setType(warehouse.getType());
+        dto.setManagerContact(warehouse.getManagerContact());
         return dto;
     }
 

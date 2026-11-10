@@ -85,8 +85,20 @@ const AdminWarehousePage = () => {
                         {warehouses.map((warehouse) => (
                             <li key={warehouse.id} className="warehouse-list-item">
                                 <div className="warehouse-item-info">
-                                    <span className="warehouse-item-name">{warehouse.name}</span>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <span className="warehouse-item-name">{warehouse.name}</span>
+                                        {warehouse.type && (
+                                            <span style={{ background: "#e0e7ff", color: "#3730a3", fontSize: "0.75rem", fontWeight: 700, padding: "2px 8px", borderRadius: "12px" }}>
+                                                {warehouse.type}
+                                            </span>
+                                        )}
+                                    </div>
                                     <span className="warehouse-item-address">{formatAddress(warehouse)}</span>
+                                    {warehouse.managerContact && (
+                                        <span style={{ fontSize: "0.85rem", color: "#4b5563", marginTop: "2px" }}>
+                                            Manager Contact: {warehouse.managerContact}
+                                        </span>
+                                    )}
                                     <span className={`warehouse-stock-badge ${warehouse.totalStockQuantity > 0 ? 'in-stock' : 'no-stock'}`}>
                                         {warehouse.totalStockQuantity > 0
                                             ? `${warehouse.totalStockQuantity} units in stock`

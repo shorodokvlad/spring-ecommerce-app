@@ -8,6 +8,8 @@ const EditWarehousePage = () => {
     const { warehouseId } = useParams();
     const [form, setForm] = useState({
         name: '',
+        type: 'Main Hub',
+        managerContact: '',
         street: '',
         city: '',
         state: '',
@@ -25,6 +27,8 @@ const EditWarehousePage = () => {
                 const wh = response.warehouse;
                 setForm({
                     name: wh.name || '',
+                    type: wh.type || '',
+                    managerContact: wh.managerContact || '',
                     street: wh.street || '',
                     city: wh.city || '',
                     state: wh.state || '',
@@ -82,6 +86,34 @@ const EditWarehousePage = () => {
                         onChange={handleChange}
                         required
                     />
+                </div>
+
+                <div className="warehouse-form-row">
+                    <div className="warehouse-form-group">
+                        <label>Warehouse Type</label>
+                        <select
+                            name="type"
+                            value={form.type}
+                            onChange={handleChange}
+                            style={{ padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db", width: "100%", fontSize: "0.95rem" }}
+                        >
+                            <option value="">Select Warehouse Type...</option>
+                            <option value="Main Hub">Main Hub</option>
+                            <option value="Return Center">Return Center</option>
+                            <option value="Retail Store Stock">Retail Store Stock</option>
+                            <option value="Regional Depot">Regional Depot</option>
+                        </select>
+                    </div>
+                    <div className="warehouse-form-group">
+                        <label>Manager Contact</label>
+                        <input
+                            type="text"
+                            name="managerContact"
+                            placeholder="e.g. John Doe (+31 6 12345678)"
+                            value={form.managerContact}
+                            onChange={handleChange}
+                        />
+                    </div>
                 </div>
 
                 <div className="warehouse-form-row">

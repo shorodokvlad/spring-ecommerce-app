@@ -414,6 +414,79 @@ export default class ApiService {
         return response.data;
     }
 
+    /* INVENTORY, SUPPLIER & PURCHASE ORDER APIS */
+    static async getInventorySummary() {
+        const response = await axios.get(`${this.BASE_URL}/api/inventory/summary`, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async getInventoryItems(search = "", status = "", page = 0, size = 20) {
+        const response = await axios.get(`${this.BASE_URL}/api/inventory/items`, {
+            params: { search, status, page, size },
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async getAllSuppliers() {
+        const response = await axios.get(`${this.BASE_URL}/api/suppliers`, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async createSupplier(supplierData) {
+        const response = await axios.post(`${this.BASE_URL}/api/suppliers`, supplierData, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async updateSupplier(id, supplierData) {
+        const response = await axios.put(`${this.BASE_URL}/api/suppliers/${id}`, supplierData, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async deleteSupplier(id) {
+        const response = await axios.delete(`${this.BASE_URL}/api/suppliers/${id}`, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async getAllPurchaseOrders(page = 0, size = 20) {
+        const response = await axios.get(`${this.BASE_URL}/api/purchase-orders`, {
+            params: { page, size },
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async createPurchaseOrder(poData) {
+        const response = await axios.post(`${this.BASE_URL}/api/purchase-orders`, poData, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async receiveStock(poId, quantitiesMap) {
+        const response = await axios.post(`${this.BASE_URL}/api/purchase-orders/${poId}/receive`, quantitiesMap, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async cancelPurchaseOrder(poId) {
+        const response = await axios.put(`${this.BASE_URL}/api/purchase-orders/${poId}/cancel`, {}, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
     /***AUTHEMNTICATION CHECKER */
     static logout(){
         clearSession()

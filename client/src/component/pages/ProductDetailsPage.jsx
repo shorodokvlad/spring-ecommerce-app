@@ -14,6 +14,7 @@ import { parseSpecifications } from "../../utils/specParser";
 import { configureProduct, findVariantFromSearch, getDefaultInStockVariant, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
 import { CheckCircle2, Star } from "lucide-react";
 import '../../style/productDetailsPage.css';
+import '../../style/productList.css';
 
 const getColorHex = (colorName) => {
     if (!colorName) return null;
@@ -346,6 +347,8 @@ const ProductDetailsPage = () => {
     const currentImage = currentImages[activeImageIndex] || currentImages[0] || product.imageUrl;
     const hasAttributeGroups = Object.keys(attributeGroups).length > 0;
     const hasVariantsList = product.variants && product.variants.length > 0;
+    const isBestSeller = Boolean(product.isBestSeller || product.bestSeller || product.isTopSelling || product.topSelling);
+    const isTopRated = Boolean(product.isTopRated || product.topRated || (product.averageRating && product.averageRating >= 4.8));
 
     const checkOptionStock = (attrKey, val) => {
         if (!product || !product.variants) return 1;
@@ -368,20 +371,26 @@ const ProductDetailsPage = () => {
 
     return (
         <div className="product-detail-page-wrapper">
-            {/* Breadcrumbs */}
-            <nav className="product-breadcrumb">
-                <Link to="/">Home</Link>
-                <span className="crumb-sep">/</span>
-                <Link to="/categories">Categories</Link>
-                {product.category?.name && (
-                    <>
-                        <span className="crumb-sep">/</span>
-                        <Link to={`/category/${product.category.id}`}>{product.category.name}</Link>
-                    </>
-                )}
-                <span className="crumb-sep">/</span>
-                <span className="crumb-current">{product.name}</span>
-            </nav>
+            {/* Breadcrumbs & Product SKU Top Header Row */}
+            <div className="product-top-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", marginBottom: "20px" }}>
+                <nav className="product-breadcrumb" style={{ marginBottom: 0 }}>
+                    <Link to="/">Home</Link>
+                    <span className="crumb-sep">/</span>
+                    <Link to="/categories">Categories</Link>
+                    {product.category?.name && (
+                        <>
+                            <span className="crumb-sep">/</span>
+                            <Link to={`/category/${product.category.id}`}>{product.category.name}</Link>
+                        </>
+                    )}
+                    <span className="crumb-sep">/</span>
+                    <span className="crumb-current">{product.name}</span>
+                </nav>
+
+                <div className="product-sku-header" style={{ fontSize: "0.84rem", color: "#64748b", fontWeight: 400, marginTop: "6px" }}>
+                    SKU: {product.sku && product.sku.trim() !== "" ? product.sku : "No SKU"}
+                </div>
+            </div>
 
             {/* 3-Column Widescreen Layout: Media Left | Title & Options Middle | Purchasing Card Right */}
             <div className="product-detail-3col">
@@ -405,7 +414,17 @@ const ProductDetailsPage = () => {
                             </div>
                         )}
 
-                        <div className="product-main-media-box">
+                        <div className="product-main-media-box" style={{ position: "relative" }}>
+                            {(isBestSeller || isTopRated) && (
+                                <div className="emag-badges-wrap" style={{ position: "absolute", top: "12px", left: "12px", zIndex: 10, flexDirection: "column", alignItems: "flex-start", gap: "6px" }}>
+                                    {isBestSeller && (
+                                        <span className="emag-badge badge-best-seller">Best seller</span>
+                                    )}
+                                    {isTopRated && (
+                                        <span className="emag-badge badge-top-rated">Top rated</span>
+                                    )}
+                                </div>
+                            )}
                             <img src={currentImage} alt={product.name} />
                         </div>
                     </div>

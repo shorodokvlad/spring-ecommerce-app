@@ -20,6 +20,9 @@ public class ProductDto {
     private String imageUrl;
     private java.util.List<String> imageUrls;
     private Integer stockQuantity;
+    private String sku;
+    private BigDecimal costPrice;
+    private Integer lowStockThreshold;
     private CategoryDto category;
     private java.util.List<ProductVariantDto> variants;
     private BigDecimal averageRating;

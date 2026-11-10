@@ -32,6 +32,9 @@ import AdminWarehousePage from './component/admin/AdminWarehousePage';
 import AddWarehousePage from './component/admin/AddWarehousePage';
 import EditWarehousePage from './component/admin/EditWarehousePage';
 import AdminEmployeesPage from './component/admin/AdminEmployeesPage';
+import AdminInventoryPage from './component/admin/AdminInventoryPage';
+import AdminPurchaseOrdersPage from './component/admin/AdminPurchaseOrdersPage';
+import AdminSuppliersPage from './component/admin/AdminSuppliersPage';
 import SessionExpiryHandler from './component/common/SessionExpiryHandler';
 
 const AppContent = () => {
@@ -66,6 +69,10 @@ const AppContent = () => {
           <Route path='/admin/products' element={<AdminRoute element={<AdminProductPage />} />} />
           <Route path='/admin/add-product' element={<AdminRoute element={<AddProductPage />} />} />
           <Route path='/admin/edit-product/:productId' element={<AdminRoute element={<EditProductPage />} />} />
+
+          <Route path='/admin/inventory' element={<AdminRoute element={<AdminInventoryPage />} />} />
+          <Route path='/admin/purchase-orders' element={<AdminRoute element={<AdminPurchaseOrdersPage />} />} />
+          <Route path='/admin/suppliers' element={<AdminRoute element={<AdminSuppliersPage />} />} />
 
           <Route path='/admin/orders' element={<AdminRoute element={<AdminOrdersPage />} />} />
           <Route path='/admin/order-details/:itemId' element={<AdminRoute element={<AdminOrderDetailsPage />} />} />

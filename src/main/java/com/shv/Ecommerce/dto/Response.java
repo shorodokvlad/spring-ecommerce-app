@@ -55,4 +55,11 @@ public class Response {
 
     private DashboardStatsDto dashboardStats;
     private TopProductsDto topProducts;
+
+    private SupplierDto supplier;
+    private List<SupplierDto> supplierList;
+    private PurchaseOrderDto purchaseOrder;
+    private List<PurchaseOrderDto> purchaseOrderList;
+    private InventorySummaryDto inventorySummary;
+    private List<InventoryItemDto> inventoryItemList;
 }
