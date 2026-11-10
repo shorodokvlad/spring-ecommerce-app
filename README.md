@@ -73,8 +73,11 @@ You also need a free [Supabase](https://supabase.com/) account — the database 
      SUPABASE_DB_USER=postgres.<your-project-ref>
      SUPABASE_DB_PASSWORD=<your-db-password>
      JWT_SECRET=<any long random string>
-     aws.s3.access=<aws key, optional>
-     aws.s3.secrete=<aws secret, optional>
+     R2_ACCOUNT_ID=<cloudflare account id>
+     R2_ACCESS_KEY_ID=<r2 access key id>
+     R2_SECRET_ACCESS_KEY=<r2 secret access key>
+     R2_BUCKET=shv-ecommerce
+     R2_PUBLIC_URL=<https://pub-xxxx.r2.dev or custom domain>
      ```
 4. **Run the Backend**
    * From the root directory, use the Maven wrapper with the `local` profile:

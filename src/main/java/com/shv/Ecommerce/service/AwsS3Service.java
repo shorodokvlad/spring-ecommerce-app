@@ -2,9 +2,8 @@ package com.shv.Ecommerce.service;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -19,25 +18,36 @@ import java.io.InputStream;
 @Service
 @Slf4j
 public class AwsS3Service {
-    private final String bucketName = "shv-ecommerce";
+    // Cloudflare R2 (S3-compatible API)
+    @Value("${r2.account-id}")
+    private String accountId;
 
-    @Value("${aws.s3.access}")
-    private String awsS3AccessKey;
+    @Value("${r2.access-key}")
+    private String accessKey;
 
-    @Value("${aws.s3.secrete}")
-    private String awsS3SecreteKey;
+    @Value("${r2.secret-key}")
+    private String secretKey;
+
+    @Value("${r2.bucket}")
+    private String bucketName;
+
+    // Public base URL of the bucket: r2.dev subdomain or custom domain, no trailing slash
+    @Value("${r2.public-url}")
+    private String publicUrl;
 
     public String saveImageToS3(MultipartFile photo) {
         try {
             String s3FileName = photo.getOriginalFilename();
 
-            // Create AWS Credentails using the access and secrete key
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsS3AccessKey, awsS3SecreteKey);
+            BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
-            // Create an S3 Client with config credentails and region
+            // R2 endpoint, region must be "auto"
             AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(Regions.US_EAST_1)
+                    .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                            "https://" + accountId + ".r2.cloudflarestorage.com", "auto"))
+                    .withPathStyleAccessEnabled(true)
+                    .withChunkedEncodingDisabled(true)
                     .build();
 
 
@@ -47,16 +57,17 @@ public class AwsS3Service {
             // Set metadata for the object
             ObjectMetadata metaData = new ObjectMetadata();
             metaData.setContentType("image/jpeg");
+            metaData.setContentLength(photo.getSize());
 
             // Create a put request to upload the image to s3
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, s3FileName, inputStream, metaData);
             s3Client.putObject(putObjectRequest);
 
-            return "https://" + bucketName + ".s3.us-east-1.amazonaws.com/" + s3FileName; 
+            return publicUrl + "/" + s3FileName;
 
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Unable to upload images to s3 bucket " + bucketName + e.getMessage());
+            throw new RuntimeException("Unable to upload images to R2 bucket " + bucketName + e.getMessage());
         }
     }
 
