@@ -466,6 +466,9 @@ const EditProductPage = () => {
                     : [];
 
                 return {
+                    // Saved variants keep their id so the server updates them instead of replacing them
+                    // (new ones have a temporary string id)
+                    ...(typeof v.id === "number" ? { id: v.id } : {}),
                     title: v.title || `Configuration #${vIndex + 1}`,
                     attributes: attrMap,
                     price: v.price ? parseFloat(v.price) : 0,

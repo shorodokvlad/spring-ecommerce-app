@@ -4,6 +4,7 @@ import com.shv.Ecommerce.entity.OrderItem;
 import com.shv.Ecommerce.enums.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,4 +23,12 @@ public interface OrderItemRepo extends JpaRepository<OrderItem, Long>, JpaSpecif
             "  AND (oi.status IS NULL OR oi.status NOT IN (:excludedStatuses)) " +
             "GROUP BY oi.product.id")
     List<Object[]> findTotalSoldByProduct(@Param("excludedStatuses") Collection<OrderStatus> excludedStatuses);
+
+    /**
+     * Orders keep their lines when a product is deleted: quantity, price and the variant
+     * snapshot stay, only the product link is cleared.
+     */
+    @Modifying(flushAutomatically = true)
+    @Query("update OrderItem oi set oi.product = null where oi.product.id = :productId")
+    int detachProduct(@Param("productId") Long productId);
 }

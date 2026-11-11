@@ -2,9 +2,12 @@ package com.shv.Ecommerce.service.impl;
 
 import com.shv.Ecommerce.ai.AiProductChangedEvent;
 import com.shv.Ecommerce.dto.ProductDto;
+import com.shv.Ecommerce.dto.ProductVariantDto;
+import com.shv.Ecommerce.dto.WarehouseStockDto;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.entity.Category;
 import com.shv.Ecommerce.entity.Product;
+import com.shv.Ecommerce.entity.ProductVariant;
 import com.shv.Ecommerce.entity.Review;
 import com.shv.Ecommerce.entity.Warehouse;
 import com.shv.Ecommerce.entity.WarehouseStock;
@@ -12,8 +15,10 @@ import com.shv.Ecommerce.enums.OrderStatus;
 import com.shv.Ecommerce.exception.NotFoundException;
 import com.shv.Ecommerce.mapper.EntityDtoMapper;
 import com.shv.Ecommerce.repository.CategoryRepo;
+import com.shv.Ecommerce.repository.InventoryTransactionRepo;
 import com.shv.Ecommerce.repository.OrderItemRepo;
 import com.shv.Ecommerce.repository.ProductRepo;
+import com.shv.Ecommerce.repository.PurchaseOrderItemRepo;
 import com.shv.Ecommerce.repository.ReviewRepo;
 import com.shv.Ecommerce.repository.WarehouseRepo;
 import com.shv.Ecommerce.service.AwsS3Service;
@@ -28,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
@@ -37,9 +43,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,6 +67,8 @@ public class ProductServiceImpl implements IProductService {
     private final ReviewRepo reviewRepo;
     private final WarehouseRepo warehouseRepo;
     private final OrderItemRepo orderItemRepo;
+    private final InventoryTransactionRepo inventoryTransactionRepo;
+    private final PurchaseOrderItemRepo purchaseOrderItemRepo;
     private final ApplicationEventPublisher eventPublisher;
 
     private ProductDto mapProductToDtoWithReviewStats(Product product) {
@@ -160,6 +170,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(cacheNames = {"products", "topProducts"}, allEntries = true)
     public Response updateProduct(Long productId, Long categoryId, MultipartFile image, List<MultipartFile> images, String name, String description, BigDecimal price, Integer stockQuantity, List<String> existingImageUrls, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
         Product product = productRepo.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
@@ -216,84 +227,147 @@ public class ProductServiceImpl implements IProductService {
     }
 
     private void processVariantsJson(Product product, String variantsJson, Map<Integer, List<MultipartFile>> variantImagesMap) {
-        if (variantsJson != null && !variantsJson.isBlank()) {
-            try {
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                List<com.shv.Ecommerce.dto.ProductVariantDto> vDtos = mapper.readValue(
-                        variantsJson,
-                        new com.fasterxml.jackson.core.type.TypeReference<List<com.shv.Ecommerce.dto.ProductVariantDto>>() {}
-                );
-                product.getVariants().clear();
-                int totalStock = 0;
-                for (int i = 0; i < vDtos.size(); i++) {
-                    com.shv.Ecommerce.dto.ProductVariantDto dto = vDtos.get(i);
-                    com.shv.Ecommerce.entity.ProductVariant variant = new com.shv.Ecommerce.entity.ProductVariant();
-                    variant.setTitle(dto.getTitle());
-                    if (dto.getAttributes() != null) {
-                        variant.setAttributes(new HashMap<>(dto.getAttributes()));
-                    }
-                    variant.setPrice(dto.getPrice());
+        if (variantsJson == null || variantsJson.isBlank()) {
+            return;
+        }
+        List<ProductVariantDto> vDtos;
+        try {
+            vDtos = new com.fasterxml.jackson.databind.ObjectMapper().readValue(
+                    variantsJson,
+                    new com.fasterxml.jackson.core.type.TypeReference<List<ProductVariantDto>>() {}
+            );
+        } catch (Exception e) {
+            log.error("Error parsing variantsJson", e);
+            return;
+        }
 
-                    int vStock = 0;
-                    List<WarehouseStock> warehouseStocks = new ArrayList<>();
-                    if (dto.getStockByWarehouse() != null && !dto.getStockByWarehouse().isEmpty()) {
-                        for (com.shv.Ecommerce.dto.WarehouseStockDto stockDto : dto.getStockByWarehouse()) {
-                            if (stockDto.getWarehouseId() == null || stockDto.getQuantity() == null || stockDto.getQuantity() <= 0) {
-                                continue;
-                            }
-                            Warehouse warehouse = warehouseRepo.findById(stockDto.getWarehouseId())
-                                    .orElseThrow(() -> new NotFoundException("Warehouse not found"));
-                            WarehouseStock warehouseStock = new WarehouseStock();
-                            warehouseStock.setWarehouse(warehouse);
-                            warehouseStock.setVariant(variant);
-                            warehouseStock.setQuantity(stockDto.getQuantity());
-                            warehouseStocks.add(warehouseStock);
-                            vStock += stockDto.getQuantity();
-                        }
-                    }
-                    variant.setWarehouseStocks(warehouseStocks);
-                    if (vStock == 0 && dto.getStockQuantity() != null && dto.getStockQuantity() > 0) {
-                        vStock = dto.getStockQuantity();
-                    }
-                    variant.setStockQuantity(vStock);
-                    totalStock += vStock;
+        // Variants are updated in place by id. Deleting and recreating them would break the
+        // inventory history and purchase orders that point to them (and change their ids).
+        Map<Long, ProductVariant> existingById = new HashMap<>();
+        for (ProductVariant existing : product.getVariants()) {
+            if (existing.getId() != null) {
+                existingById.put(existing.getId(), existing);
+            }
+        }
+        Set<Long> keptIds = vDtos.stream().map(ProductVariantDto::getId)
+                .filter(existingById::containsKey).collect(Collectors.toSet());
+        List<Long> removedIds = existingById.keySet().stream().filter(id -> !keptIds.contains(id)).toList();
+        if (!removedIds.isEmpty()) {
+            // Stock history and purchase orders stay; they just lose the link to the removed variant.
+            inventoryTransactionRepo.detachVariants(removedIds);
+            purchaseOrderItemRepo.detachVariants(removedIds);
+        }
 
-                    List<String> variantUrls = new ArrayList<>();
-                    if (dto.getImageUrls() != null) {
-                        variantUrls.addAll(dto.getImageUrls());
-                    }
-                    if (variantImagesMap != null && variantImagesMap.containsKey(i)) {
-                        List<MultipartFile> vFiles = variantImagesMap.get(i);
-                        if (vFiles != null && !vFiles.isEmpty()) {
-                            variantUrls.addAll(awsS3Service.saveImagesToS3(vFiles));
-                        }
-                    }
-                    variant.setImageUrls(variantUrls);
-                    variant.setProduct(product);
-                    product.getVariants().add(variant);
+        List<ProductVariant> variants = new ArrayList<>();
+        int totalStock = 0;
+        for (int i = 0; i < vDtos.size(); i++) {
+            ProductVariantDto dto = vDtos.get(i);
+            ProductVariant variant = dto.getId() != null ? existingById.remove(dto.getId()) : null;
+            if (variant == null) {
+                variant = new ProductVariant();
+                variant.setProduct(product);
+            }
+            variant.setTitle(dto.getTitle());
+            variant.getAttributes().clear();
+            if (dto.getAttributes() != null) {
+                variant.getAttributes().putAll(dto.getAttributes());
+            }
+            variant.setPrice(dto.getPrice());
+
+            int vStock = syncWarehouseStocks(variant, dto.getStockByWarehouse());
+            if (vStock == 0 && dto.getStockQuantity() != null && dto.getStockQuantity() > 0) {
+                vStock = dto.getStockQuantity();
+            }
+            variant.setStockQuantity(vStock);
+            totalStock += vStock;
+
+            List<String> variantUrls = new ArrayList<>();
+            if (dto.getImageUrls() != null) {
+                variantUrls.addAll(dto.getImageUrls());
+            }
+            if (variantImagesMap != null && variantImagesMap.containsKey(i)) {
+                List<MultipartFile> vFiles = variantImagesMap.get(i);
+                if (vFiles != null && !vFiles.isEmpty()) {
+                    variantUrls.addAll(awsS3Service.saveImagesToS3(vFiles));
                 }
+            }
+            variant.getImageUrls().clear();
+            variant.getImageUrls().addAll(variantUrls);
+            variants.add(variant);
+        }
+        // Variants missing from the list are removed by orphanRemoval.
+        product.getVariants().clear();
+        product.getVariants().addAll(variants);
 
-                if (!product.getVariants().isEmpty()) {
-                    product.setStockQuantity(totalStock);
-                    com.shv.Ecommerce.entity.ProductVariant firstVariant = product.getVariants().get(0);
-                    if (firstVariant.getPrice() != null) {
-                        product.setPrice(firstVariant.getPrice());
-                    }
-                    if (firstVariant.getImageUrls() != null && !firstVariant.getImageUrls().isEmpty()) {
-                        product.setImageUrl(firstVariant.getImageUrls().get(0));
-                        product.setImageUrls(new ArrayList<>(firstVariant.getImageUrls()));
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Error parsing variantsJson", e);
+        if (!variants.isEmpty()) {
+            product.setStockQuantity(totalStock);
+            ProductVariant firstVariant = variants.get(0);
+            if (firstVariant.getPrice() != null) {
+                product.setPrice(firstVariant.getPrice());
+            }
+            if (firstVariant.getImageUrls() != null && !firstVariant.getImageUrls().isEmpty()) {
+                product.setImageUrl(firstVariant.getImageUrls().get(0));
+                product.setImageUrls(new ArrayList<>(firstVariant.getImageUrls()));
             }
         }
     }
 
+    /**
+     * Updates the variant's per-warehouse stock rows in place (one row per warehouse is unique,
+     * so deleting and re-inserting the same pair in one flush would fail). Returns the total.
+     */
+    private int syncWarehouseStocks(ProductVariant variant, List<WarehouseStockDto> stockDtos) {
+        Map<Long, Integer> wanted = new LinkedHashMap<>();
+        if (stockDtos != null) {
+            for (WarehouseStockDto stockDto : stockDtos) {
+                if (stockDto.getWarehouseId() == null || stockDto.getQuantity() == null || stockDto.getQuantity() <= 0) {
+                    continue;
+                }
+                wanted.merge(stockDto.getWarehouseId(), stockDto.getQuantity(), Integer::sum);
+            }
+        }
+        int total = wanted.values().stream().mapToInt(Integer::intValue).sum();
+
+        Iterator<WarehouseStock> existing = variant.getWarehouseStocks().iterator();
+        while (existing.hasNext()) {
+            WarehouseStock stock = existing.next();
+            Integer quantity = wanted.remove(stock.getWarehouse().getId());
+            if (quantity == null) {
+                existing.remove();
+            } else {
+                stock.setQuantity(quantity);
+            }
+        }
+        for (Map.Entry<Long, Integer> entry : wanted.entrySet()) {
+            Warehouse warehouse = warehouseRepo.findById(entry.getKey())
+                    .orElseThrow(() -> new NotFoundException("Warehouse not found"));
+            WarehouseStock stock = new WarehouseStock();
+            stock.setWarehouse(warehouse);
+            stock.setVariant(variant);
+            stock.setQuantity(entry.getValue());
+            variant.getWarehouseStocks().add(stock);
+        }
+        return total;
+    }
+
     @Override
+    @Transactional
     @CacheEvict(cacheNames = {"products", "topProducts"}, allEntries = true)
     public Response deleteProduct(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
+
+        // Orders, purchase orders and stock history outlive the product; they lose only the link.
+        List<Long> variantIds = product.getVariants().stream()
+                .map(ProductVariant::getId).filter(Objects::nonNull).toList();
+        if (!variantIds.isEmpty()) {
+            inventoryTransactionRepo.detachVariants(variantIds);
+            purchaseOrderItemRepo.detachVariants(variantIds);
+        }
+        inventoryTransactionRepo.detachProduct(productId);
+        purchaseOrderItemRepo.detachProduct(productId);
+        orderItemRepo.detachProduct(productId);
+        reviewRepo.deleteAll(reviewRepo.findByProductId(productId));
+
         productRepo.delete(product);
         eventPublisher.publishEvent(new AiProductChangedEvent(productId));
 
