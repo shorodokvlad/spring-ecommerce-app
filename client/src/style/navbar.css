@@ -415,3 +415,25 @@ button.sub-link-item {
         display: none;
     }
 }
+/* Phones: let the search field shrink so the header fits without sideways scrolling */
+@media (max-width: 600px) {
+    .navbar-container {
+        gap: 10px;
+        padding: 10px 16px;
+    }
+
+    .navbar-search {
+        min-width: 0;
+        margin: 0;
+        padding: 2px 4px 2px 12px;
+    }
+
+    .navbar-search input {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .navbar-actions {
+        gap: 12px;
+    }
+}

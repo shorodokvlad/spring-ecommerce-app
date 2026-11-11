@@ -9,13 +9,15 @@ import AddReviewModal from "../common/AddReviewModal";
 import ProductDetailsSkeleton from "../common/ProductDetailsSkeleton";
 import StarRating from "../common/StarRating";
 import DeliveryEstimate from "../delivery/DeliveryEstimate";
-import AiOverviewCard from "../ai/AiOverviewCard";
+import AiOverviewSummary from "../ai/AiOverviewSummary";
+import AiHighlights from "../ai/AiHighlights";
 import AskProductBox from "../ai/AskProductBox";
 import ReviewSummaryCard from "../ai/ReviewSummaryCard";
+import useAiOverview from "../ai/useAiOverview";
 import ApiService from "../../service/ApiService";
 import { parseSpecifications } from "../../utils/specParser";
 import { configureProduct, findVariantFromSearch, getDefaultInStockVariant, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
-import { CheckCircle2, Star } from "lucide-react";
+import { Star, Truck, ShieldCheck } from "lucide-react";
 import '../../style/productDetailsPage.css';
 import '../../style/productList.css';
 
@@ -67,9 +69,8 @@ const ProductDetailsPage = () => {
     const [reviewError, setReviewError] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
 
-    // SHV Assistant: suggested questions come with the AI overview; the review filter is set
-    // by clicking a point in the AI review summary ({label, reviewIds} or null).
-    const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+    // SHV Assistant: the review filter is set by clicking a point in the AI review summary
+    // ({label, reviewIds} or null).
     const [reviewFilter, setReviewFilter] = useState(null);
 
     const { dispatch } = useCart();
@@ -80,7 +81,6 @@ const ProductDetailsPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        setSuggestedQuestions([]);
         setReviewFilter(null);
     }, [productId]);
 
@@ -89,6 +89,10 @@ const ProductDetailsPage = () => {
         () => reviews.map((r) => `${r.id}:${r.rating}:${(r.content || "").length}`).join(","),
         [reviews]
     );
+
+    // AI overview: summary under the title, highlights above the specs, questions for the Ask panel.
+    const aiOverview = useAiOverview(product?.id);
+    const suggestedQuestions = aiOverview.overview?.suggested_questions || [];
 
     const visibleReviews = useMemo(() => {
         if (!reviewFilter) return reviews;
@@ -314,7 +318,7 @@ const ProductDetailsPage = () => {
             const cnt = counts[star] || 0;
             const pct = displayCount > 0 ? Math.round((cnt / displayCount) * 100) : 0;
             const color = star === 5 ? "#22c55e" : star === 4 ? "#84cc16" : star === 3 ? "#eab308" : star === 2 ? "#f97316" : "#ef4444";
-            return { label: `${star} star${star === 1 ? "" : "s"}`, count: cnt, pct, color };
+            return { star, label: `${star} star${star === 1 ? "" : "s"}`, count: cnt, pct, color };
         });
     }, [reviews, product, displayCount]);
 
@@ -467,6 +471,8 @@ const ProductDetailsPage = () => {
                         </div>
                     )}
 
+                    <AiOverviewSummary state={aiOverview} />
+
                     {!specSections && <p className="product-detail-desc">{product.description}</p>}
 
                     {/* Configurations / Variant Options Section */}
@@ -599,36 +605,38 @@ const ProductDetailsPage = () => {
                     </div>
 
                     {/* Delivery & Protection Info Card */}
-                    <div className="delivery-info-card">
-                        <div className="delivery-line">
-                            <img src="/truck.svg" alt="Shipping" style={{ width: "20px", height: "20px" }} />
-                            <span>Shipping: <strong>Free Express Shipping</strong></span>
-                        </div>
-                        <div className="delivery-line">
-                            <img src="/shield.svg" alt="Warranty" style={{ width: "20px", height: "20px" }} />
-                            <span>Warranty: <strong>2-Year Official Warranty</strong></span>
-                        </div>
-                    </div>
+                    <ul className="delivery-info-list">
+                        <li className="delivery-line">
+                            <span className="delivery-line-icon" aria-hidden="true"><Truck size={18} /></span>
+                            <span><strong>Free express shipping</strong><small>On every order</small></span>
+                        </li>
+                        <li className="delivery-line">
+                            <span className="delivery-line-icon" aria-hidden="true"><ShieldCheck size={18} /></span>
+                            <span><strong>2-year warranty</strong><small>Official manufacturer warranty</small></span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            {/* SHV Assistant: AI overview + product Q&A (each hides itself if the AI is unavailable) */}
-            <div className="ai-section">
-                <AiOverviewCard productId={product.id} onSuggestedQuestions={setSuggestedQuestions} />
-                <AskProductBox productId={product.id} suggestedQuestions={suggestedQuestions} />
-            </div>
-
-            {/* Full-Width Product Specifications Section at Bottom */}
-            {specSections && (
-                <div className="product-specifications-section">
-                    <SpecificationsTable sections={specSections} />
+            {/* Details: AI highlights + specifications, with the Ask panel kept beside them */}
+            <div className="product-content-grid">
+                <div className="product-content-main">
+                    <AiHighlights state={aiOverview} />
+                    {specSections && (
+                        <div className="product-specifications-section">
+                            <SpecificationsTable sections={specSections} />
+                        </div>
+                    )}
                 </div>
-            )}
+                <aside className="product-content-aside">
+                    <AskProductBox productId={product.id} suggestedQuestions={suggestedQuestions} />
+                </aside>
+            </div>
 
             {/* eMAG Reviews Breakdown Section */}
             <div className="emag-reviews-container" id="reviews">
                 <h2 className="emag-reviews-main-title">
-                    Reviews <span className="emag-reviews-count-pill">({displayCount} reviews)</span>
+                    Reviews {displayCount > 0 && <span className="reviews-count-pill">{displayCount}</span>}
                 </h2>
 
                 {reviewMessage && <p className="message">{reviewMessage}</p>}
@@ -663,105 +671,111 @@ const ProductDetailsPage = () => {
                         </div>
                     </div>
                 ) : (
-                    <>
-                        {/* 4-Column Breakdown Dashboard Card */}
-                        <div className="emag-reviews-dashboard-card">
-                            {/* Col 1: Big Score */}
-                            <div className="emag-rev-col emag-rev-score-col">
-                                <div className="emag-big-score">{displayRating ? displayRating.toFixed(2) : "0.00"}</div>
-                                <div className="emag-score-stars">
+                    <div className="reviews-layout">
+                        {/* Left: rating overview (sticky on desktop) */}
+                        <aside className="reviews-overview">
+                            <div className="reviews-score">
+                                <span className="reviews-score-number">{displayRating ? displayRating.toFixed(1) : "0.0"}</span>
+                                <div>
                                     <StarRating value={displayRating || 0} size={18} />
+                                    <span className="reviews-score-count">
+                                        Based on {displayCount} review{displayCount === 1 ? "" : "s"}
+                                    </span>
                                 </div>
-                                <div className="emag-score-subtext">{displayCount} review{displayCount === 1 ? '' : 's'}</div>
                             </div>
 
-                            {/* Col 2: Star Breakdown Progress Bars */}
-                            <div className="emag-rev-col emag-rev-bars-col">
-                                {ratingBreakdown.map((bar) => (
-                                    <div className="emag-bar-row" key={bar.label}>
-                                        <span className="emag-bar-label">{bar.label}</span>
-                                        <div className="emag-bar-track">
-                                            <div className="emag-bar-fill" style={{ width: `${bar.pct}%`, backgroundColor: bar.color }} />
-                                        </div>
-                                        <span className="emag-bar-count">({bar.count})</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Col 3: Verified Buyer Badge */}
-                            <div className="emag-rev-col emag-rev-verified-col">
-                                <div className="emag-verified-badge-icon">
-                                    <CheckCircle2 size={24} color="#22c55e" fill="#22c55e" />
-                                </div>
-                                <div className="emag-verified-count">{displayCount}</div>
-                                <div className="emag-verified-subtext">Verified Buyer Reviews</div>
-                            </div>
-
-                            {/* Col 4: Action Box - Add a Review */}
-                            <div className="emag-rev-col emag-rev-action-col">
-                                <h4 className="emag-action-heading">Do you own or have you used this product?</h4>
-                                <p className="emag-action-subtext">Share your opinion by rating the product</p>
-                                
-                                <div 
-                                    className="emag-action-star-row"
-                                    onClick={handleOpenReviewModal}
-                                >
-                                    {[1, 2, 3, 4, 5].map((s) => (
-                                        <Star key={s} size={22} color="#cbd5e1" strokeWidth={1.5} />
-                                    ))}
-                                    <span className="emag-rate-hint">Rate this product</span>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    className="emag-add-review-btn"
-                                    onClick={handleOpenReviewModal}
-                                >
-                                    Add a review
-                                </button>
-                            </div>
-                        </div>
-
-                        <ReviewSummaryCard
-                            productId={product.id}
-                            reviewsVersion={reviewsVersion}
-                            selectedLabel={reviewFilter?.label}
-                            onSelect={setReviewFilter}
-                        />
-
-                        {reviewFilter && (
-                            <div className="ai-review-filter" role="status">
-                                <span>
-                                    Showing {visibleReviews.length} review{visibleReviews.length === 1 ? "" : "s"} about{" "}
-                                    <strong>{reviewFilter.label.replace(/^theme:/, "")}</strong>
-                                </span>
-                                <button type="button" onClick={() => setReviewFilter(null)}>Show all</button>
-                            </div>
-                        )}
-
-                        {/* Reviews List */}
-                        <div className="reviews-list">
-                            {visibleReviews.map((review) => (
-                                <article className="review-card" key={review.id}>
-                                    <div className="review-card-head">
-                                        <StarRating value={review.rating} size={13} />
-                                        <span className="review-author">{review.userName || 'Anonymous'}</span>
-                                        <span className="review-date">{formatReviewDate(review.createdAt)}</span>
-                                        {(isAdmin || currentUserId === review.userId) && (
+                            <ul className="reviews-bars" aria-label="Filter reviews by rating">
+                                {ratingBreakdown.map((bar) => {
+                                    const label = `rating:${bar.star}`;
+                                    const isActive = reviewFilter?.label === label;
+                                    return (
+                                        <li key={bar.star}>
                                             <button
                                                 type="button"
-                                                className="review-delete-btn"
-                                                onClick={() => handleDeleteReview(review.id)}
+                                                className={`reviews-bar-row ${isActive ? "is-active" : ""}`}
+                                                disabled={bar.count === 0}
+                                                aria-pressed={isActive}
+                                                aria-label={`${bar.star} star${bar.star === 1 ? "" : "s"}: ${bar.count} review${bar.count === 1 ? "" : "s"}`}
+                                                onClick={() => setReviewFilter(isActive ? null : {
+                                                    label,
+                                                    reviewIds: reviews
+                                                        .filter((r) => Math.round(r.rating || 0) === bar.star)
+                                                        .map((r) => r.id),
+                                                })}
                                             >
-                                                Delete
+                                                <span className="reviews-bar-label">{bar.star} <Star size={12} fill="currentColor" strokeWidth={0} /></span>
+                                                <span className="reviews-bar-track">
+                                                    <span className="reviews-bar-fill" style={{ width: `${bar.pct}%` }} />
+                                                </span>
+                                                <span className="reviews-bar-count">{bar.count}</span>
                                             </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+
+                            <div className="reviews-cta">
+                                <p className="reviews-cta-title">Own this product?</p>
+                                <p className="reviews-cta-sub">Tell other shoppers what you think.</p>
+                                <button type="button" className="reviews-cta-btn" onClick={handleOpenReviewModal}>
+                                    Write a review
+                                </button>
+                            </div>
+                        </aside>
+
+                        {/* Right: AI summary, active filter, review cards */}
+                        <div className="reviews-main">
+                            <ReviewSummaryCard
+                                productId={product.id}
+                                reviewsVersion={reviewsVersion}
+                                selectedLabel={reviewFilter?.label}
+                                onSelect={setReviewFilter}
+                            />
+
+                            {reviewFilter && (
+                                <div className="ai-review-filter" role="status">
+                                    <span>
+                                        {reviewFilter.label.startsWith("rating:") ? (
+                                            <>Showing {visibleReviews.length} <strong>{reviewFilter.label.slice(7)}-star</strong> review{visibleReviews.length === 1 ? "" : "s"}</>
+                                        ) : (
+                                            <>Showing {visibleReviews.length} review{visibleReviews.length === 1 ? "" : "s"} mentioning{" "}
+                                                <strong>{reviewFilter.label.replace(/^theme:/, "")}</strong></>
                                         )}
-                                    </div>
-                                    {review.content && <p className="review-content">{review.content}</p>}
-                                </article>
-                            ))}
+                                    </span>
+                                    <button type="button" onClick={() => setReviewFilter(null)}>Show all reviews</button>
+                                </div>
+                            )}
+
+                            <div className="reviews-list">
+                                {visibleReviews.map((review) => {
+                                    const name = review.userName || "Anonymous";
+                                    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+                                    return (
+                                        <article className="review-card" key={review.id}>
+                                            <div className="review-card-head">
+                                                <span className="review-avatar" aria-hidden="true">{initials || "?"}</span>
+                                                <div className="review-meta">
+                                                    <span className="review-author">{name}</span>
+                                                    <span className="review-date">{formatReviewDate(review.createdAt)}</span>
+                                                </div>
+                                                <StarRating value={review.rating} size={14} />
+                                            </div>
+                                            {review.content && <p className="review-content">{review.content}</p>}
+                                            {(isAdmin || currentUserId === review.userId) && (
+                                                <button
+                                                    type="button"
+                                                    className="review-delete-btn"
+                                                    onClick={() => handleDeleteReview(review.id)}
+                                                >
+                                                    Delete review
+                                                </button>
+                                            )}
+                                        </article>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
 

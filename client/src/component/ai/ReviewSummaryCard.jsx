@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import AiService from "../../service/AiService";
+import AiTag from "./AiTag";
 import "../../style/aiProduct.css";
 
 const SENTIMENT_LABEL = { positive: "Mostly positive", mixed: "Mixed", negative: "Mostly negative" };
@@ -51,15 +52,14 @@ const ReviewSummaryCard = ({ productId, reviewsVersion, selectedLabel, onSelect 
     };
 
     return (
-        <section className="ai-card ai-review-summary" aria-label="AI summary of customer reviews">
-            <div className="ai-card-head">
-                <Sparkles size={18} className="ai-spark" />
-                <span className="ai-card-title">Customers say</span>
+        <section className="ai-review-summary" aria-labelledby="ai-review-summary-title">
+            <div className="ai-section-head">
+                <h3 id="ai-review-summary-title" className="ai-review-summary-title">Customers say</h3>
                 {sentiment && <span className={`ai-sentiment ai-sentiment--${sentiment}`}>{SENTIMENT_LABEL[sentiment]}</span>}
-                <span className="ai-badge">AI summary of {data.summary.review_count} reviews</span>
+                <AiTag>AI summary of {data.summary.review_count} reviews</AiTag>
             </div>
 
-            <p className="ai-summary">{verdict}</p>
+            <p className="ai-review-verdict">{verdict}</p>
 
             {(pros.length > 0 || cons.length > 0) && (
                 <div className="ai-proscons">

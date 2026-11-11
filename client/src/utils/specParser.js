@@ -287,9 +287,12 @@ export const parseSpecifications = (text) => {
             const parsed = JSON.parse(trimmed);
             if (Array.isArray(parsed) && parsed.length > 0) {
                 // Filter out empty items
+                // Accept both {items: [{label, value}]} (SpecBuilder) and {specs: [{name, value}]} (imported data)
                 return parsed.map(sec => ({
                     title: sec.title || "SPECIFICATIONS",
-                    items: (sec.items || []).filter(item => item.label && item.value && item.value.trim() !== "")
+                    items: (sec.items || sec.specs || [])
+                        .map(item => ({ label: item.label || item.name, value: item.value }))
+                        .filter(item => item.label && typeof item.value === "string" && item.value.trim() !== "")
                 })).filter(sec => sec.items.length > 0);
             }
         } catch (e) {
