@@ -66,29 +66,32 @@ const DeliveryEstimate = ({ defaultSubtotal = 0 }) => {
     const [selectedLocality, setSelectedLocality] = useState("");
     const [estimate, setEstimate] = useState(null);
     const fetchedKeyRef = useRef("");
+    // Read the latest estimate through a ref so loadEstimate stays stable. When it depended on
+    // `estimate`, every new estimate recreated it and re-ran both effects below; the account
+    // city ("Bucuresti") and the server-normalized one ("București") then kept re-fetching
+    // each other in an endless loop (and called /user/my-info every time).
+    const estimateRef = useRef(null);
+    estimateRef.current = estimate;
 
-    const loadEstimate = useCallback(
-        async (params) => {
-            const key = `${params.country || 'RO'}:${params.county || ''}:${params.locality || ''}:${subtotalRef.current}`;
-            if (fetchedKeyRef.current === key) return estimate;
-            fetchedKeyRef.current = key;
+    const loadEstimate = useCallback(async (params) => {
+        const key = `${params.country || 'RO'}:${params.county || ''}:${params.locality || ''}:${subtotalRef.current}`;
+        if (fetchedKeyRef.current === key) return estimateRef.current;
+        fetchedKeyRef.current = key;
 
-            try {
-                const response = await ApiService.getDeliveryEstimate({ ...params, subtotal: subtotalRef.current });
-                const est = response.deliveryEstimate;
-                if (est && est.options?.length) {
-                    setEstimate(est);
-                    setMode("done");
-                    return est;
-                }
-                return null;
-            } catch (error) {
-                console.error("Error fetching delivery estimate:", error);
-                return null;
+        try {
+            const response = await ApiService.getDeliveryEstimate({ ...params, subtotal: subtotalRef.current });
+            const est = response.deliveryEstimate;
+            if (est && est.options?.length) {
+                setEstimate(est);
+                setMode("done");
+                return est;
             }
-        },
-        [estimate]
-    );
+            return null;
+        } catch (error) {
+            console.error("Error fetching delivery estimate:", error);
+            return null;
+        }
+    }, []);
 
     // Initial resolution: fetch fresh user account address if logged in
     useEffect(() => {
