@@ -14,6 +14,7 @@ com/shv/Ecommerce/entity/Product.class
 com/shv/Ecommerce/entity/EmailVerificationToken.class
 com/shv/Ecommerce/dto/TopProductDto.class
 com/shv/Ecommerce/entity/InventoryTransaction.class
+com/shv/Ecommerce/ai/AiProductChangedEvent.class
 com/shv/Ecommerce/service/impl/DashboardServiceImpl$SalesPeriod.class
 com/shv/Ecommerce/ai/AiCatalogService.class
 com/shv/Ecommerce/config/CacheConfig.class
@@ -38,6 +39,7 @@ com/shv/Ecommerce/dto/BannerDto.class
 com/shv/Ecommerce/specification/OrderItemSpecification.class
 com/shv/Ecommerce/service/InventoryService.class
 com/shv/Ecommerce/dto/DeliveryEstimateDto.class
+com/shv/Ecommerce/ai/AiGatewayController.class
 com/shv/Ecommerce/dto/GoogleLoginRequest.class
 com/shv/Ecommerce/repository/PurchaseOrderRepo.class
 com/shv/Ecommerce/entity/Payment.class
@@ -51,6 +53,7 @@ com/shv/Ecommerce/EcommerceApplication.class
 com/shv/Ecommerce/dto/ForgotPasswordRequest.class
 com/shv/Ecommerce/security/JwtUtils.class
 com/shv/Ecommerce/dto/PurchaseOrderItemDto.class
+com/shv/Ecommerce/ai/AiRateLimiter.class
 com/shv/Ecommerce/service/impl/InventoryServiceImpl.class
 com/shv/Ecommerce/service/MailService.class
 com/shv/Ecommerce/repository/WarehouseStockRepo.class
@@ -92,15 +95,18 @@ com/shv/Ecommerce/repository/BannerRepo.class
 com/shv/Ecommerce/service/impl/ReviewServiceImpl.class
 com/shv/Ecommerce/service/interf/IReviewService.class
 com/shv/Ecommerce/ai/ServiceTokenFilter.class
+com/shv/Ecommerce/ai/AiClient.class
 com/shv/Ecommerce/dto/OrderDto.class
 com/shv/Ecommerce/dto/Response.class
 com/shv/Ecommerce/dto/InventoryItemDto.class
 com/shv/Ecommerce/dto/WarehouseDto.class
 com/shv/Ecommerce/dto/AddressDto.class
 com/shv/Ecommerce/repository/PasswordResetTokenRepo.class
+com/shv/Ecommerce/ai/AiGatewayController$AskRequest.class
 com/shv/Ecommerce/dto/TopProductDto$TopProductDtoBuilder.class
 com/shv/Ecommerce/repository/OrderItemRepo.class
 com/shv/Ecommerce/entity/User$UserBuilder.class
+com/shv/Ecommerce/ai/AiContentService.class
 com/shv/Ecommerce/controller/CategoryController.class
 com/shv/Ecommerce/service/impl/DashboardServiceImpl$RatedEntry.class
 com/shv/Ecommerce/entity/Supplier.class
@@ -134,6 +140,7 @@ com/shv/Ecommerce/dto/OrderRequest.class
 com/shv/Ecommerce/entity/ProductVariant.class
 com/shv/Ecommerce/service/impl/DeliveryServiceImpl.class
 com/shv/Ecommerce/security/AuthUser$AuthUserBuilder.class
+com/shv/Ecommerce/ai/AiServiceException.class
 com/shv/Ecommerce/dto/LocalityDto.class
 com/shv/Ecommerce/dto/DeliveryEstimateDto$DeliveryEstimateDtoBuilder.class
 com/shv/Ecommerce/service/impl/CategoryServiceImpl.class
@@ -142,6 +149,7 @@ com/shv/Ecommerce/service/impl/BannerServiceImpl.class
 com/shv/Ecommerce/dto/OrderItemDto.class
 com/shv/Ecommerce/entity/PasswordResetToken.class
 com/shv/Ecommerce/controller/SupplierController.class
+com/shv/Ecommerce/ai/AiIndexNotifier.class
 com/shv/Ecommerce/entity/WarehouseStock.class
 com/shv/Ecommerce/controller/AuthController.class
 com/shv/Ecommerce/repository/PurchaseOrderItemRepo.class

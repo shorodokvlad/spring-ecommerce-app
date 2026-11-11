@@ -46,6 +46,14 @@ public class CacheConfig implements CachingConfigurer {
                 redisCacheConfiguration.entryTtl(Duration.ofMinutes(10)));
     }
 
+    /** AI content is evicted on product/review changes (AiIndexNotifier); the TTL is a safety net. */
+    @Bean
+    public RedisCacheManagerBuilderCustomizer aiContentCacheCustomizer(RedisCacheConfiguration redisCacheConfiguration) {
+        return builder -> builder
+                .withCacheConfiguration("aiOverview", redisCacheConfiguration.entryTtl(Duration.ofHours(6)))
+                .withCacheConfiguration("aiReviewSummary", redisCacheConfiguration.entryTtl(Duration.ofHours(1)));
+    }
+
     @Override
     public CacheErrorHandler errorHandler() {
         return new CacheErrorHandler() {

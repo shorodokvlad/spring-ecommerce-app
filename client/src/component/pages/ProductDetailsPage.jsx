@@ -9,6 +9,9 @@ import AddReviewModal from "../common/AddReviewModal";
 import ProductDetailsSkeleton from "../common/ProductDetailsSkeleton";
 import StarRating from "../common/StarRating";
 import DeliveryEstimate from "../delivery/DeliveryEstimate";
+import AiOverviewCard from "../ai/AiOverviewCard";
+import AskProductBox from "../ai/AskProductBox";
+import ReviewSummaryCard from "../ai/ReviewSummaryCard";
 import ApiService from "../../service/ApiService";
 import { parseSpecifications } from "../../utils/specParser";
 import { configureProduct, findVariantFromSearch, getDefaultInStockVariant, getProductIdFromRoute, getProductPath } from "../../utils/productVariant";
@@ -64,6 +67,11 @@ const ProductDetailsPage = () => {
     const [reviewError, setReviewError] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
 
+    // SHV Assistant: suggested questions come with the AI overview; the review filter is set
+    // by clicking a point in the AI review summary ({label, reviewIds} or null).
+    const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+    const [reviewFilter, setReviewFilter] = useState(null);
+
     const { dispatch } = useCart();
     const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -72,7 +80,21 @@ const ProductDetailsPage = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        setSuggestedQuestions([]);
+        setReviewFilter(null);
     }, [productId]);
+
+    // Changes whenever the set of reviews changes, so the AI review summary refetches.
+    const reviewsVersion = useMemo(
+        () => reviews.map((r) => `${r.id}:${r.rating}:${(r.content || "").length}`).join(","),
+        [reviews]
+    );
+
+    const visibleReviews = useMemo(() => {
+        if (!reviewFilter) return reviews;
+        const ids = new Set(reviewFilter.reviewIds);
+        return reviews.filter((r) => ids.has(r.id));
+    }, [reviews, reviewFilter]);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -590,6 +612,12 @@ const ProductDetailsPage = () => {
                 </div>
             </div>
 
+            {/* SHV Assistant: AI overview + product Q&A (each hides itself if the AI is unavailable) */}
+            <div className="ai-section">
+                <AiOverviewCard productId={product.id} onSuggestedQuestions={setSuggestedQuestions} />
+                <AskProductBox productId={product.id} suggestedQuestions={suggestedQuestions} />
+            </div>
+
             {/* Full-Width Product Specifications Section at Bottom */}
             {specSections && (
                 <div className="product-specifications-section">
@@ -694,9 +722,26 @@ const ProductDetailsPage = () => {
                             </div>
                         </div>
 
+                        <ReviewSummaryCard
+                            productId={product.id}
+                            reviewsVersion={reviewsVersion}
+                            selectedLabel={reviewFilter?.label}
+                            onSelect={setReviewFilter}
+                        />
+
+                        {reviewFilter && (
+                            <div className="ai-review-filter" role="status">
+                                <span>
+                                    Showing {visibleReviews.length} review{visibleReviews.length === 1 ? "" : "s"} about{" "}
+                                    <strong>{reviewFilter.label.replace(/^theme:/, "")}</strong>
+                                </span>
+                                <button type="button" onClick={() => setReviewFilter(null)}>Show all</button>
+                            </div>
+                        )}
+
                         {/* Reviews List */}
                         <div className="reviews-list">
-                            {reviews.map((review) => (
+                            {visibleReviews.map((review) => (
                                 <article className="review-card" key={review.id}>
                                     <div className="review-card-head">
                                         <StarRating value={review.rating} size={13} />

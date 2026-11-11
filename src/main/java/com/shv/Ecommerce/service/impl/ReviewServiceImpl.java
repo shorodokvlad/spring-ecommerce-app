@@ -1,5 +1,7 @@
 package com.shv.Ecommerce.service.impl;
 
+import com.shv.Ecommerce.ai.AiProductChangedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.dto.ReviewDto;
 import com.shv.Ecommerce.entity.Product;
@@ -25,6 +27,7 @@ public class ReviewServiceImpl implements IReviewService {
     private final ReviewRepo reviewRepo;
     private final ProductRepo productRepo;
     private final EntityDtoMapper entityDtoMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Response getReviewsByProductId(Long productId) {
@@ -58,6 +61,7 @@ public class ReviewServiceImpl implements IReviewService {
         review.setRating(rating);
         review.setContent(content);
         reviewRepo.save(review);
+        eventPublisher.publishEvent(new AiProductChangedEvent(productId));
 
         return Response.builder()
                 .status(200)
@@ -81,6 +85,7 @@ public class ReviewServiceImpl implements IReviewService {
         }
 
         reviewRepo.delete(review);
+        eventPublisher.publishEvent(new AiProductChangedEvent(review.getProduct().getId()));
 
         return Response.builder()
                 .status(200)

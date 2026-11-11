@@ -1,7 +1,14 @@
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/EcommerceApplication.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiCatalogService.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiClient.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiConfig.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiContentService.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiGatewayController.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiIndexNotifier.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiProductChangedEvent.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiProperties.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiRateLimiter.java
+/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/AiServiceException.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/InternalAiController.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/ServiceTokenFilter.java
 /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/src/main/java/com/shv/Ecommerce/ai/dto/AiPage.java

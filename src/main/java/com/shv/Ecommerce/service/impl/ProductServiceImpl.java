@@ -1,5 +1,6 @@
 package com.shv.Ecommerce.service.impl;
 
+import com.shv.Ecommerce.ai.AiProductChangedEvent;
 import com.shv.Ecommerce.dto.ProductDto;
 import com.shv.Ecommerce.dto.Response;
 import com.shv.Ecommerce.entity.Category;
@@ -20,6 +21,7 @@ import com.shv.Ecommerce.service.interf.IProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,6 +59,7 @@ public class ProductServiceImpl implements IProductService {
     private final ReviewRepo reviewRepo;
     private final WarehouseRepo warehouseRepo;
     private final OrderItemRepo orderItemRepo;
+    private final ApplicationEventPublisher eventPublisher;
 
     private ProductDto mapProductToDtoWithReviewStats(Product product) {
         return mapProductToDtoWithReviewStats(product, null);
@@ -131,6 +134,7 @@ public class ProductServiceImpl implements IProductService {
         processVariantsJson(product, variantsJson, variantImagesMap);
 
         productRepo.save(product);
+        eventPublisher.publishEvent(new AiProductChangedEvent(product.getId()));
 
         return Response.builder()
                 .status(200)
@@ -204,6 +208,7 @@ public class ProductServiceImpl implements IProductService {
         }
 
         productRepo.save(product);
+        eventPublisher.publishEvent(new AiProductChangedEvent(product.getId()));
         return Response.builder()
                 .status(200)
                 .message("Product updated successfully")
@@ -290,6 +295,7 @@ public class ProductServiceImpl implements IProductService {
     public Response deleteProduct(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(()->new RuntimeException("Product not found"));
         productRepo.delete(product);
+        eventPublisher.publishEvent(new AiProductChangedEvent(productId));
 
         return Response.builder()
                 .status(200)
