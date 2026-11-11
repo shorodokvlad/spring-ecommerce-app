@@ -87,17 +87,21 @@ public class AiGatewayController {
      * comes from the JWT here, never from the browser.
      */
     @PostMapping("/chat")
-    public ResponseEntity<?> chat(
+    public ResponseEntity<StreamingResponseBody> chat(
             @RequestBody ChatRequest body,
             @AuthenticationPrincipal AuthUser authUser,
             HttpServletRequest request) {
         String message = body == null || body.message() == null ? "" : body.message().strip();
+        // Errors are thrown, not returned: the declared body type must stay StreamingResponseBody,
+        // or Spring won't stream it (and fails the request instead). handleAiError makes them JSON.
         if (message.isEmpty() || message.length() > MAX_CHAT_MESSAGE_LENGTH) {
-            return error(HttpStatus.BAD_REQUEST, "Messages must be between 1 and " + MAX_CHAT_MESSAGE_LENGTH + " characters");
+            throw new AiServiceException(HttpStatus.BAD_REQUEST,
+                    "Messages must be between 1 and " + MAX_CHAT_MESSAGE_LENGTH + " characters");
         }
         Long userId = authUser != null ? authUser.getUser().getId() : null;
         if (!rateLimiter.tryAcquire("chat", userId, clientIp(request))) {
-            return error(HttpStatus.TOO_MANY_REQUESTS, "You've sent a lot of messages. Please try again in a few minutes.");
+            throw new AiServiceException(HttpStatus.TOO_MANY_REQUESTS,
+                    "You've sent a lot of messages. Please try again in a few minutes.");
         }
 
         Map<String, Object> payload = new HashMap<>();

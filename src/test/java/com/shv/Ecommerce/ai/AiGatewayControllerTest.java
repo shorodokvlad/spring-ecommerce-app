@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -96,14 +97,14 @@ class AiGatewayControllerTest {
         ArgumentCaptor<Map<String, Object>> payload = ArgumentCaptor.forClass(Map.class);
         when(aiClient.openChat(payload.capture())).thenReturn(new ByteArrayInputStream(sse));
 
-        ResponseEntity<?> response = controller.chat(
+        ResponseEntity<StreamingResponseBody> response = controller.chat(
                 new AiGatewayController.ChatRequest("  phones?  ", "123e4567-e89b-12d3-a456-426614174000", 7L),
                 null, new MockHttpServletRequest());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_EVENT_STREAM);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ((StreamingResponseBody) response.getBody()).writeTo(out);
+        response.getBody().writeTo(out);
         assertThat(out.toByteArray()).isEqualTo(sse);
 
         assertThat(payload.getValue())
@@ -129,17 +130,19 @@ class AiGatewayControllerTest {
 
     @Test
     void chatValidatesAndRateLimitsBeforeCallingTheAi() {
-        ResponseEntity<?> empty = controller.chat(new AiGatewayController.ChatRequest("   ", null, null), null,
-                new MockHttpServletRequest());
-        ResponseEntity<?> tooLong = controller.chat(new AiGatewayController.ChatRequest("x".repeat(1001), null, null),
-                null, new MockHttpServletRequest());
+        assertThatThrownBy(() -> controller.chat(new AiGatewayController.ChatRequest("   ", null, null), null,
+                new MockHttpServletRequest()))
+                .isInstanceOfSatisfying(AiServiceException.class,
+                        e -> assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST));
+        assertThatThrownBy(() -> controller.chat(new AiGatewayController.ChatRequest("x".repeat(1001), null, null),
+                null, new MockHttpServletRequest()))
+                .isInstanceOfSatisfying(AiServiceException.class,
+                        e -> assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST));
         when(rateLimiter.tryAcquire(eq("chat"), any(), anyString())).thenReturn(false);
-        ResponseEntity<?> limited = controller.chat(new AiGatewayController.ChatRequest("hi", null, null), null,
-                new MockHttpServletRequest());
-
-        assertThat(empty.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(tooLong.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(limited.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThatThrownBy(() -> controller.chat(new AiGatewayController.ChatRequest("hi", null, null), null,
+                new MockHttpServletRequest()))
+                .isInstanceOfSatisfying(AiServiceException.class,
+                        e -> assertThat(e.getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS));
         verify(aiClient, never()).openChat(any());
     }
 

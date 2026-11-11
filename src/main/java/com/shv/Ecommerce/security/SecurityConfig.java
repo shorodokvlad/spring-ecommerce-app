@@ -38,6 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/internal/ai/**").hasAuthority(ServiceTokenFilter.AUTHORITY)
                         // Storefront AI (overview, review summary, Q&A, chat): open to guests, rate-limited
                         .requestMatchers("/ai/products/**", "/ai/chat", "/ai/chat/feedback").permitAll()
+                        // Spring's error page: without this, any server error on a public endpoint
+                        // reaches guests as "Your session is missing or expired" (401).
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/delivery/**").permitAll()
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/warehouse/**").permitAll()
                         .anyRequest().authenticated())
