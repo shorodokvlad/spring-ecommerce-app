@@ -510,3 +510,23 @@
         padding: 16px;
     }
 }
+
+/* ---------- link from the Ask box to the chat drawer ---------- */
+.ai-open-chat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #5B4BC4;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ai-open-chat:hover { text-decoration: underline; }
+.ai-open-chat:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }

@@ -12,6 +12,42 @@ const AI_WAKE_URL = process.env.REACT_APP_AI_WAKE_URL || "https://shv-ai.onrende
 const WAKE_INTERVAL_MS = 5 * 60 * 1000;
 const WAKE_STORAGE_KEY = "shv_ai_woken_at";
 
+/**
+ * Incremental Server-Sent Events parser: feed it decoded text chunks as they arrive and it
+ * calls onEvent(name, data) for every complete event. Chunks may split events anywhere.
+ */
+export function createSseParser(onEvent) {
+    let buffer = "";
+    const dispatch = (block) => {
+        let name = "message";
+        const data = [];
+        for (const line of block.split("\n")) {
+            if (line.startsWith("event:")) name = line.slice(6).trim();
+            else if (line.startsWith("data:")) data.push(line.slice(5).replace(/^ /, ""));
+        }
+        if (data.length === 0) return;
+        try {
+            onEvent(name, JSON.parse(data.join("\n")));
+        } catch {
+            // ignore a malformed event rather than breaking the whole answer
+        }
+    };
+    return {
+        push(text) {
+            buffer += text.replace(/\r\n?/g, "\n");
+            let end;
+            while ((end = buffer.indexOf("\n\n")) !== -1) {
+                dispatch(buffer.slice(0, end));
+                buffer = buffer.slice(end + 2);
+            }
+        },
+        flush() {
+            if (buffer.trim()) dispatch(buffer);
+            buffer = "";
+        },
+    };
+}
+
 export default class AiService {
     /** Fire-and-forget wake-up ping, at most once every 5 minutes per tab. */
     static wake() {
@@ -48,6 +84,54 @@ export default class AiService {
             { headers: { ...this.authHeaders(), "Content-Type": "application/json" } }
         );
         return response.data;
+    }
+
+    /**
+     * Send a chat message and stream the answer. onEvent(name, data) gets every event:
+     * session, token, tool, products, comparison, action, sources, done, error.
+     * Rejects with an Error whose message is shown to the shopper.
+     */
+    static async streamChat({ message, sessionId, productId }, onEvent, signal) {
+        let response;
+        try {
+            response = await fetch(`${ApiService.BASE_URL}/ai/chat`, {
+                method: "POST",
+                headers: { ...this.authHeaders(), "Content-Type": "application/json", Accept: "text/event-stream" },
+                body: JSON.stringify({ message, sessionId: sessionId || null, productId: productId || null }),
+                signal,
+            });
+        } catch (err) {
+            if (err.name === "AbortError") throw err;
+            throw new Error("Can't reach the assistant. Check your connection and try again.");
+        }
+        if (!response.ok || !response.body) {
+            let text = "The assistant isn't available right now. Please try again.";
+            try {
+                text = (await response.json()).message || text;
+            } catch {
+                // keep the default text
+            }
+            throw new Error(text);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        const parser = createSseParser(onEvent);
+        for (;;) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            parser.push(decoder.decode(value, { stream: true }));
+        }
+        parser.push(decoder.decode());
+        parser.flush();
+    }
+
+    static async sendChatFeedback(sessionId, messageId, rating) {
+        await axios.post(
+            `${ApiService.BASE_URL}/ai/chat/feedback`,
+            { sessionId, messageId, rating },
+            { headers: { ...this.authHeaders(), "Content-Type": "application/json" } }
+        );
     }
 
     /** Human-readable message for a failed AI call. */

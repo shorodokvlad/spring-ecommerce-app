@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { MessageCircleQuestion, ArrowUp, Loader2 } from "lucide-react";
+import { MessageCircleQuestion, ArrowUp, Loader2, Sparkles } from "lucide-react";
 import AiService from "../../service/AiService";
+import { useAiChat } from "../context/AiChatContext";
 import "../../style/aiProduct.css";
 
 const MAX_LENGTH = 300;
@@ -21,6 +22,7 @@ const AskProductBox = ({ productId, suggestedQuestions = [] }) => {
     const [answer, setAnswer] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const chat = useAiChat();
 
     useEffect(() => {
         setQuestion("");
@@ -114,6 +116,13 @@ const AskProductBox = ({ productId, suggestedQuestions = [] }) => {
                     </div>
                 )}
             </div>
+
+            {chat && (
+                <button type="button" className="ai-open-chat" onClick={chat.open}>
+                    <Sparkles size={14} aria-hidden="true" />
+                    Compare it, find alternatives or ask more in the chat
+                </button>
+            )}
         </section>
     );
 };

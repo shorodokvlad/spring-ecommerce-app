@@ -36,6 +36,8 @@ import AdminInventoryPage from './component/admin/AdminInventoryPage';
 import AdminPurchaseOrdersPage from './component/admin/AdminPurchaseOrdersPage';
 import AdminSuppliersPage from './component/admin/AdminSuppliersPage';
 import SessionExpiryHandler from './component/common/SessionExpiryHandler';
+import { AiChatProvider } from './component/context/AiChatContext';
+import AiChatDrawer from './component/ai/chat/AiChatDrawer';
 
 const AppContent = () => {
   const location = useLocation();
@@ -84,6 +86,7 @@ const AppContent = () => {
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <AiChatDrawer />}
     </div>
   );
 };
@@ -94,7 +97,9 @@ function App() {
       <CartProvider>
         <FavoritesProvider>
           <SessionExpiryHandler />
-          <AppContent />
+          <AiChatProvider>
+            <AppContent />
+          </AiChatProvider>
         </FavoritesProvider>
       </CartProvider>
     </BrowserRouter>
