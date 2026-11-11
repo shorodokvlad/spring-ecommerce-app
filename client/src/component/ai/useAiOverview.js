@@ -11,6 +11,7 @@ export default function useAiOverview(productId) {
 
     useEffect(() => {
         if (!productId) return undefined;
+        AiService.wake(); // wake the sleeping AI service before Spring calls it
         let active = true;
         setState({ status: "loading", overview: null });
         AiService.getOverview(productId)

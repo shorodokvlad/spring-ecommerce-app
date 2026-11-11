@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.103" tests="5" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.251" tests="5" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -13,7 +13,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/Users/vladshorodok/Library/Java/JavaVirtualMachines/temurin-17.0.21/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/target/surefire/surefirebooter-20261111113343178_3.jar /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/target/surefire 2026-11-11T11-33-43_138-jvmRun1 surefire-20261111113343178_1tmp surefire_0-20261111113343178_2tmp"/>
+    <property name="sun.java.command" value="/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/target/surefire/surefirebooter-20261111122152344_3.jar /Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/target/surefire 2026-11-11T12-21-52_298-jvmRun1 surefire-20261111122152344_1tmp surefire_0-20261111122152344_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="test" value="ServiceTokenFilterTest,AiGatewayControllerTest,AiClientTest"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/target/surefire/surefirebooter-20261111113343178_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/vladshorodok/Desktop/home/projects/Java/spring-ecommerce-app/target/surefire/surefirebooter-20261111122152344_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.runtime.version" value="17.0.21+9"/>
@@ -59,9 +59,9 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="validTokenOnInternalPathAuthenticatesAsAiService" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.09"/>
-  <testcase name="otherPathsAreLeftAlone" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.001"/>
+  <testcase name="validTokenOnInternalPathAuthenticatesAsAiService" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.234"/>
+  <testcase name="otherPathsAreLeftAlone" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.003"/>
   <testcase name="missingConfiguredTokenRejectsEvenEmptyHeader" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.001"/>
-  <testcase name="userJwtAuthenticationIsDroppedOnInternalPaths" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.0"/>
-  <testcase name="wrongTokenLeavesRequestUnauthenticated" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.0"/>
+  <testcase name="userJwtAuthenticationIsDroppedOnInternalPaths" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.001"/>
+  <testcase name="wrongTokenLeavesRequestUnauthenticated" classname="com.shv.Ecommerce.ai.ServiceTokenFilterTest" time="0.001"/>
 </testsuite>

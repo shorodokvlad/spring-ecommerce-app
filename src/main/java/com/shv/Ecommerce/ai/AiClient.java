@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -26,7 +27,10 @@ public class AiClient {
     // The free Render instance sleeps when idle and can take about a minute to wake up.
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration READ_TIMEOUT = Duration.ofSeconds(100);
-    private static final Duration RETRY_DELAY = Duration.ofSeconds(3);
+    // ~70 s in total: long enough for a sleeping free instance to start after being woken.
+    private static final List<Duration> WAKE_RETRY_DELAYS = List.of(
+            Duration.ofSeconds(3), Duration.ofSeconds(5), Duration.ofSeconds(8),
+            Duration.ofSeconds(12), Duration.ofSeconds(18), Duration.ofSeconds(24));
     private static final int LOGGED_BODY_CHARS = 200;
 
     private final AiProperties properties;
@@ -100,7 +104,7 @@ public class AiClient {
             throw new AiServiceException(HttpStatus.SERVICE_UNAVAILABLE, "The AI assistant isn't configured");
         }
         try {
-            return callWithOneRetry(request);
+            return callWithRetry(request);
         } catch (RestClientResponseException e) {
             HttpStatusCode code = e.getStatusCode();
             if (code.value() == 404) {
@@ -118,22 +122,29 @@ public class AiClient {
         }
     }
 
-    /** Render answers 502 for a moment while a sleeping free instance starts: retry once. */
-    private static <T> T callWithOneRetry(Supplier<T> request) {
-        try {
-            return request.get();
-        } catch (RestClientResponseException e) {
-            if (e.getStatusCode().value() != 502) {
-                throw e;
-            }
-            log.info("AI service answered 502, retrying once in {}s", RETRY_DELAY.toSeconds());
+    /**
+     * Render answers 502 while the free AI instance is asleep, and it doesn't wake it up for calls
+     * coming from another Render service. The storefront pings the AI service directly
+     * (AiService.wake in the client), which takes ~30-60 s; keep retrying for that long.
+     */
+    private static <T> T callWithRetry(Supplier<T> request) {
+        for (int attempt = 0; ; attempt++) {
             try {
-                Thread.sleep(RETRY_DELAY.toMillis());
-            } catch (InterruptedException interrupted) {
-                Thread.currentThread().interrupt();
-                throw e;
+                return request.get();
+            } catch (RestClientResponseException e) {
+                if (e.getStatusCode().value() != 502 || attempt >= WAKE_RETRY_DELAYS.size()) {
+                    throw e;
+                }
+                Duration delay = WAKE_RETRY_DELAYS.get(attempt);
+                log.info("AI service answered 502 (probably asleep), retry {}/{} in {}s",
+                        attempt + 1, WAKE_RETRY_DELAYS.size(), delay.toSeconds());
+                try {
+                    Thread.sleep(delay.toMillis());
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
             }
-            return request.get();
         }
     }
 
