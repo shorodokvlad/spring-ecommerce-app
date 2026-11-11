@@ -9,7 +9,6 @@ import AddReviewModal from "../common/AddReviewModal";
 import ProductDetailsSkeleton from "../common/ProductDetailsSkeleton";
 import StarRating from "../common/StarRating";
 import DeliveryEstimate from "../delivery/DeliveryEstimate";
-import AiOverviewSummary from "../ai/AiOverviewSummary";
 import AiHighlights from "../ai/AiHighlights";
 import AskProductBox from "../ai/AskProductBox";
 import ReviewSummaryCard from "../ai/ReviewSummaryCard";
@@ -470,8 +469,6 @@ const ProductDetailsPage = () => {
                             </span>
                         </div>
                     )}
-
-                    <AiOverviewSummary state={aiOverview} />
 
                     {!specSections && <p className="product-detail-desc">{product.description}</p>}
 
