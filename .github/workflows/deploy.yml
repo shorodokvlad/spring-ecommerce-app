@@ -1,11 +1,14 @@
 name: Build and Publish Backend Image
 
+# Disabled on push: Render builds the backend from the Dockerfile itself, and this image is
+# only needed for the Kubernetes deploy below. Run it by hand from the Actions tab
+# ("Run workflow") when you need the image. To re-enable on every push to main, add:
+#   push:
+#     branches: [main]
+#     paths-ignore:
+#       - "client/**"
+#       - "**.md"
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - "client/**"
-      - "**.md"
   workflow_dispatch:
 
 env:

@@ -36,8 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         // Python AI service only (X-Service-Token), never user JWTs
                         .requestMatchers("/internal/ai/**").hasAuthority(ServiceTokenFilter.AUTHORITY)
-                        // Storefront AI (overview, review summary, Q&A): open to guests, rate-limited
-                        .requestMatchers("/ai/products/**").permitAll()
+                        // Storefront AI (overview, review summary, Q&A, chat): open to guests, rate-limited
+                        .requestMatchers("/ai/products/**", "/ai/chat", "/ai/chat/feedback").permitAll()
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/delivery/**").permitAll()
                         .requestMatchers("/auth/**", "/category/**", "/product/**", "/banner/**", "/review/get-by-product-id/**", "/warehouse/**").permitAll()
                         .anyRequest().authenticated())

@@ -1,16 +1,21 @@
 package com.shv.Ecommerce.ai;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.io.InputStream;
 import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +98,43 @@ public class AiClient {
                 .retrieve().body(String.class));
     }
 
+    /**
+     * Start a chat turn. Returns the AI service's Server-Sent Events stream, open: the caller
+     * copies it to the browser and must close it. Errors before the stream starts (asleep,
+     * busy, invalid message) are thrown like for the other calls.
+     */
+    public InputStream openChat(Map<String, Object> payload) {
+        return call(() -> restClient.post().uri("/chat")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .body(payload)
+                .exchange((request, response) -> {
+                    if (response.getStatusCode().is2xxSuccessful()) {
+                        return response.getBody();
+                    }
+                    byte[] body;
+                    try (response) {
+                        body = response.getBody().readAllBytes();
+                    }
+                    throw errorFor(response.getStatusCode(), body);
+                }, false));
+    }
+
+    public void chatFeedback(Map<String, Object> payload) {
+        call(() -> restClient.post().uri("/chat/feedback")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve().toBodilessEntity());
+    }
+
+    private static RestClientResponseException errorFor(HttpStatusCode status, byte[] body) {
+        HttpStatus known = HttpStatus.resolve(status.value());
+        String text = known != null ? known.getReasonPhrase() : "";
+        return status.is4xxClientError()
+                ? HttpClientErrorException.create(status, text, HttpHeaders.EMPTY, body, StandardCharsets.UTF_8)
+                : HttpServerErrorException.create(status, text, HttpHeaders.EMPTY, body, StandardCharsets.UTF_8);
+    }
+
     /** Ask the AI service to re-index the product (it deletes the data if the product is gone). */
     public void requestReindex(Long productId) {
         call(() -> restClient.post().uri("/index/products/{id}", productId)
@@ -111,7 +153,7 @@ public class AiClient {
                 throw new AiServiceException(HttpStatus.NOT_FOUND, "Product not found", e);
             }
             if (code.value() == 422) {
-                throw new AiServiceException(HttpStatus.BAD_REQUEST, "Invalid question", e);
+                throw new AiServiceException(HttpStatus.BAD_REQUEST, "Invalid request", e);
             }
             log.warn("AI service answered {}: {}", code.value(), shorten(e.getResponseBodyAsString()));
             HttpStatus status = code.value() == 503 ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY;
