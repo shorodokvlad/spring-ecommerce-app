@@ -13,6 +13,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * HTTP client for the Python AI service. Responses are passed through as raw JSON strings:
@@ -25,20 +26,46 @@ public class AiClient {
     // The free Render instance sleeps when idle and can take about a minute to wake up.
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration READ_TIMEOUT = Duration.ofSeconds(100);
+    private static final Duration RETRY_DELAY = Duration.ofSeconds(3);
+    private static final int LOGGED_BODY_CHARS = 200;
 
     private final AiProperties properties;
     private final RestClient restClient;
 
     public AiClient(AiProperties properties) {
         this.properties = properties;
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
+        String baseUrl = normalizeBaseUrl(properties.serviceUrl());
+
+        // HTTP/1.1 on purpose: the JDK client otherwise tries an HTTP/2 upgrade, which proxies
+        // such as Render's edge can answer with a 502 page even though the service is healthy.
+        HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(CONNECT_TIMEOUT)
+                .build();
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
         requestFactory.setReadTimeout(READ_TIMEOUT);
         this.restClient = RestClient.builder()
-                .baseUrl(properties.serviceUrl() == null ? "http://localhost:8000" : properties.serviceUrl())
+                .baseUrl(baseUrl)
                 .requestFactory(requestFactory)
                 .defaultHeader(ServiceTokenFilter.HEADER, properties.hasServiceToken() ? properties.serviceToken() : "")
                 .build();
+
+        // Not secret, and the first thing to check when the AI "doesn't work".
+        log.info("AI service: url={} tokenConfigured={}", baseUrl, properties.hasServiceToken());
+        if (baseUrl.startsWith("http://") && baseUrl.contains(".onrender.com")) {
+            log.warn("AI_SERVICE_URL uses http:// for a Render service; use https://");
+        }
+    }
+
+    static String normalizeBaseUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return "http://localhost:8000";
+        }
+        String trimmed = url.strip();
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed;
     }
 
     public boolean isConfigured() {
@@ -68,12 +95,12 @@ public class AiClient {
                 .retrieve().toBodilessEntity());
     }
 
-    private <T> T call(java.util.function.Supplier<T> request) {
+    private <T> T call(Supplier<T> request) {
         if (!isConfigured()) {
             throw new AiServiceException(HttpStatus.SERVICE_UNAVAILABLE, "The AI assistant isn't configured");
         }
         try {
-            return request.get();
+            return callWithOneRetry(request);
         } catch (RestClientResponseException e) {
             HttpStatusCode code = e.getStatusCode();
             if (code.value() == 404) {
@@ -82,12 +109,40 @@ public class AiClient {
             if (code.value() == 422) {
                 throw new AiServiceException(HttpStatus.BAD_REQUEST, "Invalid question", e);
             }
-            log.warn("AI service answered {}: {}", code.value(), e.getResponseBodyAsString());
+            log.warn("AI service answered {}: {}", code.value(), shorten(e.getResponseBodyAsString()));
             HttpStatus status = code.value() == 503 ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.BAD_GATEWAY;
             throw new AiServiceException(status, "The AI assistant is unavailable right now", e);
         } catch (ResourceAccessException e) {
             log.warn("AI service unreachable: {}", e.getMessage());
             throw new AiServiceException(HttpStatus.SERVICE_UNAVAILABLE, "The AI assistant is waking up, try again in a minute", e);
         }
+    }
+
+    /** Render answers 502 for a moment while a sleeping free instance starts: retry once. */
+    private static <T> T callWithOneRetry(Supplier<T> request) {
+        try {
+            return request.get();
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().value() != 502) {
+                throw e;
+            }
+            log.info("AI service answered 502, retrying once in {}s", RETRY_DELAY.toSeconds());
+            try {
+                Thread.sleep(RETRY_DELAY.toMillis());
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                throw e;
+            }
+            return request.get();
+        }
+    }
+
+    /** Error bodies can be whole HTML pages; keep logs readable. */
+    static String shorten(String body) {
+        if (body == null) {
+            return "";
+        }
+        String oneLine = body.replaceAll("\\s+", " ").strip();
+        return oneLine.length() <= LOGGED_BODY_CHARS ? oneLine : oneLine.substring(0, LOGGED_BODY_CHARS) + "…";
     }
 }
